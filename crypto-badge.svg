@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="USDT Crypto">
+  <defs><linearGradient id="c" x1="25" y1="20" x2="215" y2="220"><stop stop-color="#36C99B"/><stop offset="1" stop-color="#16745F"/></linearGradient><linearGradient id="d" x1="35" y1="28" x2="205" y2="212"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#D4A843"/></linearGradient></defs>
+  <rect x="18" y="18" width="204" height="204" rx="58" fill="url(#c)"/>
+  <path d="M120 38 184 74v72l-64 56-64-56V74Z" fill="rgba(255,255,255,.12)" stroke="url(#d)" stroke-width="8"/>
+  <path d="M72 82h96M120 82v92M88 111c15 8 49 8 64 0M88 111c0 13 64 13 64 0" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="120" y="198" text-anchor="middle" font-family="Cairo, Arial, sans-serif" font-size="24" font-weight="900" fill="#fff">USDT</text>
+</svg>

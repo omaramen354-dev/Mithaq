@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="شعار ميثاق">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="50" x2="430" y2="460" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2E6D5C"/>
+      <stop offset="0.55" stop-color="#1D4A3E"/>
+      <stop offset="1" stop-color="#0B2C25"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="110" y1="90" x2="400" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8E3A0"/>
+      <stop offset="0.55" stop-color="#D4A843"/>
+      <stop offset="1" stop-color="#A8791D"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="36%" cy="22%" r="75%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#071F1A" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <rect x="42" y="42" width="428" height="428" rx="122" fill="url(#bg)"/>
+    <rect x="42" y="42" width="428" height="428" rx="122" fill="url(#glow)"/>
+
+    <!-- minimal Andalusian frame -->
+    <path d="M256 78 300 168 398 114 344 212 434 256 344 300 398 398 300 344 256 434 212 344 114 398 168 300 78 256 168 212 114 114 212 168Z" fill="none" stroke="url(#gold)" stroke-width="14" stroke-linejoin="round"/>
+    <circle cx="256" cy="256" r="126" fill="rgba(7,31,26,.22)" stroke="url(#gold)" stroke-width="8"/>
+
+    <!-- covenant mark: two parties meeting in a balanced agreement -->
+    <path d="M151 264c32-62 95-95 153-72 31 12 53 38 65 72" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round"/>
+    <path d="M361 248c-32 62-95 95-153 72-31-12-53-38-65-72" fill="none" stroke="url(#gold)" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="256" cy="256" r="28" fill="#0B2C25" stroke="#F8E3A0" stroke-width="10"/>
+
+    <!-- quiet balance points -->
+    <circle cx="256" cy="118" r="7" fill="#F8E3A0"/>
+    <circle cx="256" cy="394" r="7" fill="#F8E3A0"/>
+    <circle cx="118" cy="256" r="7" fill="#F8E3A0"/>
+    <circle cx="394" cy="256" r="7" fill="#F8E3A0"/>
+  </g>
+</svg>

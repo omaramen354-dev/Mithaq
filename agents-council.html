@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <title>مجلس ميثاق | فريق الوكلاء</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{--green:#1D4A3E;--deep:#071F1A;--gold:#D4A843;--gold2:#F6D979;--ivory:#FBF8EF;--ink:#12231D;--muted:#6D7C73;--line:#E7E1CE;--red:#C94A4A;--blue:#436E83;--shadow:0 28px 90px rgba(7,31,26,.14);--ease:cubic-bezier(.2,.8,.2,1)}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Cairo,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 90% 4%,rgba(212,168,67,.18),transparent 420px),radial-gradient(circle at 10% 92%,rgba(29,74,62,.14),transparent 470px),#F3F0E6}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23D4A843' stroke-opacity='.28' stroke-width='1'%3E%3Cpath d='M60 10 73 47 110 60 73 73 60 110 47 73 10 60 47 47Z'/%3E%3Ccircle cx='60' cy='60' r='24'/%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px}.page{position:relative;z-index:1;width:min(1220px,100%);margin:auto;padding:28px}.hero{position:relative;overflow:hidden;min-height:340px;border-radius:38px;padding:42px;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;color:#fff;background:linear-gradient(135deg,rgba(7,31,26,.98),rgba(29,74,62,.96) 58%,rgba(46,109,92,.92));box-shadow:var(--shadow)}.hero:after{content:"";position:absolute;left:26px;top:22px;width:250px;height:250px;background:radial-gradient(circle,rgba(212,168,67,.18),transparent 65%);filter:blur(6px);animation:float 8s ease-in-out infinite}.hero>*{position:relative;z-index:1}.brand{display:flex;align-items:center;gap:14px;margin-bottom:20px}.brand img{width:72px;height:72px;filter:drop-shadow(0 18px 28px rgba(0,0,0,.20));animation:breath 5.5s ease-in-out infinite}.brand h1{margin:0;font-size:2rem;line-height:1;font-weight:900}.brand p{margin:5px 0 0;color:rgba(255,255,255,.72);font-weight:800}.tag{display:inline-flex;margin-bottom:14px;padding:8px 13px;border-radius:999px;color:#FFE9A8;background:rgba(212,168,67,.14);border:1px solid rgba(246,217,121,.28);font-weight:900}.hero h2{margin:0;font-size:clamp(2.3rem,5vw,4.7rem);line-height:1.1;letter-spacing:-.055em}.lead{margin:18px 0 0;max-width:700px;color:rgba(255,255,255,.82);line-height:2;font-weight:650}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.btn{border:0;min-height:46px;padding:0 16px;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:900;cursor:pointer;transition:.24s var(--ease);text-decoration:none}.btn:hover{transform:translateY(-2px)}.primary{color:var(--deep);background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:0 16px 32px rgba(212,168,67,.24)}.soft{color:var(--green);background:#E9F1EC}.glass{color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16)}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}.stat{padding:18px;border-radius:24px;background:rgba(255,255,255,.92);border:1px solid var(--line);box-shadow:0 14px 38px rgba(7,31,26,.08)}.stat strong{display:block;color:var(--green);font-size:1.6rem;line-height:1}.stat span{display:block;color:var(--muted);font-weight:800;margin-top:6px}.section{margin-top:28px}.head{display:flex;align-items:end;justify-content:space-between;gap:14px;margin-bottom:16px}.title{margin:0;color:var(--green);font-size:1.6rem;font-weight:900}.sub{margin:5px 0 0;color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.agent{position:relative;overflow:hidden;padding:20px;border-radius:28px;background:rgba(255,255,255,.92);border:1px solid var(--line);box-shadow:0 14px 40px rgba(7,31,26,.08);transition:.3s var(--ease);text-align:right}.agent:hover{transform:translateY(-6px);border-color:rgba(212,168,67,.7);box-shadow:0 26px 62px rgba(7,31,26,.14);background:linear-gradient(135deg,#fff,#FFF8DF)}.agent:after{content:"";position:absolute;left:-48px;top:-48px;width:130px;height:130px;background:radial-gradient(circle,rgba(212,168,67,.16),transparent 68%)}.agentIcon{width:58px;height:58px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(135deg,#FFF7D8,#fff);border:1px solid rgba(212,168,67,.28);font-size:1.55rem}.agent h3{margin:14px 0 6px;color:var(--green);font-weight:900}.agent p{margin:0;color:var(--muted);line-height:1.8}.agent .actions{margin-top:16px}.modalBackdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(7,31,26,.58);backdrop-filter:blur(10px);z-index:100}.modalBackdrop.open{display:flex}.modal{width:min(780px,100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:30px;background:#fff;box-shadow:0 34px 80px rgba(0,0,0,.24)}.modalHead{padding:20px 23px;border-bottom:1px solid #F0EEE5;display:flex;justify-content:space-between;align-items:center}.modalTitle{margin:0;color:var(--green);font-weight:900}.modalBody{padding:22px}.reportText{white-space:pre-wrap;line-height:2;background:#FCFAF2;border:1px solid var(--line);border-radius:18px;padding:16px;max-height:420px;overflow:auto;direction:rtl}.toast{position:fixed;left:22px;bottom:22px;z-index:140;display:none;align-items:center;gap:10px;min-width:min(390px,calc(100vw - 44px));padding:14px 16px;border-radius:18px;background:var(--green);color:#fff;font-weight:900;box-shadow:0 20px 42px rgba(7,31,26,.22)}.toast.show{display:flex}.toast.error{background:var(--red)}.note{padding:14px 16px;border-radius:20px;background:#E9F1EC;color:var(--green);font-weight:800;line-height:1.8}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}@keyframes breath{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}@media(max-width:900px){.page{padding:16px}.hero{grid-template-columns:1fr;padding:28px;border-radius:30px}.summary{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr 1fr}}@media(max-width:580px){.summary,.grid{grid-template-columns:1fr}.hero h2{font-size:2.45rem}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <div class="brand"><img src="assets/mithaq-logo.svg" alt="ميثاق"><div><h1>مجلس ميثاق</h1><p>فريقك الذكي من الوكلاء</p></div></div>
+        <span class="tag">غرفة قيادة المنتج</span>
+        <h2>لست وحدك في إدارة ميثاق.</h2>
+        <p class="lead">مجلس ميثاق يحوّل بيانات العقود والمدفوعات والمراجعات إلى تقارير ومهام يومية. ابدأ بدون أي تكلفة AI خارجية، ثم اربطه لاحقاً ببوت تلجرام ونماذج ذكية.</p>
+        <div class="actions"><a class="btn glass" href="/">العودة للمنصة</a><button class="btn primary" onclick="sendDailySummary()">إرسال تقرير تلجرام</button><button class="btn soft" onclick="loadAgents()">تحديث البيانات</button></div>
+      </div>
+      <div class="note">لربط تلجرام اضبط متغيرات البيئة:<br><bdi>TELEGRAM_BOT_TOKEN</bdi><br><bdi>TELEGRAM_CHAT_ID</bdi></div>
+    </section>
+
+    <section class="summary" id="summaryGrid"></section>
+
+    <section class="section">
+      <div class="head"><div><h2 class="title">الوكلاء</h2><p class="sub">كل وكيل يقرأ بيانات ميثاق ويعطيك تقريراً ومهاماً قابلة للتنفيذ.</p></div></div>
+      <div class="grid" id="agentsGrid"></div>
+    </section>
+  </main>
+
+  <div id="reportModal" class="modalBackdrop" onclick="handleBackdrop(event)"><div class="modal"><div class="modalHead"><h2 class="modalTitle" id="modalTitle">تقرير الوكيل</h2><button class="btn soft" onclick="closeModal()">إغلاق</button></div><div class="modalBody"><div id="reportText" class="reportText">جاري التحميل...</div><div class="actions"><button class="btn primary" id="telegramBtn">إرسال هذا التقرير لتلجرام</button><button class="btn soft" onclick="copyReport()">نسخ التقرير</button></div></div></div></div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API_BASE = (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin) + '/api';
+    let agents = [];
+    let currentAgentId = '';
+    let currentReportText = '';
+
+    document.addEventListener('DOMContentLoaded', loadAgents);
+
+    async function loadAgents(){
+      try{
+        const res = await fetch(`${API_BASE}/agents`);
+        const data = await res.json();
+        if(!res.ok || !data.ok) throw new Error('تعذر تحميل مجلس ميثاق');
+        agents = data.agents || [];
+        renderSummary(data.summary);
+        renderAgents();
+      }catch(e){ showToast(e.message || 'تعذر التحميل', 'error'); }
+    }
+
+    function renderSummary(summary){
+      const grid = document.getElementById('summaryGrid');
+      const c = summary && summary.counts ? summary.counts : {};
+      const items = [
+        ['العقود', c.contracts || 0],
+        ['مدفوعات معلقة', c.pendingPayments || 0],
+        ['مدفوعات مؤكدة', c.paidPayments || 0],
+        ['طلبات مراجعة', c.pendingReviews || 0]
+      ];
+      grid.innerHTML = items.map(i => `<article class="stat"><strong>${i[1]}</strong><span>${i[0]}</span></article>`).join('');
+    }
+
+    function renderAgents(){
+      const grid = document.getElementById('agentsGrid');
+      grid.innerHTML = agents.map(agent => `<article class="agent"><div class="agentIcon">${agent.icon}</div><h3>${escapeHtml(agent.name)}</h3><p>${escapeHtml(agent.title)}</p><div class="actions"><button class="btn primary" onclick="openReport('${escapeAttr(agent.id)}')">فتح التقرير</button><button class="btn soft" onclick="sendAgentTelegram('${escapeAttr(agent.id)}')">إرسال لتلجرام</button></div></article>`).join('');
+    }
+
+    async function openReport(agentId){
+      currentAgentId = agentId;
+      const modal = document.getElementById('reportModal');
+      const title = document.getElementById('modalTitle');
+      const text = document.getElementById('reportText');
+      modal.classList.add('open');
+      text.textContent = 'جاري التحميل...';
+      try{
+        const res = await fetch(`${API_BASE}/agents/${encodeURIComponent(agentId)}/report`);
+        const data = await res.json();
+        if(!res.ok || !data.ok) throw new Error('تعذر تحميل التقرير');
+        title.textContent = data.data.agent.name;
+        currentReportText = data.text;
+        text.textContent = data.text;
+        document.getElementById('telegramBtn').onclick = () => sendAgentTelegram(agentId);
+      }catch(e){ text.textContent = e.message || 'تعذر تحميل التقرير'; }
+    }
+
+    async function sendAgentTelegram(agentId){
+      try{
+        const res = await fetch(`${API_BASE}/agents/${encodeURIComponent(agentId)}/telegram`, { method:'POST' });
+        const data = await res.json();
+        if(data.ok) showToast('تم إرسال التقرير إلى تلجرام', 'success');
+        else showToast(data.telegram?.message || 'تلجرام غير مضبوط بعد', 'error');
+      }catch(e){ showToast('تعذر الإرسال لتلجرام', 'error'); }
+    }
+
+    async function sendDailySummary(){
+      try{
+        const res = await fetch(`${API_BASE}/telegram/daily-summary`, { method:'POST' });
+        const data = await res.json();
+        if(data.ok) showToast('تم إرسال التقرير اليومي', 'success');
+        else showToast(data.telegram?.message || 'تلجرام غير مضبوط بعد', 'error');
+      }catch(e){ showToast('تعذر إرسال التقرير اليومي', 'error'); }
+    }
+
+    function copyReport(){
+      if(!currentReportText) return;
+      if(navigator.clipboard) navigator.clipboard.writeText(currentReportText);
+      showToast('تم نسخ التقرير', 'success');
+    }
+    function closeModal(){ document.getElementById('reportModal').classList.remove('open'); }
+    function handleBackdrop(e){ if(e.target && e.target.id === 'reportModal') closeModal(); }
+    function showToast(message,type){ const el=document.getElementById('toast'); el.className=`toast show ${type||''}`; el.textContent=message; setTimeout(()=>{el.className='toast';},3200); }
+    function escapeHtml(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+    function escapeAttr(v){ return escapeHtml(v).replace(/`/g,'&#096;'); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <title>ميثاق | منصة العقود الذكية العربية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+
+    :root{--green:#1D4A3E;--green2:#0B2C25;--green3:#2F725F;--gold:#D4A843;--gold2:#F8DE8A;--ivory:#FBF8EF;--bg:#F4F3EA;--card:#fff;--ink:#12231D;--muted:#6F7F76;--line:#E5E2D4;--red:#C94A4A;--blue:#436E83;--side:312px;--shadow:0 26px 80px rgba(11,44,37,.13);--shadow2:0 14px 38px rgba(11,44,37,.09);--r:30px;--ease:240ms cubic-bezier(.2,.8,.2,1)}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 92% 4%,rgba(212,168,67,.20),transparent 410px),radial-gradient(circle at 8% 95%,rgba(29,74,62,.15),transparent 450px),linear-gradient(135deg,#FCFAF2,var(--bg));font-family:Cairo,Tahoma,sans-serif;color:var(--ink);overflow-x:hidden}button,input,select,textarea{font:inherit}button{border:0;cursor:pointer}textarea{resize:vertical}bdi{direction:ltr}.logo{display:flex;align-items:center;gap:13px;min-width:0}.logo svg{width:62px;height:62px;filter:drop-shadow(0 16px 24px rgba(11,44,37,.16));flex:0 0 auto}.logo h2{margin:0;color:var(--green);font-family:Cairo,serif;font-size:1.62rem;font-weight:800;letter-spacing:-.045em;line-height:1}.logo p{margin:5px 0 0;color:var(--muted);font-size:.78rem;font-weight:800;white-space:nowrap}.topbar{position:fixed;inset:0 0 auto 0;height:74px;z-index:60;display:none;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(251,248,239,.86);border-bottom:1px solid rgba(229,226,212,.82);backdrop-filter:blur(18px)}.icon,.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:900;transition:var(--ease);white-space:nowrap}.icon{width:46px;height:46px;border-radius:17px;color:var(--green);background:#E9F1EC;box-shadow:inset 0 0 0 1px rgba(29,74,62,.05)}.icon:hover,.btn:hover{transform:translateY(-2px)}.sidebar{position:fixed;inset:0 0 0 auto;width:var(--side);z-index:80;height:100vh;padding:24px 22px;display:flex;flex-direction:column;gap:22px;background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(251,248,239,.92));border-left:1px solid rgba(229,226,212,.9);box-shadow:-18px 0 58px rgba(11,44,37,.08);backdrop-filter:blur(24px);transition:transform var(--ease)}.overlay{position:fixed;inset:0;z-index:70;background:rgba(12,29,24,.48);opacity:0;visibility:hidden;transition:var(--ease)}.side-head{display:flex;align-items:center;justify-content:space-between}.close{display:none}.nav{display:grid;gap:9px}.nav button{min-height:52px;border-radius:18px;display:flex;align-items:center;gap:12px;padding:0 14px;background:transparent;color:#45564C;font-weight:900;text-align:right}.nav button:hover{background:#F0F3ED;color:var(--green);transform:translateX(-2px)}.nav button.active{color:#fff;background:linear-gradient(135deg,var(--green2),var(--green));box-shadow:0 16px 30px rgba(29,74,62,.18)}.navSvg{width:24px;height:24px;flex:0 0 auto}.navSvg *,.typeSvg *{vector-effect:non-scaling-stroke}.auth{margin-top:auto;padding:17px;border-radius:26px;background:linear-gradient(160deg,rgba(255,245,207,.82),#fff 50%);border:1px solid rgba(212,168,67,.28);box-shadow:var(--shadow2)}.auth-title{margin:0 0 7px;color:var(--green);font-weight:900}.auth-text{margin:0 0 14px;color:var(--muted);font-size:.88rem;line-height:1.8}.avatar{width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid rgba(212,168,67,.55)}.user{display:flex;align-items:center;gap:12px}.user p{margin:0}.user .name{color:var(--green);font-weight:900}.user .mail{direction:ltr;text-align:right;color:var(--muted);font-size:.76rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app{margin-right:var(--side);padding:30px}.container{width:min(1220px,100%);margin:0 auto}.page{display:none;animation:rise .32s ease both}.page.active{display:block}@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.hero{position:relative;overflow:hidden;min-height:450px;border-radius:38px;padding:48px;display:grid;grid-template-columns:1.12fr .88fr;gap:34px;align-items:center;color:#fff;background:linear-gradient(135deg,rgba(11,44,37,.99),rgba(29,74,62,.96) 54%,rgba(47,114,95,.92));box-shadow:var(--shadow)}.hero:before{content:"";position:absolute;width:620px;height:620px;border:1px solid rgba(255,255,255,.12);border-radius:50%;left:-195px;top:-210px}.hero:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;right:-60px;bottom:-80px;background:radial-gradient(circle,rgba(212,168,67,.26),transparent 66%)}.tag{position:relative;z-index:1;display:inline-flex;gap:8px;align-items:center;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);color:#FFE9A8;font-weight:900;margin-bottom:18px}.hero h1{position:relative;z-index:1;margin:0;font-family:Cairo,serif;font-size:clamp(2.35rem,5vw,4.65rem);line-height:1.14;letter-spacing:-.055em}.hero p{position:relative;z-index:1;margin:20px 0 30px;color:rgba(255,255,255,.82);line-height:2;font-size:1.08rem}.preview{position:relative;z-index:1;width:min(390px,100%);margin-inline-start:auto;padding:24px;border-radius:32px;color:var(--ink);background:linear-gradient(180deg,rgba(255,255,255,.97),#FBFAF4);box-shadow:0 34px 78px rgba(0,0,0,.22);transform:rotate(-1.6deg);border:1px solid rgba(255,255,255,.7)}.line{height:11px;border-radius:99px;background:#E9EFEA;margin:12px 0}.line.gold{background:linear-gradient(90deg,rgba(212,168,67,.42),rgba(248,222,138,.28));width:64%}.seal{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#FFF8D9,#F6E5A4);color:var(--green);font-family:serif;font-size:1.8rem;font-weight:800;border:1px solid rgba(212,168,67,.36);box-shadow:inset 0 0 0 6px rgba(255,255,255,.45)}.btn{min-height:47px;padding:0 17px;border-radius:16px}.primary{color:var(--green2);background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:0 18px 34px rgba(212,168,67,.26)}.green{color:#fff;background:linear-gradient(135deg,var(--green2),var(--green))}.soft{color:var(--green);background:#E9F1EC}.glass{color:#fff;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16)}.danger{color:var(--red);background:rgba(201,74,74,.1)}.blue{color:#fff;background:var(--blue)}.sm{min-height:35px;padding:0 11px;border-radius:12px;font-size:.84rem}.section{margin-top:32px}.head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px}.title{margin:0;color:var(--green);font-family:Cairo,serif;font-size:1.7rem;font-weight:800;letter-spacing:-.035em}.sub{margin:5px 0 0;color:var(--muted);line-height:1.8}.status{display:inline-flex;align-items:center;gap:8px;padding:9px 13px;border-radius:99px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow2);color:var(--muted);font-weight:900}.dot{width:9px;height:9px;border-radius:50%;background:#B6C0BA}.status.online .dot{background:#22B878;box-shadow:0 0 0 5px rgba(34,184,120,.12)}.status.offline .dot{background:var(--red)}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.gridCards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card,.stat,.panel,.empty{background:rgba(255,255,255,.92);border:1px solid rgba(229,226,212,.94);box-shadow:var(--shadow2);backdrop-filter:blur(14px)}.stat{border-radius:25px;padding:20px;display:flex;gap:14px;align-items:center}.ico{width:54px;height:54px;border-radius:19px;display:grid;place-items:center;background:linear-gradient(135deg,#FFF7D8,#fff);border:1px solid rgba(212,168,67,.25);font-size:0;color:var(--green)}.ico svg{width:29px;height:29px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.stat strong{display:block;color:var(--green);font-size:1.62rem;line-height:1}.stat span{display:block;color:var(--muted);font-weight:800;margin-top:5px}.card{position:relative;overflow:hidden;border-radius:28px;padding:21px;text-align:right;transition:var(--ease);min-height:212px}.card:before{content:"";position:absolute;inset:auto -70px -95px auto;width:170px;height:170px;border-radius:50%;background:rgba(29,74,62,.055)}.card:hover{transform:translateY(-7px);border-color:rgba(212,168,67,.7);box-shadow:0 25px 58px rgba(11,44,37,.14)}.card h3{margin:13px 0 8px;color:var(--green);font-size:1.08rem;font-weight:900}.card p{margin:0;color:var(--muted);line-height:1.75;font-size:.9rem}.card .btn{width:100%;margin-top:16px}.tools{display:grid;grid-template-columns:1fr 190px auto auto;gap:10px;margin-bottom:14px}.input{width:100%;min-height:49px;border-radius:17px;border:1px solid var(--line);outline:none;padding:0 13px;background:#FFFEFA;color:var(--ink);transition:var(--ease)}textarea.input{padding:12px 13px;line-height:1.75}.input:focus{background:#fff;border-color:var(--gold);box-shadow:0 0 0 4px rgba(212,168,67,.14)}.panel{border-radius:28px;overflow:hidden}.table-wrap{overflow-x:auto}table{width:100%;min-width:930px;border-collapse:collapse;background:#fff}th,td{padding:15px 16px;border-bottom:1px solid #F0EEE5;text-align:right;vertical-align:middle}th{color:var(--green);background:#FCFAF2;font-weight:900;font-size:.9rem}td{font-weight:700;color:#435149}.badge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:99px;color:var(--green);background:#E9F1EC;font-weight:900}.badge svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}.actions{display:flex;gap:7px;flex-wrap:wrap}.loading,.empty-cell{text-align:center;padding:32px;color:var(--muted);font-weight:900}.empty{min-height:390px;border-radius:34px;display:grid;place-items:center;text-align:center;padding:36px}.empty div:first-child{font-size:3.3rem}.empty h2{margin:8px 0;color:var(--green);font-weight:900}.empty p{margin:0;color:var(--muted);line-height:1.9}.modal-backdrop{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(10,25,21,.58);backdrop-filter:blur(10px)}.modal-backdrop.open{display:flex}.modal{width:min(760px,100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:30px;background:#fff;box-shadow:0 34px 80px rgba(0,0,0,.24);animation:pop .22s ease both}@keyframes pop{from{opacity:0;transform:scale(.97) translateY(10px)}to{opacity:1;transform:none}}.modal-head{padding:20px 23px;border-bottom:1px solid #F0EEE5;display:flex;justify-content:space-between;align-items:center}.modal-title{margin:0;color:var(--green);font-size:1.3rem;font-weight:900}.modal-body{padding:22px}.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:7px}.field.full{grid-column:1/-1}.field label{color:var(--green);font-weight:900}.canvasBox{border:1px dashed #B8C4BE;border-radius:18px;overflow:hidden;background:#fff}.canvasBox canvas{display:block;width:100%;height:170px;touch-action:none}.detailText{white-space:pre-wrap;line-height:2;background:#FCFAF2;border:1px solid var(--line);border-radius:18px;padding:16px;max-height:320px;overflow:auto}.toast{position:fixed;z-index:130;left:22px;bottom:22px;min-width:min(390px,calc(100vw - 44px));display:none;align-items:center;gap:10px;padding:14px 16px;border-radius:18px;color:#fff;background:var(--green);box-shadow:0 20px 42px rgba(15,47,40,.22);font-weight:900}.toast.show{display:flex}.toast.error{background:var(--red)}.toast.info{background:var(--blue)}@media(max-width:1180px){.hero{grid-template-columns:1fr}.preview{margin:0;transform:none}.gridCards{grid-template-columns:repeat(3,1fr)}}@media(max-width:900px){.topbar{display:flex}.sidebar{transform:translateX(105%)}body.sidebar-open .sidebar{transform:none}body.sidebar-open .overlay{opacity:1;visibility:visible}.close{display:inline-flex}.app{margin-right:0;padding:92px 16px 24px}.grid4{grid-template-columns:repeat(2,1fr)}.gridCards{grid-template-columns:repeat(2,1fr)}.tools{grid-template-columns:1fr 1fr}.head{align-items:flex-start;flex-direction:column}.hero{padding:28px;border-radius:30px}.form{grid-template-columns:1fr}}@media(max-width:580px){.logo p{display:none}.logo svg{width:52px;height:52px}.hero{padding:24px 18px}.grid4,.gridCards,.tools{grid-template-columns:1fr}.modal-body{padding:18px}.modal .btn{width:100%}.toast{left:14px;bottom:14px;min-width:calc(100vw - 28px)}}
+
+  
+/* Andalusian golden ornaments */
+body{position:relative;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.20;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23D4A843' stroke-opacity='.32' stroke-width='1.4'%3E%3Cpath d='M48 6 59 37 90 48 59 59 48 90 37 59 6 48 37 37Z'/%3E%3Cpath d='M48 18 56 40 78 48 56 56 48 78 40 56 18 48 40 40Z'/%3E%3Ccircle cx='48' cy='48' r='20'/%3E%3Cpath d='M0 48h96M48 0v96' stroke-opacity='.18'/%3E%3C/g%3E%3C/svg%3E");background-size:96px 96px;mask-image:linear-gradient(135deg,rgba(0,0,0,.65),transparent 45%,rgba(0,0,0,.38));}
+.app{position:relative;z-index:1;}
+.logo svg{width:68px;height:68px;}
+.topbar .logo svg{width:54px;height:54px;}
+.hero{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23D4A843' stroke-opacity='.32' stroke-width='1.4'%3E%3Cpath d='M48 6 59 37 90 48 59 59 48 90 37 59 6 48 37 37Z'/%3E%3Cpath d='M48 18 56 40 78 48 56 56 48 78 40 56 18 48 40 40Z'/%3E%3Ccircle cx='48' cy='48' r='20'/%3E%3Cpath d='M0 48h96M48 0v96' stroke-opacity='.18'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(135deg,rgba(11,44,37,.99),rgba(29,74,62,.96) 54%,rgba(47,114,95,.92));background-size:112px 112px,cover;background-blend-mode:soft-light,normal;}
+.hero::before{border:0;width:255px;height:255px;left:22px;top:18px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke='%23F6D979' stroke-width='2' stroke-opacity='.58'%3E%3Cpath d='M110 10 134 82 210 110 134 138 110 210 86 138 10 110 86 82Z'/%3E%3Cpath d='M110 38 126 91 182 110 126 129 110 182 94 129 38 110 94 91Z'/%3E%3Ccircle cx='110' cy='110' r='48'/%3E%3Ccircle cx='110' cy='110' r='82' stroke-opacity='.22'/%3E%3Cpath d='M110 10v200M10 110h200M39 39l142 142M181 39 39 181' stroke-opacity='.18'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;opacity:.32;}
+.hero::after{width:280px;height:280px;right:-95px;bottom:-95px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke='%23F6D979' stroke-width='2' stroke-opacity='.58'%3E%3Cpath d='M110 10 134 82 210 110 134 138 110 210 86 138 10 110 86 82Z'/%3E%3Cpath d='M110 38 126 91 182 110 126 129 110 182 94 129 38 110 94 91Z'/%3E%3Ccircle cx='110' cy='110' r='48'/%3E%3Ccircle cx='110' cy='110' r='82' stroke-opacity='.22'/%3E%3Cpath d='M110 10v200M10 110h200M39 39l142 142M181 39 39 181' stroke-opacity='.18'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;opacity:.18;}
+.sidebar::before{content:"";position:absolute;inset:0 0 auto 0;height:9px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);opacity:.85;}
+.auth::before{content:"";display:block;height:2px;margin:-4px 18px 12px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.card{isolation:isolate;}
+.card::after{content:"";position:absolute;left:-36px;top:-36px;width:118px;height:118px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke='%23F6D979' stroke-width='2' stroke-opacity='.58'%3E%3Cpath d='M110 10 134 82 210 110 134 138 110 210 86 138 10 110 86 82Z'/%3E%3Cpath d='M110 38 126 91 182 110 126 129 110 182 94 129 38 110 94 91Z'/%3E%3Ccircle cx='110' cy='110' r='48'/%3E%3Ccircle cx='110' cy='110' r='82' stroke-opacity='.22'/%3E%3Cpath d='M110 10v200M10 110h200M39 39l142 142M181 39 39 181' stroke-opacity='.18'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;opacity:.11;z-index:-1;}
+.title::after{content:"";display:block;width:74px;height:3px;border-radius:99px;margin-top:7px;background:linear-gradient(90deg,var(--gold),transparent);}
+.preview::before{content:"";position:absolute;inset:12px;border:1px solid rgba(212,168,67,.22);border-radius:24px;pointer-events:none;}
+
+  
+/* Premium launch polish */
+.logo img{width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 18px 26px rgba(11,44,37,.20));animation:logoBreath 5.5s ease-in-out infinite;}
+.topbar .logo img{width:54px;height:54px;}
+body::before{opacity:.075 !important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23D4A843' stroke-opacity='.20' stroke-width='1'%3E%3Cpath d='M60 10 73 47 110 60 73 73 60 110 47 73 10 60 47 47Z'/%3E%3Cpath d='M60 26 69 51 94 60 69 69 60 94 51 69 26 60 51 51Z'/%3E%3Ccircle cx='60' cy='60' r='24'/%3E%3Cpath d='M0 60h120M60 0v120' stroke-opacity='.09'/%3E%3C/g%3E%3C/svg%3E") !important;background-size:120px 120px !important;}
+.hero,.stat,.card,.panel,.empty{animation:enterSoft .72s var(--ease) both;}
+.stat:nth-child(2),.card:nth-child(2){animation-delay:.06s}.stat:nth-child(3),.card:nth-child(3){animation-delay:.12s}.stat:nth-child(4),.card:nth-child(4){animation-delay:.18s}.card:nth-child(5){animation-delay:.24s}.card:nth-child(6){animation-delay:.30s}.card:nth-child(7){animation-delay:.36s}.card:nth-child(8){animation-delay:.42s}
+.preview{animation:floatDoc 6s ease-in-out infinite;}
+.btn{position:relative;overflow:hidden;}
+.btn::after{content:"";position:absolute;inset:-80% auto -80% -45%;width:34%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);transform:rotate(18deg);transition:.55s ease;}
+.btn:hover::after{left:115%;}
+.card .ico,.stat .ico{transition:transform .35s ease, box-shadow .35s ease;}
+.card:hover .ico,.stat:hover .ico{transform:translateY(-3px) rotate(-2deg);box-shadow:0 16px 28px rgba(212,168,67,.18);}
+.input{box-shadow:0 0 0 rgba(212,168,67,0);}
+.modal.open .modal{animation:modalRoyal .28s cubic-bezier(.2,.8,.2,1) both;}
+@keyframes enterSoft{from{opacity:0;transform:translateY(18px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes floatDoc{0%,100%{transform:translateY(0) rotate(-1.6deg)}50%{transform:translateY(-10px) rotate(-.6deg)}}
+@keyframes logoBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes modalRoyal{from{opacity:0;transform:translateY(14px) scale(.975)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+  
+/* Ultra smooth living background + premium card interactions */
+body::after{
+  content:"";
+  position:fixed;
+  inset:-22%;
+  z-index:0;
+  pointer-events:none;
+  opacity:.42;
+  filter:blur(54px);
+  background:
+    radial-gradient(circle at 18% 24%, rgba(212,168,67,.18), transparent 28%),
+    radial-gradient(circle at 78% 18%, rgba(46,109,92,.18), transparent 30%),
+    radial-gradient(circle at 58% 82%, rgba(212,168,67,.11), transparent 28%),
+    radial-gradient(circle at 22% 78%, rgba(29,74,62,.14), transparent 30%);
+  animation:ambientDrift 18s ease-in-out infinite alternate;
+}
+.sidebar,.topbar,.modal-backdrop,.toast{z-index:80}.topbar{z-index:90}.modal-backdrop{z-index:120}.toast{z-index:150}.app{position:relative;z-index:2}
+.hero{isolation:isolate;}
+.hero > *{position:relative;z-index:2}
+.hero .ambient-line{display:none}
+.card{
+  transform:translateZ(0);
+  will-change:transform, background, box-shadow;
+}
+.card h3,.card p,.card .ico,.card .btn{position:relative;z-index:2;transition:color .32s var(--ease), background .32s var(--ease), transform .32s var(--ease), border-color .32s var(--ease)}
+.card::before{
+  transition:opacity .35s var(--ease), transform .45s var(--ease), background .35s var(--ease);
+}
+.card::after{
+  transition:opacity .35s var(--ease), transform .55s var(--ease);
+}
+.card:hover{
+  color:#fff;
+  background:
+    linear-gradient(135deg, rgba(11,44,37,.98), rgba(29,74,62,.96) 58%, rgba(47,114,95,.92)),
+    #1D4A3E;
+  border-color:rgba(212,168,67,.78);
+  box-shadow:0 30px 72px rgba(11,44,37,.20), 0 0 0 1px rgba(212,168,67,.16) inset;
+}
+.card:hover h3,.card:hover p{color:#fff}
+.card:hover .sub{color:rgba(255,255,255,.72)}
+.card:hover::before{
+  opacity:.38;
+  transform:scale(1.25) rotate(18deg);
+  background:radial-gradient(circle, rgba(212,168,67,.22), transparent 62%);
+}
+.card:hover::after{
+  opacity:.24;
+  transform:translate(12px,12px) rotate(18deg) scale(1.12);
+}
+.card::marker{display:none}
+.card .ico{
+  color:var(--green);
+  background:linear-gradient(145deg,#FFF8DC,#FFFFFF 58%,#EAF3EF);
+}
+.card:hover .ico{
+  color:#FFE9A8;
+  background:rgba(255,255,255,.10);
+  border-color:rgba(248,222,138,.35);
+  transform:translateY(-5px) rotate(-3deg) scale(1.04);
+  box-shadow:0 18px 34px rgba(0,0,0,.18), 0 0 24px rgba(212,168,67,.20);
+}
+.card:hover .btn.green{
+  color:var(--green2);
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+}
+.card::selection{background:var(--gold);color:var(--green2)}
+.card:has(.ico)::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  z-index:1;
+  opacity:0;
+  background:linear-gradient(115deg, transparent 0%, transparent 34%, rgba(255,255,255,.20) 43%, rgba(255,255,255,.06) 50%, transparent 62%, transparent 100%);
+  transform:translateX(48%);
+  pointer-events:none;
+}
+.card:hover:has(.ico)::before{
+  opacity:1;
+  animation:cardShine 1.18s var(--ease) both;
+}
+.typeSvg,.ico svg{
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  transition:transform .35s var(--ease), filter .35s var(--ease);
+}
+.card:hover .ico svg{filter:drop-shadow(0 0 8px rgba(246,217,121,.45));transform:scale(1.03)}
+.panel{transition:transform .35s var(--ease), box-shadow .35s var(--ease)}
+.panel:hover{transform:translateY(-2px);box-shadow:0 22px 56px rgba(11,44,37,.11)}
+.nav button{position:relative;overflow:hidden}.nav button::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);transform:translateX(110%);transition:.55s var(--ease)}.nav button:hover::after{transform:translateX(-110%)}
+@keyframes ambientDrift{
+  0%{transform:translate3d(-2%, -1%, 0) rotate(0deg) scale(1)}
+  50%{transform:translate3d(2%, 1.5%, 0) rotate(8deg) scale(1.035)}
+  100%{transform:translate3d(-1%, 2%, 0) rotate(-6deg) scale(1.06)}
+}
+@keyframes cardShine{0%{transform:translateX(55%) skewX(-12deg)}100%{transform:translateX(-115%) skewX(-12deg)}}
+
+  
+/* Payment method cards */
+.paymentGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}.payCard{position:relative;overflow:hidden;min-height:190px;padding:18px;border-radius:24px;background:linear-gradient(145deg,#fff,#FBF8EF);border:1px solid var(--line);box-shadow:0 14px 36px rgba(11,44,37,.08);transition:transform .32s var(--ease), box-shadow .32s var(--ease), border-color .32s var(--ease), background .32s var(--ease)}.payCard:hover{transform:translateY(-5px);border-color:rgba(212,168,67,.7);box-shadow:0 26px 62px rgba(11,44,37,.15);background:linear-gradient(135deg,rgba(11,44,37,.98),rgba(29,74,62,.96))}.payCard:hover h4,.payCard:hover p,.payCard:hover .payMeta{color:#fff}.payTop{display:flex;align-items:center;gap:13px}.payLogo{width:62px;height:62px;border-radius:18px;object-fit:contain;filter:drop-shadow(0 12px 20px rgba(11,44,37,.14))}.payCard h4{margin:0;color:var(--green);font-size:1.08rem;font-weight:900}.payCard p{margin:8px 0 0;color:var(--muted);line-height:1.75;font-size:.9rem}.payMeta{display:inline-flex;margin-top:12px;padding:6px 10px;border-radius:999px;background:#E9F1EC;color:var(--green);font-weight:900;font-size:.82rem}.payCard:hover .payMeta{background:rgba(255,255,255,.12)}.paymentResult{margin-top:16px;padding:16px;border-radius:20px;background:#FCFAF2;border:1px solid var(--line)}.paymentResult code{direction:ltr;display:block;white-space:nowrap;overflow:auto;padding:10px;border-radius:12px;background:#fff;border:1px solid var(--line);margin-top:8px}.premiumBadge{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--green2);font-weight:900}@media(max-width:650px){.paymentGrid{grid-template-columns:1fr}}
+
+  
+.planFeatures{display:grid;gap:9px;margin:14px 0}.planFeatures li{list-style:none;display:flex;gap:9px;align-items:center;padding:10px 12px;border-radius:14px;background:#FCFAF2;border:1px solid var(--line);font-weight:800;color:var(--green)}.planFeatures li::before{content:"✓";width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--green2);font-size:.8rem}.planPrice{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--green2);font-weight:900;margin-top:10px}.planNote{padding:12px 14px;border-radius:16px;background:#E9F1EC;color:var(--green);font-weight:800;line-height:1.8}.planPayTitle{margin:18px 0 8px;color:var(--green);font-weight:900;font-size:1.05rem}
+
+  </style>
+</head>
+<body>
+  <header class="topbar"><button class="icon" onclick="toggleSidebar(true)">☰</button><div class="logo"><img src="assets/mithaq-logo.svg" alt="شعار ميثاق" loading="eager" /><div><h2>ميثاق</h2><p>العقود الذكية العربية</p></div></div><button class="icon" onclick="openContractModal()">＋</button></header>
+  <div class="overlay" onclick="toggleSidebar(false)"></div>
+  <aside class="sidebar"><div class="side-head"><div class="logo"><img src="assets/mithaq-logo.svg" alt="شعار ميثاق" loading="eager" /><div><h2>ميثاق</h2><p>منصة العقود الذكية</p></div></div><button class="icon close" onclick="toggleSidebar(false)">✕</button></div><nav class="nav"><button class="active" data-page="home" onclick="showPage('home')"><span class="navSvg"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>الرئيسية</button><button data-page="templates" onclick="showPage('templates')"><span class="navSvg"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15 3v5h5M8 13h8M8 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>القوالب</button><button data-page="favorites" onclick="showPage('favorites')"><span class="navSvg"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8-5.4 2.8 1-6-4.3-4.2 6-.9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>المفضلة</button><button data-page="signatures" onclick="showPage('signatures')"><span class="navSvg"><svg viewBox="0 0 24 24"><path d="M4 18c4-6 6 3 10-3 2-3 3-8 6-7 2 1 0 5-3 7M4 21h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>التوقيعات</button><button data-page="reviews" onclick="showPage('reviews')"><span class="navSvg"><svg viewBox="0 0 24 24"><path d="M12 3v18M6 7h12M7 7l-4 7h8Zm10 0-4 7h8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>مراجعة قانونية</button><button data-page="settings" onclick="showPage('settings')"><span class="navSvg"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 3h-5l-.3 3.1a7 7 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.7 1l.3 3.1h5l.3-3.1a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.5c.1-.3.1-.7.1-1Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>الإعدادات</button><button data-page="help" onclick="showPage('help')"><span class="navSvg"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.8 9a2.4 2.4 0 1 1 4.1 1.7c-.8.8-1.9 1.2-1.9 2.8M12 17h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>المساعدة</button></nav><div class="auth"><div id="authArea"><p class="auth-title">تسجيل الدخول</p><p class="auth-text">ادخل بحساب Google لحفظ هويتك.</p><div id="g_id_onload" data-client_id="833920861265-thb91fppfn01og76abas65a78c9a8o66.apps.googleusercontent.com" data-callback="onGoogleLoginSuccess"></div><div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="right"></div></div></div></aside>
+  <main class="app"><div class="container">
+    <section id="page-home" class="page active"><div class="hero"><div><span class="tag">⚖️ عقود • PDF • توقيع • مشاركة • مراجعة</span><h1>منصة عربية لإنشاء وإدارة العقود من مكان واحد.</h1><p>أنشئ عقداً، عدّل البنود، أضف توقيعاً رقمياً، شارك رابطاً عاماً، اطبع PDF، واطلب مراجعة قانونية عند الحاجة.</p><div class="actions"><button class="btn primary" onclick="openContractModal()">＋ إنشاء عقد جديد</button><button class="btn glass" onclick="showPage('templates')">استعراض القوالب</button><button class="btn glass" onclick="exportContracts()">تصدير نسخة JSON</button></div></div><div class="preview"><div style="display:flex;justify-content:space-between;align-items:center"><div><b style="color:var(--green);font-size:1.1rem">وثيقة ميثاق</b><p class="sub" style="margin:3px 0 0">عقد إلكتروني قابل للطباعة</p></div><div class="seal">م</div></div><div class="line gold"></div><div class="line"></div><div class="line" style="width:85%"></div><div class="line" style="width:72%"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px"><div class="line" style="height:56px"></div><div class="line" style="height:56px"></div></div></div></div><section class="section"><div class="head"><div><h2 class="title">لوحة التحكم</h2><p class="sub">إحصائيات، حالة الخادم، وآخر العقود.</p></div><div id="serverStatus" class="status"><span class="dot"></span><span>فحص السيرفر...</span></div></div><div class="grid4"><div class="stat"><div class="ico">📑</div><div><strong id="contractsCount">0</strong><span>العقود</span></div></div><div class="stat"><div class="ico">⭐</div><div><strong id="favoritesCount">0</strong><span>المفضلة</span></div></div><div class="stat"><div class="ico">✍️</div><div><strong id="signedCount">0</strong><span>الموقعة</span></div></div><div class="stat"><div class="ico">🧩</div><div><strong id="templatesCount">8</strong><span>القوالب</span></div></div></div></section><section class="section"><div class="head"><div><h2 class="title">أنواع العقود</h2><p class="sub">ابدأ من قالب جاهز ثم عدّل البنود حسب حاجتك.</p></div></div><div id="contractTypesGrid" class="gridCards"></div></section><section class="section"><div class="head"><div><h2 class="title">العقود</h2><p class="sub">بحث، فلترة، عرض، PDF، مشاركة، توقيع، مفضلة وحذف.</p></div></div><div class="tools"><input id="searchInput" class="input" placeholder="ابحث باسم الطرف أو نوع العقد..." oninput="renderContracts()"><select id="typeFilter" class="input" onchange="renderContracts()"><option value="all">كل الأنواع</option></select><button class="btn soft" onclick="loadContracts()">↻ تحديث</button><label class="btn soft" for="importFile">استيراد JSON</label><input id="importFile" type="file" accept="application/json" style="display:none" onchange="importContracts(event)"></div><div class="panel table-wrap"><table><thead><tr><th>النوع</th><th>الأطراف</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody id="contractsTableBody"><tr><td class="loading" colspan="6">جاري التحميل...</td></tr></tbody></table></div></section></section>
+    <section id="page-templates" class="page"><div class="head"><div><h1 class="title">القوالب</h1><p class="sub">قوالب أكثر للاستخدام اليومي والتجاري.</p></div></div><div id="templatesGrid" class="gridCards"></div></section>
+    <section id="page-favorites" class="page"><div class="head"><div><h1 class="title">المفضلة</h1><p class="sub">العقود التي وضعتها في المفضلة.</p></div></div><div id="favoritesGrid" class="gridCards"></div></section>
+    <section id="page-signatures" class="page"><div class="head"><div><h1 class="title">التوقيعات الرقمية</h1><p class="sub">اختر عقداً من الجدول واضغط عرض ثم أضف توقيع الطرف الأول أو الثاني.</p></div></div><div id="signaturesGrid" class="gridCards"></div></section>
+    <section id="page-reviews" class="page"><div class="empty"><div>⚖️</div><h2>مراجعة قانونية مدفوعة</h2><p>افتح أي عقد واضغط "طلب مراجعة". تم تجهيز باكند لتخزين طلبات المراجعة كخطوة أولى قبل ربط بوابة دفع أو محامين.</p></div></section>
+    <section id="page-settings" class="page"><div class="head"><div><h1 class="title">الباقات والدفع</h1><p class="sub">اختر الباقة المناسبة، ثم اختر طريقة الدفع المتاحة لك.</p></div></div><div id="plansGrid" class="gridCards"></div></section>
+    <section id="page-help" class="page"><div class="empty"><div>💬</div><h2>المساعدة</h2><p>شغّل الخادم على <bdi>http://localhost:5000</bdi>. زر PDF يفتح صفحة طباعة تستطيع منها الحفظ PDF.</p></div></section>
+  </div></main>
+
+  <div id="contractModal" class="modal-backdrop" onclick="handleModalBackdropClick(event)"><div class="modal"><div class="modal-head"><h2 class="modal-title" id="modalTitle">إنشاء عقد</h2><button class="icon" onclick="closeContractModal()">✕</button></div><div class="modal-body"><form id="contractForm" onsubmit="saveContract(event)"><input id="editingId" type="hidden"><div class="form"><div class="field"><label>نوع العقد</label><select id="contractType" class="input" required></select></div><div class="field"><label>المدينة</label><input id="city" class="input" placeholder="دمشق / الرياض / دبي"></div><div class="field"><label>الطرف الأول</label><input id="party1" class="input" required></div><div class="field"><label>الطرف الثاني</label><input id="party2" class="input" required></div><div class="field"><label>المبلغ اختياري</label><input id="amount" class="input" placeholder="5000 ريال"></div><div class="field"><label>التاريخ</label><input id="contractDate" class="input" type="date" required></div><div class="field"><label>مدة العقد</label><input id="duration" class="input" placeholder="6 أشهر"></div><div class="field"><label>طريقة السداد</label><input id="paymentMethod" class="input" placeholder="تحويل بنكي / نقداً"></div><div class="field full"><label>موضوع العقد</label><input id="subject" class="input" placeholder="وصف مختصر لموضوع العقد"></div><div class="field full"><label>البنود - كل بند في سطر مستقل</label><textarea id="clauses" class="input" rows="6"></textarea></div><div class="field full"><label>ملاحظات إضافية</label><textarea id="notes" class="input" rows="3"></textarea></div></div><div class="actions" style="margin-top:18px"><button id="saveBtn" class="btn green" type="submit">⚡ حفظ وتوليد</button><button class="btn soft" type="button" onclick="fillDraftFromStorage()">استرجاع المسودة</button><button class="btn soft" type="button" onclick="clearDraft()">مسح المسودة</button></div></form></div></div></div>
+  <div id="detailsModal" class="modal-backdrop" onclick="handleDetailsBackdropClick(event)"><div class="modal"><div class="modal-head"><h2 class="modal-title" id="detailsTitle">تفاصيل العقد</h2><button class="icon" onclick="closeDetailsModal()">✕</button></div><div class="modal-body" id="detailsBody"></div></div></div>
+
+  <div id="planModal" class="modal-backdrop" onclick="handlePlanBackdropClick(event)"><div class="modal"><div class="modal-head"><h2 class="modal-title" id="planModalTitle">اختيار الباقة</h2><button class="icon" onclick="closePlanModal()">✕</button></div><div class="modal-body" id="planModalBody"></div></div></div>
+  <div id="toast" class="toast"></div>
+
+<script>
+// CONFIG
+const API_BASE = (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin) + '/api';
+const AUTH_STORAGE_KEY = 'mthq_auth_user';
+const DRAFT_KEY = 'mthq_contract_draft';
+const CONTRACT_TYPES = [
+  { value:'lease', title:'عقد إيجار', icon:'🏢', description:'للعقارات والمكاتب والمحلات.' },
+  { value:'sale', title:'بيع وشراء', icon:'🤝', description:'اتفاق بيع وشراء واضح.' },
+  { value:'services', title:'عقد خدمات', icon:'💼', description:'تنظيم الخدمات والتزامات الأطراف.' },
+  { value:'freelance', title:'عمل حر', icon:'💻', description:'للمستقلين والعملاء.' },
+  { value:'pledge', title:'تعهد وإقرار', icon:'📜', description:'تعهدات وإقرارات مختصرة.' },
+  { value:'supply', title:'عقد توريد', icon:'🚚', description:'توريد منتجات أو مواد.' },
+  { value:'partnership', title:'اتفاق شراكة', icon:'🤝', description:'شراكات وحصص ومسؤوليات.' },
+  { value:'nda', title:'اتفاقية سرية', icon:'🔒', description:'حماية المعلومات الحساسة.' }
+];
+
+const PRICING_PLANS = [
+  { id:'free', title:'Freemium', icon:'draft', price:'مجاني', description:'ابدأ بدون عوائق: إنشاء العقد وتجربة القوالب الأساسية.', features:['إنشاء عقود أساسية','تعديل البنود','معاينة العقد','تحميل TXT'] },
+  { id:'basic', title:'أساسي', icon:'pledge', price:'5 USDT', description:'لمن يريد وثيقة مرتبة وقابلة للمشاركة بدون تعقيد.', features:['PDF احترافي','رابط مشاركة','حفظ دائم'] },
+  { id:'verified', title:'موثّق', icon:'signed', price:'9 USDT', description:'أفضل باقة فردية: PDF، توقيع، مشاركة وختم ميثاق.', features:['كل مزايا أساسي','توقيع رقمي','ختم ميثاق','أولوية في التحسينات'] },
+  { id:'freelancer', title:'المستقل', icon:'freelance', price:'15 USDT / شهر', description:'للمستقلين الذين يحتاجون عقوداً متكررة مع العملاء.', features:['حتى 10 عقود شهرياً','PDF وتوقيع','قوالب خدمات وعمل حر','أرشفة'] },
+  { id:'office', title:'المكاتب', icon:'services', price:'49 USDT / شهر', description:'لمكاتب الخدمات والمكاتب العقارية التي تحتاج إنتاج عقود متكرر.', features:['حتى 50 عقد شهرياً','قوالب متعددة','أرشفة وبحث','دعم أسرع'] },
+  { id:'legal_review', title:'مراجعة قانونية', icon:'review', price:'ابتداءً من 25 USDT', description:'مراجعة بنود العقد مع ملاحظات وتعديلات مقترحة.', features:['مراجعة البنود','ملاحظات قانونية','تعديلات مقترحة'] }
+];
+const SHOW_DEMO_PAYMENT_CONFIRM = false;
+
+const DEFAULT_CLAUSES = {
+  lease: [
+    'يقر الطرفان، وهما بكامل أهليتهما المعتبرة شرعاً ونظاماً، بأن الطرف الأول [اسم المؤجر] قد أجّر للطرف الثاني [اسم المستأجر] العين المؤجرة الكائنة في [عنوان العقار] لمدة قدرها [المدة الزمنية] تبدأ من تاريخ [تاريخ البداية] وتنتهي في تاريخ [تاريخ النهاية].',
+    'يلتزم الطرف الثاني بسداد الأجرة المتفق عليها وقدرها [القيمة المادية] وفق آلية السداد [شهرية/سنوية/دفعة واحدة]، وفي المواعيد المحددة دون تأخير، ويعد التأخر عن السداد لمدة [عدد الأيام] إخلالاً جوهرياً بالعقد.',
+    'يلتزم الطرف الأول بتمكين الطرف الثاني من الانتفاع بالعين المؤجرة انتفاعاً هادئاً ومشروعاً، كما يلتزم بإجراء الإصلاحات الجوهرية غير الناشئة عن سوء استعمال الطرف الثاني، ما لم يتفق الطرفان كتابةً على خلاف ذلك.',
+    'يلتزم الطرف الثاني بالمحافظة على العين المؤجرة واستخدامها للغرض المتفق عليه وهو [الغرض من الإيجار]، ولا يجوز له التنازل عن العقد أو التأجير من الباطن أو تغيير النشاط إلا بموافقة خطية مسبقة من الطرف الأول.',
+    'في حال وقوع قوة قاهرة أو ظرف طارئ خارج عن إرادة الطرفين يمنع الانتفاع أو التنفيذ، يلتزم الطرفان بالتشاور بحسن نية لتعديل الالتزامات أو تعليقها مؤقتاً بما يحقق العدالة ويحفظ حقوق الطرفين.',
+    'تُحل النزاعات الناشئة عن هذا العقد ودياً خلال مدة [مدة التسوية الودية] من تاريخ الإخطار الخطي، فإن تعذر ذلك تُحال إلى الجهة القضائية أو التحكيمية المختصة في [المدينة/الدولة] ما لم يتفق الطرفان على خلاف ذلك.'
+  ],
+  sale: [
+    'يقر الطرفان بأهليتهما القانونية للتعاقد، ويتفقان على أن الطرف الأول [اسم البائع] قد باع للطرف الثاني [اسم المشتري] الشيء/الأصل محل البيع وهو [وصف المبيع وصفاً نافياً للجهالة]، وذلك وفق الشروط الواردة في هذا العقد.',
+    'يلتزم الطرف الثاني بسداد ثمن المبيع وقدره [القيمة المادية] بالطريقة التالية [طريقة السداد]، ويعد عدم السداد في الموعد المحدد إخلالاً يجيز للطرف الأول المطالبة بالتنفيذ أو الفسخ والتعويض عند الاقتضاء.',
+    'يلتزم الطرف الأول بتسليم المبيع للطرف الثاني في تاريخ [تاريخ التسليم] وبالحالة والمواصفات المتفق عليها، خالياً من الحقوق أو المطالبات أو العيوب الجوهرية غير المعلنة، ما لم يتم الإفصاح عنها كتابةً في هذا العقد.',
+    'يقر الطرف الثاني بأنه عاين المبيع المعاينة النافية للجهالة، أو أتيحت له فرصة المعاينة، وأن قبوله النهائي يكون عند الاستلام ما لم تظهر عيوب خفية لم يكن بالإمكان اكتشافها بالفحص المعتاد.',
+    'تنتقل مخاطر الهلاك أو التلف إلى الطرف الثاني من تاريخ الاستلام الفعلي، ما لم يكن الهلاك أو التلف ناشئاً عن فعل أو تقصير من الطرف الأول قبل التسليم.',
+    'أي نزاع ينشأ عن تنفيذ أو تفسير هذا العقد تتم تسويته ودياً أولاً، وفي حال تعذر التسوية خلال [عدد الأيام] يوماً، ينعقد الاختصاص للجهة المختصة في [المدينة/الدولة].'
+  ],
+  services: [
+    'يقر الطرفان بأهليتهما القانونية، ويتفقان على أن الطرف الثاني [اسم مقدم الخدمة] يلتزم بتقديم الخدمات المبينة في [وصف الخدمة] لصالح الطرف الأول [اسم طالب الخدمة] وفق نطاق العمل والمخرجات والجداول الزمنية المتفق عليها.',
+    'يلتزم الطرف الأول بتزويد الطرف الثاني بجميع البيانات والموافقات والمواد اللازمة لتنفيذ الخدمة في الوقت المناسب، كما يلتزم بسداد المقابل المالي وقدره [القيمة المادية] وفق مواعيد السداد [آلية السداد].',
+    'يلتزم الطرف الثاني ببذل العناية المهنية المعتادة وتنفيذ الخدمة وفق الأصول الفنية والمهنية، وتسليم المخرجات في موعد أقصاه [تاريخ/مدة التسليم]، ما لم يحدث تأخير بسبب الطرف الأول أو قوة قاهرة.',
+    'يحق للطرف الأول طلب تعديلات معقولة ضمن نطاق الخدمة المتفق عليه، أما الأعمال أو التعديلات الخارجة عن النطاق فتعد أعمالاً إضافية لا تنفذ إلا بعد اتفاق خطي على مدتها وتكلفتها.',
+    'تظل المعلومات والبيانات المتبادلة بين الطرفين سرية، ولا يجوز لأي طرف إفشاؤها أو استخدامها لغير أغراض تنفيذ هذا العقد، إلا بموافقة خطية أو بموجب التزام قانوني.',
+    'في حال الإخلال الجوهري، يوجه الطرف المتضرر إخطاراً خطياً للطرف الآخر يمنحه مهلة [عدد الأيام] لتصحيح الإخلال، فإن لم يتم التصحيح جاز للطرف المتضرر إنهاء العقد والمطالبة بحقوقه النظامية.'
+  ],
+  freelance: [
+    'يقر الطرفان بأهليتهما للتعاقد، ويتفقان على أن الطرف الثاني [اسم المستقل] يلتزم بتنفيذ العمل الحر الموضح في [وصف المشروع/الخدمة] لصالح الطرف الأول [اسم العميل] وفق نطاق العمل والمخرجات المتفق عليها.',
+    'يلتزم الطرف الأول بسداد أتعاب الطرف الثاني وقدرها [القيمة المادية] وفق الدفعات التالية [تفاصيل الدفعات]، ولا يجوز تأخير السداد بعد تسليم المرحلة أو العمل المتفق عليه دون سبب مشروع ومكتوب.',
+    'يلتزم الطرف الثاني بتسليم العمل في موعد أقصاه [تاريخ التسليم] وبجودة مهنية مناسبة، كما يلتزم بإبلاغ الطرف الأول فوراً بأي عائق جوهري قد يؤثر في الموعد أو جودة التسليم.',
+    'يحق للطرف الأول طلب عدد [عدد التعديلات] من التعديلات ضمن نطاق العمل الأصلي، أما التعديلات الجوهرية أو تغيير المتطلبات بعد اعتمادها فتعد عملاً إضافياً يستوجب اتفاقاً مستقلاً على التكلفة والمدة.',
+    'لا تنتقل حقوق الملكية الفكرية للمخرجات النهائية إلى الطرف الأول إلا بعد سداد كامل المستحقات المتفق عليها، ما لم ينص اتفاق مكتوب على خلاف ذلك، ويحتفظ الطرف الثاني بحق عرض العمل ضمن معرض أعماله ما لم يطلب الطرف الأول السرية كتابةً.',
+    'في حال إلغاء المشروع من الطرف الأول بعد بدء التنفيذ، يستحق الطرف الثاني مقابلاً عادلاً عن الأعمال المنجزة حتى تاريخ الإلغاء، ويحدد ذلك وفق نسبة الإنجاز أو المراحل المسلمة أو ما يتفق عليه الطرفان.',
+    'تتم تسوية أي نزاع ودياً خلال [عدد الأيام] يوماً، وفي حال تعذر التسوية ينعقد الاختصاص للجهة المختصة في [المدينة/الدولة]، مع بقاء حق الطرف الثاني في المطالبة بالمستحقات الثابتة عن الأعمال المنجزة.'
+  ],
+  pledge: [
+    'يقر الطرف الأول [اسم المقر/المتعهد] بكامل أهليته وإرادته الحرة، ودون إكراه أو تدليس، بأنه يتعهد أمام الطرف الثاني [اسم المستفيد] بتنفيذ الالتزام التالي: [وصف التعهد أو الإقرار] خلال مدة [المدة الزمنية].',
+    'يقر الطرف الأول بصحة البيانات والمعلومات الواردة في هذا التعهد، ويتحمل المسؤولية الكاملة عن أي ضرر ينشأ عن عدم صحتها أو عن إخلاله بما تعهد به.',
+    'يلتزم الطرف الأول بعدم القيام بأي تصرف من شأنه تعطيل أو إعاقة تنفيذ هذا التعهد، كما يلتزم بإخطار الطرف الثاني فوراً بأي ظرف قد يؤثر في التنفيذ.',
+    'إذا ترتب على إخلال الطرف الأول ضرر مادي أو معنوي للطرف الثاني، جاز للطرف الثاني المطالبة بالتعويض المناسب وفق القواعد القانونية المعمول بها، دون الإخلال بأي حقوق أخرى.',
+    'لا يعفى الطرف الأول من تنفيذ التزامه إلا في حال القوة القاهرة أو السبب الأجنبي الذي لا يد له فيه، وبشرط إثبات ذلك وإخطار الطرف الثاني خلال مدة معقولة.',
+    'يعد هذا التعهد محرراً إلكترونياً قابلاً للإثبات بالوسائل النظامية، ويخضع في تفسيره وتنفيذه للأنظمة المعمول بها في [المدينة/الدولة].'
+  ],
+  supply: [
+    'يقر الطرفان بأهليتهما القانونية، ويتفقان على أن الطرف الأول [اسم المورد] يلتزم بتوريد [وصف البضائع/المواد] للطرف الثاني [اسم المشتري] بالكميات والمواصفات والأسعار المحددة في [عرض السعر/الملحق/جدول المواصفات].',
+    'يلتزم الطرف الأول بتسليم المواد في المكان [مكان التسليم] وفي الموعد [تاريخ/جدول التسليم]، وبحالة صالحة ومطابقة للمواصفات المتفق عليها وخالية من العيوب الظاهرة التي تمنع الانتفاع بها.',
+    'يلتزم الطرف الثاني بسداد قيمة التوريد وقدرها [القيمة المادية] وفق شروط السداد [دفعة مقدمة/عند التسليم/أقساط]، ولا يعد التأخير في السداد مبرراً لرفض الاستلام إذا كان التوريد مطابقاً، ما لم يتفق على خلاف ذلك.',
+    'يحق للطرف الثاني فحص المواد خلال مدة [مدة الفحص] من تاريخ الاستلام، وعليه إخطار الطرف الأول كتابةً بأي عيب أو نقص أو مخالفة للمواصفات، وإلا اعتبر الاستلام قبولاً مبدئياً ما لم تظهر عيوب خفية.',
+    'يلتزم الطرف الأول باستبدال أو إصلاح أو تعويض المواد غير المطابقة خلال مدة [مدة المعالجة] متى ثبت أن عدم المطابقة راجع إليه، دون تحميل الطرف الثاني تكاليف إضافية غير متفق عليها.',
+    'لا يكون أي طرف مسؤولاً عن التأخير أو عدم التنفيذ إذا كان ناتجاً عن قوة قاهرة أو ظرف خارج عن الإرادة، على أن يخطر الطرف المتأثر الطرف الآخر فوراً ويعمل على تقليل آثار التأخير.',
+    'تتم تسوية النزاعات ودياً، فإن تعذر ذلك خلال [عدد الأيام] يوماً، ينعقد الاختصاص للجهة المختصة في [المدينة/الدولة].'
+  ],
+  partnership: [
+    'يقر الشركاء الموقعون على هذا الاتفاق، وهم [أسماء الشركاء]، بأهليتهم القانونية، ويتفقون على تأسيس علاقة شراكة لغرض [غرض الشراكة/النشاط] وفق الحصص والالتزامات المبينة في هذا الاتفاق.',
+    'تحدد حصة كل شريك على النحو الآتي: [اسم الشريك ونسبة الحصة]، وتحدد المساهمات المالية أو العينية أو الفنية لكل شريك في [تفاصيل المساهمات].',
+    'يلتزم كل شريك بأداء ما عليه من التزامات بحسن نية، وبذل العناية اللازمة لإنجاح الشراكة، والامتناع عن أي تصرف يضر بمصلحة الشراكة أو يستغل أصولها أو معلوماتها لمصلحة شخصية دون موافقة الشركاء.',
+    'توزع الأرباح والخسائر وفق نسب الحصص المتفق عليها، ما لم يتفق الشركاء كتابةً على آلية أخرى، ولا يتم توزيع الأرباح إلا بعد خصم المصروفات والالتزامات والاحتياطيات اللازمة.',
+    'تتخذ القرارات الجوهرية، مثل إدخال شريك جديد أو الاقتراض أو بيع أصول رئيسية أو تغيير النشاط، بموافقة [نسبة الموافقة المطلوبة] من الشركاء، وتوثق القرارات كتابةً.',
+    'يلتزم الشركاء بسرية المعلومات المالية والتجارية والفنية المتعلقة بالشراكة، ويستمر هذا الالتزام حتى بعد انتهاء الشراكة أو خروج أحد الشركاء.',
+    'في حال رغبة أحد الشركاء في الانسحاب أو بيع حصته، يلتزم بإخطار باقي الشركاء قبل مدة [مدة الإخطار]، ويكون لباقي الشركاء حق الأولوية في شراء الحصة وفق آلية تقييم عادلة يتفق عليها.',
+    'تتم تسوية أي نزاع بين الشركاء ودياً، فإن تعذر ذلك خلال [عدد الأيام] يوماً، يحال النزاع إلى [التحكيم/المحكمة المختصة] في [المدينة/الدولة].'
+  ],
+  nda: [
+    'يقر الطرفان بأهليتهما القانونية، ويتفقان على أن المعلومات التي يفصح عنها أي طرف للطرف الآخر والمتعلقة بـ [موضوع العلاقة/المشروع] تعد معلومات سرية متى كانت بطبيعتها سرية أو وسمت بأنها سرية أو يفترض عقلاً سريتها.',
+    'يلتزم الطرف المستلم للمعلومات السرية بعدم إفشائها أو نشرها أو إتاحتها لأي طرف ثالث، وعدم استخدامها إلا لغرض [الغرض المحدد من الإفصاح] وبالقدر اللازم لتحقيق هذا الغرض فقط.',
+    'تشمل المعلومات السرية، دون حصر، البيانات الفنية والتجارية والمالية وقوائم العملاء والأسعار والخطط والمستندات والعروض والبرمجيات وأي مواد أو معلومات يتم تبادلها شفهياً أو كتابياً أو إلكترونياً.',
+    'لا تعد المعلومات سرية إذا ثبت أنها كانت معلومة للعامة دون إخلال من الطرف المستلم، أو كانت بحوزته قبل الإفصاح، أو حصل عليها من طرف ثالث يملك حق الإفصاح، أو طلب الإفصاح عنها بموجب أمر قضائي أو نظامي.',
+    'يلتزم الطرف المستلم باتخاذ إجراءات حماية معقولة لا تقل عن درجة العناية التي يتخذها لحماية معلوماته السرية، وبإخطار الطرف المفصح فوراً عند علمه بأي إفشاء أو استخدام غير مصرح به.',
+    'تستمر التزامات السرية لمدة [مدة الالتزام] من تاريخ توقيع هذا الاتفاق أو من تاريخ آخر إفصاح عن المعلومات السرية، أيهما أحدث، ما لم يتفق الطرفان على مدة أطول.',
+    'عند انتهاء العلاقة أو بناءً على طلب الطرف المفصح، يلتزم الطرف المستلم بإعادة أو إتلاف المعلومات السرية وجميع نسخها، ما لم يكن الاحتفاظ بها مطلوباً بموجب القانون أو لأغراض الإثبات.',
+    'أي إخلال بهذا الاتفاق يجيز للطرف المتضرر المطالبة بوقف الإفشاء أو الاستخدام غير المشروع والتعويض عن الأضرار، وتختص الجهة المختصة في [المدينة/الدولة] بنظر أي نزاع ينشأ عنه.'
+  ]
+};
+// STATE
+let contracts = [];
+let currentUser = null;
+let selectedContract = null;
+let toastTimer = null;
+let signaturePad = { canvas:null, ctx:null, drawing:false };
+
+// INIT
+document.addEventListener('DOMContentLoaded', function(){ renderTypeOptions(); renderContractTypes(); renderTemplates(); bindDraftAutosave(); setDefaultDate(); loadStoredUser(); checkServerHealth(); loadContracts(); });
+
+// AUTH FUNCTIONS
+function onGoogleLoginSuccess(response){ if(!response || !response.credential){ showToast('تعذر تسجيل الدخول.', 'error'); return; } const profile = decodeJwtPayload(response.credential); if(!profile){ showToast('تعذر قراءة بيانات Google.', 'error'); return; } currentUser = { name:profile.name || 'مستخدم ميثاق', email:profile.email || '', picture:profile.picture || '' }; localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser)); renderAuthArea(); showToast('تم تسجيل الدخول.', 'success'); }
+function decodeJwtPayload(token){ try{ const payload = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'); const decoded = decodeURIComponent(atob(payload).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')); return JSON.parse(decoded); }catch(e){ return null; } }
+function loadStoredUser(){ try{ currentUser = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || 'null'); }catch(e){ currentUser = null; } renderAuthArea(); }
+function renderAuthArea(){ const el = document.getElementById('authArea'); if(!el) return; if(currentUser){ el.innerHTML = `<p class="auth-title">مرحباً بك</p><div class="user"><img class="avatar" src="${escapeAttr(currentUser.picture)}" onerror="this.style.display='none'" alt=""><div><p class="name">${escapeHtml(currentUser.name)}</p><p class="mail">${escapeHtml(currentUser.email)}</p></div></div><button class="btn soft" style="width:100%;margin-top:14px" onclick="logoutGoogleUser()">تسجيل الخروج</button>`; return; } el.innerHTML = `<p class="auth-title">تسجيل الدخول</p><p class="auth-text">ادخل بحساب Google لحفظ هويتك.</p><div id="g_id_onload" data-client_id="833920861265-thb91fppfn01og76abas65a78c9a8o66.apps.googleusercontent.com" data-callback="onGoogleLoginSuccess"></div><div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="right"></div>`; if(window.google && google.accounts && google.accounts.id){ google.accounts.id.initialize({client_id:'833920861265-thb91fppfn01og76abas65a78c9a8o66.apps.googleusercontent.com', callback:onGoogleLoginSuccess}); google.accounts.id.renderButton(el.querySelector('.g_id_signin'), {type:'standard',shape:'pill',theme:'outline',text:'signin_with',size:'large',logo_alignment:'right'}); } }
+function logoutGoogleUser(){ localStorage.removeItem(AUTH_STORAGE_KEY); currentUser = null; renderAuthArea(); showToast('تم تسجيل الخروج.', 'info'); }
+window.onGoogleLoginSuccess = onGoogleLoginSuccess;
+
+// SIDEBAR & NAV
+function toggleSidebar(open){ document.body.classList.toggle('sidebar-open', Boolean(open)); }
+function showPage(page){ const ids = ['home','templates','favorites','signatures','reviews','settings','help']; const target = ids.includes(page) ? page : 'home'; ids.forEach(id => { const el = document.getElementById('page-' + id); if(el) el.classList.toggle('active', id === target); }); document.querySelectorAll('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.page === target)); if(target === 'favorites') renderFavorites(); if(target === 'signatures') renderSignatures(); toggleSidebar(false); scrollTo({top:0,behavior:'smooth'}); }
+
+// MODAL
+function openContractModal(typeValue, contractId){ const modal = document.getElementById('contractModal'); const form = document.getElementById('contractForm'); if(!modal || !form) return; form.reset(); document.getElementById('editingId').value = ''; document.getElementById('modalTitle').textContent = 'إنشاء عقد'; setDefaultDate(); if(typeValue) document.getElementById('contractType').value = typeValue; updateDefaultClauses(); if(contractId){ const c = contracts.find(x => getId(x) === contractId); if(c){ document.getElementById('modalTitle').textContent = 'تعديل عقد'; document.getElementById('editingId').value = getId(c); fillForm(c); } } modal.classList.add('open'); }
+function closeContractModal(){ const modal = document.getElementById('contractModal'); if(modal) modal.classList.remove('open'); }
+function handleModalBackdropClick(e){ if(e.target && e.target.id === 'contractModal') closeContractModal(); }
+function setDefaultDate(){ const el = document.getElementById('contractDate'); if(el) el.value = today(); }
+function today(){ const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function fillForm(c){ setValue('contractType', c.type); setValue('city', c.city); setValue('party1', c.party1); setValue('party2', c.party2); setValue('amount', c.amount); setValue('contractDate', c.date); setValue('duration', c.duration); setValue('paymentMethod', c.paymentMethod); setValue('subject', c.subject); setValue('clauses', (c.clauses || []).join('\n')); setValue('notes', c.notes); }
+function setValue(id,val){ const el = document.getElementById(id); if(el) el.value = val || ''; }
+function getFormPayload(){ return { type:value('contractType'), city:value('city'), party1:value('party1'), party2:value('party2'), amount:value('amount'), date:value('contractDate'), duration:value('duration'), paymentMethod:value('paymentMethod'), subject:value('subject'), clauses:value('clauses').split('\n').map(x=>x.trim()).filter(Boolean), notes:value('notes') }; }
+function value(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function bindDraftAutosave(){ ['contractType','city','party1','party2','amount','contractDate','duration','paymentMethod','subject','clauses','notes'].forEach(id => { const el = document.getElementById(id); if(el) el.addEventListener('input', saveDraft); }); const typeEl = document.getElementById('contractType'); if(typeEl) typeEl.addEventListener('change', function(){ updateDefaultClauses(); saveDraft(); }); }
+function saveDraft(){ localStorage.setItem(DRAFT_KEY, JSON.stringify(getFormPayload())); }
+function fillDraftFromStorage(){ try{ const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if(d){ fillForm(d); showToast('تم استرجاع المسودة.', 'success'); } }catch(e){ showToast('لا توجد مسودة صالحة.', 'error'); } }
+function clearDraft(){ localStorage.removeItem(DRAFT_KEY); showToast('تم مسح المسودة.', 'info'); }
+function updateDefaultClauses(){ const type = value('contractType'); const clauses = document.getElementById('clauses'); if(clauses && !clauses.value.trim()) clauses.value = (DEFAULT_CLAUSES[type] || DEFAULT_CLAUSES.services).join('\n'); }
+
+// CONTRACTS
+async function checkServerHealth(){ const el = document.getElementById('serverStatus'); try{ const res = await fetch(`${API_BASE}/health`); if(!res.ok) throw new Error(); if(el){ el.className='status online'; el.innerHTML='<span class="dot"></span><span>السيرفر متصل</span>'; } }catch(e){ if(el){ el.className='status offline'; el.innerHTML='<span class="dot"></span><span>السيرفر غير متصل</span>'; } } }
+async function loadContracts(){ const body = document.getElementById('contractsTableBody'); if(body) body.innerHTML = '<tr><td class="loading" colspan="6">جاري التحميل...</td></tr>'; try{ const res = await fetch(`${API_BASE}/contracts`); if(!res.ok) throw new Error(); const data = await res.json(); contracts = Array.isArray(data) ? data : (data.contracts || data.data || []); renderContracts(); renderFavorites(); renderSignatures(); }catch(e){ contracts = []; updateCounts(); if(body) body.innerHTML = '<tr><td class="empty-cell" colspan="6">تعذر جلب العقود. تأكد من تشغيل السيرفر.</td></tr>'; } }
+async function saveContract(e){ if(e) e.preventDefault(); const payload = getFormPayload(); if(!payload.party1 || !payload.party2 || !payload.date){ showToast('املأ الطرفين والتاريخ.', 'error'); return; } const id = value('editingId'); const btn = document.getElementById('saveBtn'); try{ if(btn){ btn.disabled = true; btn.textContent = 'جاري الحفظ...'; } const res = await fetch(id ? `${API_BASE}/contracts/${encodeURIComponent(id)}` : `${API_BASE}/generate-contract`, { method:id ? 'PUT' : 'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }); const data = await res.json().catch(()=>({})); if(!res.ok) throw new Error(data.message || 'فشل الحفظ'); closeContractModal(); clearDraft(); showToast(id ? 'تم تعديل العقد.' : 'تم توليد العقد.', 'success'); await loadContracts(); }catch(err){ showToast(err.message || 'تعذر الحفظ.', 'error'); }finally{ if(btn){ btn.disabled = false; btn.textContent = '⚡ حفظ وتوليد'; } } }
+function renderContracts(){ updateCounts(); renderTypeOptions(); const body = document.getElementById('contractsTableBody'); if(!body) return; const q = (value('searchInput') || '').toLowerCase(); const typeFilter = value('typeFilter') || 'all'; const rows = contracts.filter(c => (typeFilter === 'all' || c.type === typeFilter) && JSON.stringify([c.party1,c.party2,c.typeName,c.subject]).toLowerCase().includes(q)).slice(0,50); if(!rows.length){ body.innerHTML = '<tr><td class="empty-cell" colspan="6">لا توجد عقود مطابقة.</td></tr>'; return; } body.innerHTML = rows.map(c => { const t = getType(c.type); const id = getId(c); return `<tr><td><span class="badge">${t.icon} ${escapeHtml(t.title)}</span></td><td>${escapeHtml(c.party1 || '—')} / ${escapeHtml(c.party2 || '—')}</td><td>${escapeHtml(c.amount || '—')}</td><td>${statusLabel(c)}</td><td>${escapeHtml(formatDate(c.date || c.createdAt))}</td><td><div class="actions"><button class="btn sm soft" onclick="openDetails('${escapeAttr(id)}')">عرض</button><button class="btn sm soft" onclick="openContractModal('', '${escapeAttr(id)}')">تعديل</button><button class="btn sm soft" onclick="printPdf('${escapeAttr(id)}')">PDF</button><button class="btn sm soft" onclick="shareContract('${escapeAttr(id)}')">مشاركة</button><button class="btn sm soft" onclick="toggleFavorite('${escapeAttr(id)}')">${c.favorite ? '★' : '☆'}</button><button class="btn sm danger" onclick="deleteContract('${escapeAttr(id)}')">حذف</button></div></td></tr>`; }).join(''); }
+function statusLabel(c){ if(c.status === 'signed') return '<span class="badge">' + svgIcon('signed') + ' موقّع</span>'; if(c.status === 'partially_signed') return '<span class="badge">' + svgIcon('signed') + ' توقيع جزئي</span>'; if(c.reviewStatus === 'pending') return '<span class="badge">' + svgIcon('review') + ' قيد المراجعة</span>'; return '<span class="badge">' + svgIcon('draft') + ' مسودة</span>'; }
+async function deleteContract(id){ if(!confirm('حذف العقد؟')) return; try{ const res = await fetch(`${API_BASE}/contracts/${encodeURIComponent(id)}`, {method:'DELETE'}); if(!res.ok) throw new Error(); contracts = contracts.filter(c => getId(c) !== id); renderContracts(); renderFavorites(); renderSignatures(); showToast('تم الحذف.', 'success'); }catch(e){ showToast('تعذر الحذف.', 'error'); } }
+async function toggleFavorite(id){ try{ const res = await fetch(`${API_BASE}/contracts/${encodeURIComponent(id)}/favorite`, {method:'POST'}); if(!res.ok) throw new Error(); await loadContracts(); showToast('تم تحديث المفضلة.', 'success'); }catch(e){ showToast('تعذر تحديث المفضلة.', 'error'); } }
+function updateCounts(){ setText('contractsCount', contracts.length); setText('favoritesCount', contracts.filter(c=>c.favorite).length); setText('signedCount', contracts.filter(c=>c.status === 'signed').length); setText('templatesCount', CONTRACT_TYPES.length); }
+function setText(id,text){ const el = document.getElementById(id); if(el) el.textContent = String(text); }
+
+// DETAIL, PDF, SHARE, EXPORT
+function openDetails(id){ selectedContract = contracts.find(c => getId(c) === id); if(!selectedContract){ showToast('العقد غير موجود.', 'error'); return; } const modal = document.getElementById('detailsModal'); const body = document.getElementById('detailsBody'); document.getElementById('detailsTitle').textContent = getType(selectedContract.type).title; body.innerHTML = `<div class="actions" style="margin-bottom:14px"><button class="btn soft" onclick="printPdf('${escapeAttr(id)}')">طباعة / PDF</button><button class="btn soft" onclick="downloadTxt('${escapeAttr(id)}')">TXT</button><button class="btn soft" onclick="downloadHtml('${escapeAttr(id)}')">HTML</button><button class="btn soft" onclick="copyText('${escapeAttr(id)}')">نسخ النص</button><button class="btn soft" onclick="shareContract('${escapeAttr(id)}')">نسخ رابط المشاركة</button><button class="btn green" onclick="renderSignatureForm('${escapeAttr(id)}')">إضافة توقيع</button><button class="btn primary" onclick="renderPaymentForm('${escapeAttr(id)}')">ترقية / دفع</button><button class="btn blue" onclick="renderReviewForm('${escapeAttr(id)}')">طلب مراجعة</button></div><div class="detailText">${escapeHtml(selectedContract.content || buildText(selectedContract))}</div><div id="detailsExtra"></div>`; modal.classList.add('open'); }
+function closeDetailsModal(){ const modal = document.getElementById('detailsModal'); if(modal) modal.classList.remove('open'); selectedContract = null; }
+function handleDetailsBackdropClick(e){ if(e.target && e.target.id === 'detailsModal') closeDetailsModal(); }
+function printPdf(id){ window.open(`/print/${encodeURIComponent(id)}`, '_blank'); }
+function shareContract(id){ const link = `${location.origin}/share/${encodeURIComponent(id)}`; copyToClipboard(link); showToast('تم نسخ رابط المشاركة.', 'success'); }
+function downloadTxt(id){ const c = contracts.find(x => getId(x) === id); if(!c) return; downloadFile(`mithaq-${id}.txt`, buildText(c), 'text/plain;charset=utf-8'); }
+function downloadHtml(id){ const c = contracts.find(x => getId(x) === id); if(!c) return; const html = `<!DOCTYPE html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>عقد ميثاق</title><body><pre style="white-space:pre-wrap;font-family:Tahoma;line-height:2">${escapeHtml(buildText(c))}</pre></body></html>`; downloadFile(`mithaq-${id}.html`, html, 'text/html;charset=utf-8'); }
+function copyText(id){ const c = contracts.find(x => getId(x) === id); if(c){ copyToClipboard(buildText(c)); showToast('تم نسخ نص العقد.', 'success'); } }
+function exportContracts(){ downloadFile('mithaq-contracts-backup.json', JSON.stringify(contracts, null, 2), 'application/json;charset=utf-8'); }
+function importContracts(e){ const file = e.target.files && e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(){ try{ const data = JSON.parse(reader.result); if(!Array.isArray(data)) throw new Error(); downloadFile('mithaq-imported-preview.json', JSON.stringify(data, null, 2), 'application/json;charset=utf-8'); showToast('تم قراءة الملف. الاستيراد للباكند يتطلب دمجاً إدارياً، وتم تنزيل معاينة.', 'info'); }catch(err){ showToast('ملف JSON غير صالح.', 'error'); } }; reader.readAsText(file); }
+function downloadFile(name, content, type){ const blob = new Blob([content], {type}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+function copyToClipboard(text){ if(navigator.clipboard) navigator.clipboard.writeText(text).catch(()=>fallbackCopy(text)); else fallbackCopy(text); }
+function fallbackCopy(text){ const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+
+
+// PAYMENTS
+function renderPaymentForm(id, planId){
+  const extra = document.getElementById('detailsExtra');
+  const c = contracts.find(x => getId(x) === id);
+  if(!extra || !c) return;
+  const plan = PRICING_PLANS.find(p => p.id === (planId || 'verified')) || PRICING_PLANS[2];
+  const premium = c.premium ? '<span class="premiumBadge">✓ العقد مفعل كباقة مدفوعة</span>' : '';
+  extra.innerHTML = `<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3 class="title" style="font-size:1.2rem">${escapeHtml(plan.title)}</h3><p class="sub">${escapeHtml(plan.description)} اختر طريقة الدفع المتاحة لك حالياً.</p>${premium}<div class="paymentGrid"><button class="payCard" onclick="createPayment('${escapeAttr(id)}','sham_cash','${escapeAttr(plan.id)}')"><div class="payTop"><img class="payLogo" src="assets/sham-cash-badge.svg" alt="شام كاش"><div><h4>شام كاش</h4><span class="payMeta">الأفضل داخل سوريا</span></div></div><p>دفع محلي سريع. عند ربط API الرسمي سيتم التأكيد تلقائياً، وحالياً يمكن إرسال رقم العملية للمراجعة.</p></button><button class="payCard" onclick="createPayment('${escapeAttr(id)}','crypto_usdt','${escapeAttr(plan.id)}')"><div class="payTop"><img class="payLogo" src="assets/crypto-badge.svg" alt="USDT"><div><h4>USDT مباشر</h4><span class="payMeta">TRC20 / Crypto</span></div></div><p>ادفع USDT مباشرة على شبكة TRC20 ثم أرسل TXID للتحقق والتفعيل.</p></button></div><div id="paymentResult"></div>`;
+}
+
+async function createPayment(contractId, method, planId){
+  const result = document.getElementById('paymentResult');
+  if(result) result.innerHTML = '<div class="paymentResult">جاري إنشاء طلب الدفع...</div>';
+  try{
+    const payload = { contractId, method, planId: planId || 'verified', customerName: currentUser?.name || '', customerContact: currentUser?.email || '' };
+    const res = await fetch(`${API_BASE}/payments/create`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.message || 'تعذر إنشاء الدفع');
+    renderPaymentResult(data.payment);
+  }catch(e){ showToast(e.message || 'تعذر إنشاء طلب الدفع.', 'error'); if(result) result.innerHTML = ''; }
+}
+
+function renderPaymentResult(payment){
+  const result = document.getElementById('paymentResult');
+  if(!result || !payment) return;
+  if(payment.method === 'sham_cash'){
+    result.innerHTML = `<div class="paymentResult"><h4 style="margin:0 0 8px;color:var(--green)">طلب دفع شام كاش</h4><p class="sub">المبلغ: <b>${escapeHtml(payment.amountSyp)} ل.س</b> — رقم الطلب: <bdi>${escapeHtml(payment.id)}</bdi></p><p class="sub">${escapeHtml(payment.instructions || '')}</p>${payment.checkoutUrl ? `<a class="btn green" href="${escapeAttr(payment.checkoutUrl)}" target="_blank" rel="noopener">فتح صفحة الدفع</a>` : ''}<div class="field" style="margin-top:12px"><label>رقم العملية / المرجع</label><input id="paymentProof" class="input" placeholder="أدخل رقم عملية شام كاش"></div><div class="actions" style="margin-top:12px"><button class="btn green" onclick="submitPaymentProof('${escapeAttr(payment.id)}')">إرسال الإثبات</button>${SHOW_DEMO_PAYMENT_CONFIRM ? `<button class="btn soft" onclick="confirmPaymentDemo('${escapeAttr(payment.id)}')">تأكيد تجريبي</button>` : ''}</div></div>`;
+    return;
+  }
+  result.innerHTML = `<div class="paymentResult"><h4 style="margin:0 0 8px;color:var(--green)">الدفع عبر USDT TRC20</h4><p class="sub">المبلغ: <b>${escapeHtml(payment.amountUsd)} USDT</b> — الشبكة: <b>${escapeHtml(payment.network)}</b></p><label style="font-weight:900;color:var(--green)">عنوان المحفظة</label><code>${escapeHtml(payment.walletAddress)}</code><p class="sub">ضع رقم الطلب في الملاحظة إن أمكن: <bdi>${escapeHtml(payment.id)}</bdi></p><div class="field" style="margin-top:12px"><label>TXID / رقم العملية</label><input id="paymentProof" class="input" placeholder="أدخل TXID بعد التحويل"></div><div class="actions" style="margin-top:12px"><button class="btn green" onclick="submitPaymentProof('${escapeAttr(payment.id)}')">إرسال الإثبات</button>${SHOW_DEMO_PAYMENT_CONFIRM ? `<button class="btn soft" onclick="confirmPaymentDemo('${escapeAttr(payment.id)}')">تأكيد تجريبي</button>` : ''}</div></div>`;
+}
+
+async function submitPaymentProof(paymentId){
+  const proof = value('paymentProof');
+  if(!proof){ showToast('أدخل رقم العملية أولاً.', 'error'); return; }
+  try{
+    const res = await fetch(`${API_BASE}/payments/${encodeURIComponent(paymentId)}/proof`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ txid: proof }) });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.message || 'تعذر إرسال الإثبات');
+    showToast('تم إرسال إثبات الدفع للمراجعة.', 'success');
+  }catch(e){ showToast(e.message || 'تعذر إرسال الإثبات.', 'error'); }
+}
+
+async function confirmPaymentDemo(paymentId){
+  try{
+    const res = await fetch(`${API_BASE}/payments/${encodeURIComponent(paymentId)}/confirm-demo`, { method:'POST' });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.message || 'تعذر التأكيد');
+    showToast('تم تفعيل باقة التوثيق تجريبياً.', 'success');
+    await loadContracts();
+    if(data.contract) openDetails(getId(data.contract));
+  }catch(e){ showToast(e.message || 'تعذر تأكيد الدفع.', 'error'); }
+}
+
+// SIGNATURES
+function renderSignatureForm(id){ const extra = document.getElementById('detailsExtra'); if(!extra) return; const c = contracts.find(x => getId(x) === id); extra.innerHTML = `<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3 class="title" style="font-size:1.2rem">إضافة توقيع رقمي</h3><div class="form"><div class="field"><label>الطرف</label><select id="signParty" class="input"><option value="party1">الطرف الأول</option><option value="party2">الطرف الثاني</option></select></div><div class="field"><label>اسم الموقّع</label><input id="signName" class="input" value="${escapeAttr(c.party1 || '')}"></div><div class="field full"><label>ارسم التوقيع</label><div class="canvasBox"><canvas id="signatureCanvas" width="900" height="250"></canvas></div></div></div><div class="actions" style="margin-top:12px"><button class="btn green" onclick="saveSignature('${escapeAttr(id)}')">حفظ التوقيع</button><button class="btn soft" onclick="clearSignatureCanvas()">مسح اللوحة</button></div>`; document.getElementById('signParty').addEventListener('change', function(){ document.getElementById('signName').value = this.value === 'party1' ? (c.party1 || '') : (c.party2 || ''); }); initSignatureCanvas(); }
+function initSignatureCanvas(){ const canvas = document.getElementById('signatureCanvas'); if(!canvas) return; const ctx = canvas.getContext('2d'); ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#1D4A3E'; signaturePad = {canvas, ctx, drawing:false}; const pos = e => { const r = canvas.getBoundingClientRect(); const p = e.touches ? e.touches[0] : e; return {x:(p.clientX-r.left)*(canvas.width/r.width), y:(p.clientY-r.top)*(canvas.height/r.height)}; }; const start = e => { e.preventDefault(); signaturePad.drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }; const move = e => { if(!signaturePad.drawing) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }; const end = () => { signaturePad.drawing = false; }; canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', end); canvas.addEventListener('touchstart', start, {passive:false}); canvas.addEventListener('touchmove', move, {passive:false}); canvas.addEventListener('touchend', end); }
+function clearSignatureCanvas(){ if(signaturePad.ctx && signaturePad.canvas) signaturePad.ctx.clearRect(0,0,signaturePad.canvas.width,signaturePad.canvas.height); }
+async function saveSignature(id){ if(!signaturePad.canvas){ showToast('لوحة التوقيع غير جاهزة.', 'error'); return; } try{ const party = value('signParty'); const name = value('signName'); const signatureData = signaturePad.canvas.toDataURL('image/png'); const res = await fetch(`${API_BASE}/contracts/${encodeURIComponent(id)}/signatures`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({party,name,signatureData})}); const data = await res.json().catch(()=>({})); if(!res.ok) throw new Error(data.message || 'فشل حفظ التوقيع'); await loadContracts(); showToast('تم حفظ التوقيع.', 'success'); closeDetailsModal(); openDetails(id); }catch(e){ showToast(e.message || 'تعذر حفظ التوقيع.', 'error'); } }
+function renderSignatures(){ const grid = document.getElementById('signaturesGrid'); if(!grid) return; const list = contracts.filter(c => c.status === 'signed' || c.status === 'partially_signed'); if(!list.length){ grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div>✍️</div><h2>لا توجد توقيعات بعد</h2><p>افتح عقداً وأضف توقيعاً رقمياً.</p></div>'; return; } grid.innerHTML = list.map(c => miniCard(c)).join(''); }
+
+// REVIEWS
+function renderReviewForm(id){ const extra = document.getElementById('detailsExtra'); if(!extra) return; extra.innerHTML = `<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3 class="title" style="font-size:1.2rem">طلب مراجعة قانونية</h3><div class="form"><div class="field"><label>الاسم</label><input id="reviewName" class="input" value="${escapeAttr(currentUser?.name || '')}"></div><div class="field"><label>البريد الإلكتروني</label><input id="reviewEmail" class="input" value="${escapeAttr(currentUser?.email || '')}"></div><div class="field full"><label>ملاحظات للمحامي</label><textarea id="reviewNote" class="input" rows="3" placeholder="اذكر ما تريد مراجعته تحديداً"></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn blue" onclick="sendReviewRequest('${escapeAttr(id)}')">إرسال الطلب</button></div>`; }
+async function sendReviewRequest(id){ try{ const payload = {contractId:id, name:value('reviewName'), email:value('reviewEmail'), note:value('reviewNote')}; const res = await fetch(`${API_BASE}/review-requests`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}); const data = await res.json().catch(()=>({})); if(!res.ok) throw new Error(data.message || 'فشل إرسال الطلب'); showToast('تم إرسال طلب المراجعة.', 'success'); await loadContracts(); }catch(e){ showToast(e.message || 'تعذر إرسال الطلب.', 'error'); } }
+
+
+function svgIcon(name){
+  const icons = {
+    lease:'<svg viewBox="0 0 24 24"><path d="M4 20V9.5L12 5l8 4.5V20"/><path d="M8 20v-6.5h8V20"/><path d="M8 10.5h.01M12 10.5h.01M16 10.5h.01"/><path d="M6.5 8.2 12 3.8l5.5 4.4"/></svg>',
+    sale:'<svg viewBox="0 0 24 24"><path d="M7 8.5h5l2 2h3.5a2.5 2.5 0 0 1 0 5H13"/><path d="M4 11.5 7 8.5l3 3"/><path d="M20 12.5 17 15.5l-3-3"/><path d="M5 19h14"/></svg>',
+    services:'<svg viewBox="0 0 24 24"><path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1"/><rect x="4" y="6" width="16" height="14" rx="3"/><path d="M4 12h16"/><path d="M10 12v2h4v-2"/><path d="M8 17h8"/></svg>',
+    freelance:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M9 20h6M12 16v4"/><path d="m8.5 11 2 2 5-5"/></svg>',
+    pledge:'<svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M15 3v5h5"/><path d="M8 14h8M8 18h5"/><path d="M16 17l1 1 2-3"/></svg>',
+    supply:'<svg viewBox="0 0 24 24"><path d="M3 7h11v10H3z"/><path d="M14 11h4l3 3v3h-7z"/><path d="M6 10h5M6 13h4"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>',
+    partnership:'<svg viewBox="0 0 24 24"><path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M3 20a5 5 0 0 1 10 0M11 20a5 5 0 0 1 10 0"/><path d="M9.5 14.5h5"/></svg>',
+    nda:'<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 15v2"/><path d="M9 18h6"/></svg>',
+    draft:'<svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M15 3v5h5M8 14h8M8 18h5"/></svg>',
+    signed:'<svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/><path d="M4 20h16"/></svg>',
+    review:'<svg viewBox="0 0 24 24"><path d="M12 3v18M6 7h12M7 7l-4 7h8Zm10 0-4 7h8Z"/></svg>'
+  };
+  return icons[name] || icons.draft;
+}
+
+
+// PLANS
+function renderPlans(){
+  const grid = document.getElementById('plansGrid');
+  if(!grid) return;
+  grid.innerHTML = PRICING_PLANS.map(plan => `<button class="card" onclick="openPlanModal('${escapeAttr(plan.id)}')"><div class="ico">${svgIcon(plan.icon)}</div><h3>${escapeHtml(plan.title)}</h3><p>${escapeHtml(plan.description)}</p><span class="planPrice">${escapeHtml(plan.price)}</span></button>`).join('');
+}
+
+function openPlanModal(planId){
+  const plan = PRICING_PLANS.find(p => p.id === planId) || PRICING_PLANS[1];
+  const modal = document.getElementById('planModal');
+  const title = document.getElementById('planModalTitle');
+  const body = document.getElementById('planModalBody');
+  if(!modal || !title || !body) return;
+  title.textContent = plan.title;
+  const isPaid = plan.id !== 'free';
+  body.innerHTML = `<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px"><div class="ico">${svgIcon(plan.icon)}</div><div><h3 style="margin:0;color:var(--green);font-size:1.25rem">${escapeHtml(plan.title)}</h3><span class="planPrice">${escapeHtml(plan.price)}</span></div></div><p class="sub">${escapeHtml(plan.description)}</p><ul class="planFeatures">${plan.features.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>${isPaid ? `<div class="planPayTitle">اختر طريقة الدفع</div><div class="paymentGrid"><button class="payCard" onclick="openContractPaymentFromPlan('sham_cash','${escapeAttr(plan.id)}')"><div class="payTop"><img class="payLogo" src="assets/sham-cash-badge.svg" alt="شام كاش"><div><h4>شام كاش</h4><span class="payMeta">الأفضل داخل سوريا</span></div></div><p>ادفع عبر شام كاش بعد اختيار العقد الذي تريد ترقيته.</p></button><button class="payCard" onclick="openContractPaymentFromPlan('crypto_usdt','${escapeAttr(plan.id)}')"><div class="payTop"><img class="payLogo" src="assets/crypto-badge.svg" alt="USDT"><div><h4>USDT مباشر</h4><span class="payMeta">TRC20</span></div></div><p>ادفع USDT مباشرة ثم أرسل رقم العملية للتحقق.</p></button></div>` : `<div class="planNote">هذه الباقة ${plan.id === 'free' ? 'متاحة حالياً داخل المنصة.' : 'مخطط لها في المرحلة القادمة.'}</div>`}`;
+  modal.classList.add('open');
+}
+
+function openContractPaymentFromPlan(method, planId){
+  closePlanModal();
+  const latest = contracts && contracts.length ? contracts[0] : null;
+  if(!latest){ showToast('أنشئ عقداً أولاً ثم اختر الباقة للدفع.', 'info'); openContractModal(); return; }
+  openDetails(getId(latest));
+  setTimeout(function(){ renderPaymentForm(getId(latest), planId); createPayment(getId(latest), method, planId); }, 140);
+}
+
+function closePlanModal(){ const modal = document.getElementById('planModal'); if(modal) modal.classList.remove('open'); }
+function handlePlanBackdropClick(e){ if(e.target && e.target.id === 'planModal') closePlanModal(); }
+
+// RENDER HELPERS
+function renderTypeOptions(){ const select = document.getElementById('contractType'); const filter = document.getElementById('typeFilter'); const options = CONTRACT_TYPES.map(t => `<option value="${escapeAttr(t.value)}">${escapeHtml(t.title)} ${t.icon}</option>`).join(''); if(select && !select.dataset.done){ select.innerHTML = options; select.dataset.done = '1'; } if(filter){ const current = filter.value || 'all'; filter.innerHTML = '<option value="all">كل الأنواع</option>' + options; filter.value = current; } }
+function renderContractTypes(){ const grid = document.getElementById('contractTypesGrid'); if(!grid) return; grid.innerHTML = CONTRACT_TYPES.slice(0,8).map(t => `<button class="card" onclick="openContractModal('${escapeAttr(t.value)}')"><div class="ico">${svgIcon(t.value)}</div><h3>${escapeHtml(t.title)}</h3><p>${escapeHtml(t.description)}</p></button>`).join(''); }
+function renderTemplates(){ const grid = document.getElementById('templatesGrid'); if(!grid) return; grid.innerHTML = CONTRACT_TYPES.map(t => `<article class="card"><div class="ico">${svgIcon(t.value)}</div><h3>${escapeHtml(t.title)}</h3><p>${escapeHtml(t.description)}</p><button class="btn green" onclick="openContractModal('${escapeAttr(t.value)}')">استخدم هذا القالب</button></article>`).join(''); }
+function renderFavorites(){ const grid = document.getElementById('favoritesGrid'); if(!grid) return; const favs = contracts.filter(c => c.favorite); if(!favs.length){ grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div>⭐</div><h2>لا توجد عقود في المفضلة بعد</h2><p>اضغط النجمة بجانب أي عقد لإضافته هنا.</p></div>'; return; } grid.innerHTML = favs.map(c => miniCard(c)).join(''); }
+function miniCard(c){ const t = getType(c.type); const id = getId(c); return `<article class="card"><div class="ico">${svgIcon(t.value)}</div><h3>${escapeHtml(t.title)}</h3><p>${escapeHtml(c.party1 || '')} / ${escapeHtml(c.party2 || '')}</p><p>${statusLabel(c)}</p><button class="btn green" onclick="openDetails('${escapeAttr(id)}')">عرض العقد</button></article>`; }
+function getType(value){ return CONTRACT_TYPES.find(t => t.value === value) || {value, title:value || 'عقد', icon:'📑', description:''}; }
+function getId(c){ return String(c && (c.id || c._id || c.uuid || c.contractId)); }
+function buildText(c){ const clauses = (c.clauses || []).map((x,i)=>`${i+1}. ${x}`).join('\n'); return ['منصة ميثاق للعقود الذكية العربية','================================',`نوع العقد: ${getType(c.type).title}`,`الطرف الأول: ${c.party1 || ''}`,`الطرف الثاني: ${c.party2 || ''}`,`المبلغ: ${c.amount || 'غير محدد'}`,`التاريخ: ${formatDate(c.date || c.createdAt)}`,'',c.content || clauses].join('\n'); }
+function formatDate(v){ if(!v) return '—'; const d = new Date(v); return Number.isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('ar', {year:'numeric',month:'short',day:'numeric'}); }
+function showToast(message,type){ const el = document.getElementById('toast'); if(!el) return; const t = type || 'info'; el.className = `toast show ${t}`; el.innerHTML = `<span>${t === 'error' ? '⚠️' : t === 'success' ? '✅' : 'ℹ️'}</span><span>${escapeHtml(message)}</span>`; clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ el.className = 'toast'; el.innerHTML = ''; }, 3600); }
+function escapeHtml(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function escapeAttr(v){ return escapeHtml(v).replace(/`/g,'&#096;'); }
+</script>
+</body>
+</html>
