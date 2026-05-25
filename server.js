@@ -7,31 +7,52 @@ const path = require('path');
 const crypto = require('crypto');
 const url = require('url');
 
+// ─── Configuration ────────────────────────────────────────────
 const PORT = Number(process.env.PORT || 5000);
 const HOST = process.env.HOST || '0.0.0.0';
-const ROOT_DIR = path.resolve(__dirname, '..');
-const FRONTEND_FILE = path.join(ROOT_DIR, 'frontend', 'index.html');
-const MARKETING_FILE = path.join(ROOT_DIR, 'frontend', 'marketing-carousel.html');
-const BRAND_FILE = path.join(ROOT_DIR, 'frontend', 'brand-identity.html');
-const AGENTS_FILE = path.join(ROOT_DIR, 'frontend', 'agents-council.html');
-const DESIGN_STUDIO_FILE = path.join(ROOT_DIR, 'frontend', 'design-studio.html');
-const ASSETS_DIR = path.join(ROOT_DIR, 'frontend', 'assets');
-const DATA_DIR = path.join(__dirname, 'data');
-const CONTRACTS_FILE = path.join(DATA_DIR, 'contracts.json');
-const REVIEWS_FILE = path.join(DATA_DIR, 'review-requests.json');
-const PAYMENTS_FILE = path.join(DATA_DIR, 'payments.json');
+const PUBLIC_APP_URL = process.env.PUBLIC_APP_URL || 'mithaq-tn02.onrender.com';
 
+// ─── Paths ────────────────────────────────────────────────────
+const ROOT_DIR = __dirname;
+const FRONTEND_FILE      = path.join(ROOT_DIR, 'index.html');
+const MARKETING_FILE     = path.join(ROOT_DIR, 'marketing-carousel.html');
+const BRAND_FILE         = path.join(ROOT_DIR, 'brand-identity.html');
+const AGENTS_FILE        = path.join(ROOT_DIR, 'agents-council.html');
+const DESIGN_STUDIO_FILE = path.join(ROOT_DIR, 'design-studio.html');
+const DATA_DIR           = path.join(ROOT_DIR, 'data');
+const CONTRACTS_FILE     = path.join(DATA_DIR, 'contracts.json');
+const REVIEWS_FILE       = path.join(DATA_DIR, 'review-requests.json');
+const PAYMENTS_FILE      = path.join(DATA_DIR, 'payments.json');
+
+// ─── Startup Warnings ─────────────────────────────────────────
+function checkEnv() {
+  const warnings = [];
+  if (!process.env.ENCRYPTION_KEY || process.env.ENCRYPTION_KEY.length < 24)
+    warnings.push('⚠️  ENCRYPTION_KEY غير مضبوط أو قصير جداً — سيتم استخدام مفتاح تطوير غير آمن.');
+  if (!process.env.TELEGRAM_BOT_TOKEN)
+    warnings.push('ℹ️  TELEGRAM_BOT_TOKEN غير مضبوط — ميزة تلجرام معطلة.');
+  if (!process.env.TELEGRAM_CHAT_ID)
+    warnings.push('ℹ️  TELEGRAM_CHAT_ID غير مضبوط — ميزة تلجرام معطلة.');
+  if (!process.env.USDT_TRC20_ADDRESS)
+    warnings.push('ℹ️  USDT_TRC20_ADDRESS غير مضبوط — يجب إضافته قبل قبول مدفوعات USDT.');
+  if (!fs.existsSync(FRONTEND_FILE))
+    warnings.push('❌ index.html غير موجود في المجلد الجذري!');
+  warnings.forEach(w => console.warn(w));
+}
+
+// ─── Contract Types ───────────────────────────────────────────
 const CONTRACT_TYPES = {
-  lease: 'عقد إيجار',
-  sale: 'بيع وشراء',
-  services: 'عقد خدمات',
-  freelance: 'عمل حر',
-  pledge: 'تعهد وإقرار',
-  supply: 'عقد توريد',
+  lease:       'عقد إيجار',
+  sale:        'بيع وشراء',
+  services:    'عقد خدمات',
+  freelance:   'عمل حر',
+  pledge:      'تعهد وإقرار',
+  supply:      'عقد توريد',
   partnership: 'اتفاق شراكة',
-  nda: 'اتفاقية سرية'
+  nda:         'اتفاقية سرية'
 };
 
+// ─── Default Clauses ──────────────────────────────────────────
 const DEFAULT_CLAUSES = {
   lease: [
     'يقر الطرفان، وهما بكامل أهليتهما المعتبرة شرعاً ونظاماً، بأن الطرف الأول [اسم المؤجر] قد أجّر للطرف الثاني [اسم المستأجر] العين المؤجرة الكائنة في [عنوان العقار] لمدة قدرها [المدة الزمنية] تبدأ من تاريخ [تاريخ البداية] وتنتهي في تاريخ [تاريخ النهاية].',
@@ -105,6 +126,7 @@ const DEFAULT_CLAUSES = {
   ]
 };
 
+// ─── Encryption ───────────────────────────────────────────────
 const CONTRACTS_STORAGE_VERSION = 2;
 const JSON_INDENT = 2;
 let warnedAboutDevEncryptionKey = false;
@@ -119,7 +141,7 @@ function getEncryptionSecret() {
   if (secret && secret.length >= 24) return secret;
   if (!warnedAboutDevEncryptionKey) {
     warnedAboutDevEncryptionKey = true;
-    console.warn('WARNING: ENCRYPTION_KEY is not set or too short. Using an insecure development fallback. Set ENCRYPTION_KEY in production.');
+    console.warn('WARNING: ENCRYPTION_KEY غير مضبوط — يُستخدم مفتاح تطوير غير آمن.');
   }
   return 'mithaq-development-only-change-this-encryption-key';
 }
@@ -150,6 +172,7 @@ function decryptText(payload) {
   return Buffer.concat([decipher.update(Buffer.from(payload.data, 'base64')), decipher.final()]).toString('utf8');
 }
 
+// ─── File Operations ──────────────────────────────────────────
 function atomicWriteFileSync(file, content) {
   const tempFile = `${file}.${process.pid}.${Date.now()}.tmp`;
   fs.writeFileSync(tempFile, content, 'utf8');
@@ -180,7 +203,6 @@ function ensureEncryptedContractsFile() {
     if (!raw) return writeEncryptedContracts([]);
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      // Migrate old plaintext JSON contracts to encrypted-at-rest format.
       writeEncryptedContracts(parsed);
       return;
     }
@@ -190,7 +212,7 @@ function ensureEncryptedContractsFile() {
     }
     writeEncryptedContracts([]);
   } catch (error) {
-    console.error('Contracts storage could not be read/decrypted. Reinitializing to an empty encrypted store.', error.message);
+    console.error('Contracts storage error — reinitializing:', error.message);
     writeEncryptedContracts([]);
   }
 }
@@ -211,14 +233,15 @@ function readEncryptedContracts() {
 }
 
 function writeEncryptedContracts(contracts) {
-  const safeContracts = Array.isArray(contracts) ? contracts : [];
-  const payload = encryptText(JSON.stringify(safeContracts));
-  atomicWriteFileSync(CONTRACTS_FILE, JSON.stringify(payload, null, JSON_INDENT));
+  const safe = Array.isArray(contracts) ? contracts : [];
+  atomicWriteFileSync(CONTRACTS_FILE, JSON.stringify(encryptText(JSON.stringify(safe)), null, JSON_INDENT));
 }
 
 function getRequestMetadata(req) {
   const forwarded = req.headers['x-forwarded-for'];
-  const ip = Array.isArray(forwarded) ? forwarded[0] : String(forwarded || req.socket?.remoteAddress || '').split(',')[0].trim();
+  const ip = Array.isArray(forwarded)
+    ? forwarded[0]
+    : String(forwarded || req.socket?.remoteAddress || '').split(',')[0].trim();
   return {
     ipAddress: ip || 'unknown',
     userAgent: req.headers['user-agent'] || 'unknown',
@@ -234,7 +257,6 @@ function ensureStores() {
 }
 
 function readJson(file, fallback) {
-  ensureStores();
   try {
     const parsed = JSON.parse(fs.readFileSync(file, 'utf8') || 'null');
     return parsed == null ? fallback : parsed;
@@ -244,17 +266,17 @@ function readJson(file, fallback) {
 }
 
 function writeJson(file, value) {
-  ensureStores();
   atomicWriteFileSync(file, JSON.stringify(value, null, JSON_INDENT));
 }
 
-function readContracts() { return readEncryptedContracts(); }
-function writeContracts(contracts) { writeEncryptedContracts(contracts); }
-function readReviews() { return Array.isArray(readJson(REVIEWS_FILE, [])) ? readJson(REVIEWS_FILE, []) : []; }
-function writeReviews(reviews) { writeJson(REVIEWS_FILE, reviews); }
-function readPayments() { return Array.isArray(readJson(PAYMENTS_FILE, [])) ? readJson(PAYMENTS_FILE, []) : []; }
-function writePayments(payments) { writeJson(PAYMENTS_FILE, payments); }
+function readContracts()          { return readEncryptedContracts(); }
+function writeContracts(c)        { writeEncryptedContracts(c); }
+function readReviews()            { const d = readJson(REVIEWS_FILE, []); return Array.isArray(d) ? d : []; }
+function writeReviews(r)          { writeJson(REVIEWS_FILE, r); }
+function readPayments()           { const d = readJson(PAYMENTS_FILE, []); return Array.isArray(d) ? d : []; }
+function writePayments(p)         { writeJson(PAYMENTS_FILE, p); }
 
+// ─── HTTP Helpers ─────────────────────────────────────────────
 function commonHeaders(extra) {
   return Object.assign({
     'Access-Control-Allow-Origin': getAllowedCorsOrigin(),
@@ -263,19 +285,28 @@ function commonHeaders(extra) {
   }, extra || {});
 }
 
-function sendJson(res, statusCode, payload) {
+function sendJson(res, status, payload) {
   const body = JSON.stringify(payload);
-  res.writeHead(statusCode, commonHeaders({ 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) }));
+  res.writeHead(status, commonHeaders({
+    'Content-Type': 'application/json; charset=utf-8',
+    'Content-Length': Buffer.byteLength(body)
+  }));
   res.end(body);
 }
 
-function sendHtml(res, statusCode, html) {
-  res.writeHead(statusCode, commonHeaders({ 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': Buffer.byteLength(html) }));
-  res.end(html);
+function sendHtml(res, status, htmlContent) {
+  res.writeHead(status, commonHeaders({
+    'Content-Type': 'text/html; charset=utf-8',
+    'Content-Length': Buffer.byteLength(htmlContent)
+  }));
+  res.end(htmlContent);
 }
 
-function sendText(res, statusCode, text) {
-  res.writeHead(statusCode, commonHeaders({ 'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': Buffer.byteLength(text) }));
+function sendText(res, status, text) {
+  res.writeHead(status, commonHeaders({
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Content-Length': Buffer.byteLength(text)
+  }));
   res.end(text);
 }
 
@@ -300,56 +331,55 @@ function readBody(req) {
 }
 
 function parseBody(raw) {
-  if (!raw) return {};
+  if (!raw || !raw.trim()) return null;
   try { return JSON.parse(raw); } catch (_) { return null; }
 }
 
-function normalize(value) { return String(value == null ? '' : value).trim(); }
-function html(value) { return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
-function newId() { return crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex'); }
-function validDate(value) { const d = new Date(value); return value && !Number.isNaN(d.getTime()); }
-function arDate(value) { const d = new Date(value); return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString('ar-SY', { year: 'numeric', month: 'long', day: 'numeric' }); }
-function formatDateForDocument(value) { const d = new Date(value); return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('ar-SY', { year: 'numeric', month: '2-digit', day: '2-digit' }); }
+// ─── Utilities ────────────────────────────────────────────────
+function normalize(value)  { return String(value == null ? '' : value).trim(); }
+function esc(value)        { return String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function newId()           { return crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex'); }
+function validDate(value)  { const d = new Date(value); return Boolean(value) && !Number.isNaN(d.getTime()); }
+function arDate(value)     { const d = new Date(value); return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString('ar-SY', { year:'numeric', month:'long', day:'numeric' }); }
+function docDate(value)    { const d = new Date(value); return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('ar-SY', { year:'numeric', month:'2-digit', day:'2-digit' }); }
 
 function normalizeClauses(input, type) {
-  if (Array.isArray(input)) return input.map(normalize).filter(Boolean);
+  if (Array.isArray(input))     return input.map(normalize).filter(Boolean);
   if (typeof input === 'string') return input.split('\n').map(normalize).filter(Boolean);
   return DEFAULT_CLAUSES[type] || DEFAULT_CLAUSES.services;
 }
 
 function validatePayload(payload, partial) {
   const data = {
-    type: normalize(payload.type),
-    party1: normalize(payload.party1),
-    party2: normalize(payload.party2),
-    amount: normalize(payload.amount),
-    date: normalize(payload.date),
-    city: normalize(payload.city),
-    subject: normalize(payload.subject),
-    duration: normalize(payload.duration),
+    type:          normalize(payload.type),
+    party1:        normalize(payload.party1),
+    party2:        normalize(payload.party2),
+    amount:        normalize(payload.amount),
+    date:          normalize(payload.date),
+    city:          normalize(payload.city),
+    subject:       normalize(payload.subject),
+    duration:      normalize(payload.duration),
     paymentMethod: normalize(payload.paymentMethod),
-    notes: normalize(payload.notes),
-    clauses: normalizeClauses(payload.clauses || payload.customClauses, normalize(payload.type))
+    notes:         normalize(payload.notes),
+    clauses:       normalizeClauses(payload.clauses || payload.customClauses, normalize(payload.type))
   };
-  if (!partial || data.type) {
-    if (!CONTRACT_TYPES[data.type]) return { ok: false, message: 'نوع العقد غير صحيح.' };
-  }
-  if (!partial || data.party1) { if (!data.party1) return { ok: false, message: 'الطرف الأول مطلوب.' }; }
-  if (!partial || data.party2) { if (!data.party2) return { ok: false, message: 'الطرف الثاني مطلوب.' }; }
-  if (!partial || data.date) { if (!validDate(data.date)) return { ok: false, message: 'التاريخ غير صحيح.' }; }
+  if (!partial || data.type)   { if (!CONTRACT_TYPES[data.type])  return { ok: false, message: 'نوع العقد غير صحيح.' }; }
+  if (!partial || data.party1) { if (!data.party1)                return { ok: false, message: 'الطرف الأول مطلوب.' }; }
+  if (!partial || data.party2) { if (!data.party2)                return { ok: false, message: 'الطرف الثاني مطلوب.' }; }
+  if (!partial || data.date)   { if (!validDate(data.date))       return { ok: false, message: 'التاريخ غير صحيح.' }; }
   return { ok: true, data };
 }
 
+// ─── Contract Builder ─────────────────────────────────────────
 function buildContractContent(contract) {
   const typeName = CONTRACT_TYPES[contract.type] || 'عقد';
-  const lines = [];
-  lines.push('بسم الله الرحمن الرحيم', '', typeName, '');
+  const lines = ['بسم الله الرحمن الرحيم', '', typeName, ''];
   lines.push(`حرر هذا العقد في ${contract.city ? contract.city + '، ' : ''}بتاريخ ${arDate(contract.date)} بين:`);
   lines.push(`الطرف الأول: ${contract.party1}`);
   lines.push(`الطرف الثاني: ${contract.party2}`);
-  if (contract.subject) lines.push(`موضوع العقد: ${contract.subject}`);
-  if (contract.amount) lines.push(`القيمة/المبلغ: ${contract.amount}`);
-  if (contract.duration) lines.push(`مدة العقد: ${contract.duration}`);
+  if (contract.subject)       lines.push(`موضوع العقد: ${contract.subject}`);
+  if (contract.amount)        lines.push(`القيمة/المبلغ: ${contract.amount}`);
+  if (contract.duration)      lines.push(`مدة العقد: ${contract.duration}`);
   if (contract.paymentMethod) lines.push(`طريقة السداد: ${contract.paymentMethod}`);
   lines.push('', 'البنود:');
   (contract.clauses || []).forEach((clause, i) => lines.push(`${i + 1}. ${clause}`));
@@ -364,104 +394,17 @@ function buildContractContent(contract) {
 function makeContract(data) {
   const now = new Date().toISOString();
   const contract = {
-    id: newId(),
-    type: data.type,
-    typeName: CONTRACT_TYPES[data.type],
-    party1: data.party1,
-    party2: data.party2,
-    amount: data.amount,
-    date: data.date,
-    city: data.city,
-    subject: data.subject,
-    duration: data.duration,
-    paymentMethod: data.paymentMethod,
-    notes: data.notes,
-    clauses: data.clauses,
-    favorite: false,
-    status: 'draft',
-    signatures: {},
-    reviewStatus: 'none',
-    createdAt: now,
-    updatedAt: now
+    id: newId(), type: data.type, typeName: CONTRACT_TYPES[data.type],
+    party1: data.party1, party2: data.party2, amount: data.amount,
+    date: data.date, city: data.city, subject: data.subject,
+    duration: data.duration, paymentMethod: data.paymentMethod,
+    notes: data.notes, clauses: data.clauses,
+    favorite: false, status: 'draft', signatures: {},
+    reviewStatus: 'none', createdAt: now, updatedAt: now
   };
   contract.content = buildContractContent(contract);
   return contract;
 }
-
-function publicContractHtml(contract, printable) {
-  const typeName = CONTRACT_TYPES[contract.type] || 'عقد';
-  const title = `${typeName} - ميثاق`;
-  const clauses = (contract.clauses || []).map((c) => `<li>${html(c)}</li>`).join('');
-  const sig1 = contract.signatures?.party1?.dataUrl ? `<img src="${contract.signatures.party1.dataUrl}" alt="توقيع الطرف الأول">` : '<span>لم يوقع بعد</span>';
-  const sig2 = contract.signatures?.party2?.dataUrl ? `<img src="${contract.signatures.party2.dataUrl}" alt="توقيع الطرف الثاني">` : '<span>لم يوقع بعد</span>';
-  const logo = '/assets/mithaq-logo.svg';
-  const printButton = printable ? '<button class="btn" onclick="window.print()">طباعة / حفظ PDF</button>' : '';
-  return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${html(title)}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root{--green:#1D4A3E;--deep:#071F1A;--gold:#D4A843;--ivory:#FBF8EF;--ink:#18251F;--muted:#68786F;--line:#E7E1CE}
-    *{box-sizing:border-box}
-    body{margin:0;background:#F3F0E6;color:var(--ink);font-family:Cairo,Arial,sans-serif;line-height:1.9}
-    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23D4A843' stroke-opacity='.35' stroke-width='1'%3E%3Cpath d='M60 10 73 47 110 60 73 73 60 110 47 73 10 60 47 47Z'/%3E%3Ccircle cx='60' cy='60' r='24'/%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px}
-    .shell{position:relative;max-width:920px;margin:28px auto;padding:0 16px}
-    .actions{display:flex;gap:10px;margin-bottom:16px}.btn{border:0;border-radius:14px;background:var(--green);color:#fff;padding:12px 17px;font:800 15px Cairo;cursor:pointer}
-    .page{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:28px;padding:34px;box-shadow:0 24px 70px rgba(7,31,26,.12)}
-    .page:before{content:"";position:absolute;inset:14px;border:1px solid rgba(212,168,67,.24);border-radius:22px;pointer-events:none}.page>*{position:relative;z-index:1}
-    .doc-head{display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:2px solid #F0EBDD;padding-bottom:20px;margin-bottom:24px}
-    .brand{display:flex;align-items:center;gap:13px}.brand img{width:72px;height:72px}.brand h1{margin:0;color:var(--green);font-size:1.55rem;line-height:1;font-weight:900}.brand p{margin:5px 0 0;color:var(--muted);font-weight:700;font-size:.9rem}
-    .seal{min-width:120px;text-align:center;padding:10px 14px;border-radius:18px;background:linear-gradient(135deg,#FFF8DC,#fff);border:1px solid rgba(212,168,67,.35);color:var(--green);font-weight:900}
-    .doc-title{text-align:center;margin:18px 0 22px}.doc-title h2{margin:0;color:var(--green);font-size:2rem;font-weight:900;letter-spacing:-.03em}.doc-title p{margin:6px 0 0;color:var(--muted);font-weight:700}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.box{background:#FCFAF2;border:1px solid var(--line);border-radius:16px;padding:13px 15px}.box b{display:block;color:var(--green);margin-bottom:3px}
-    h3{color:var(--green);font-size:1.25rem;margin:24px 0 10px;border-bottom:1px solid #F0EBDD;padding-bottom:8px}
-    ol{margin:0;padding:0 24px 0 0}.clauses li{margin:0 0 10px;padding-right:4px;text-align:justify}
-    .signatures{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}.sig-card b{display:block;color:var(--green);margin-bottom:8px}.sig{height:138px;border:1px dashed #B8C4BE;border-radius:18px;display:grid;place-items:center;color:var(--muted);background:#FFFEFA}.sig img{max-width:94%;max-height:112px}
-    .disclaimer{margin-top:24px;padding:13px 15px;border-radius:16px;background:#F7F1DD;border:1px solid rgba(212,168,67,.28);color:#5B4A20;font-size:.9rem;font-weight:700}
-    .foot{display:flex;justify-content:space-between;gap:12px;margin-top:22px;color:var(--muted);font-size:.82rem;border-top:1px solid #F0EBDD;padding-top:14px}
-    @media print{body{background:#fff}.shell{max-width:none;margin:0;padding:0}.actions{display:none}.page{border:0;box-shadow:none;border-radius:0;padding:22mm 18mm}.page:before{inset:8mm;border-radius:0}@page{size:A4;margin:0}}
-    @media(max-width:650px){.doc-head,.grid,.signatures,.foot{grid-template-columns:1fr;display:grid}.seal{text-align:right}.page{padding:22px}.brand img{width:58px;height:58px}}
-  </style>
-</head>
-<body>
-  <main class="shell">
-    <div class="actions">${printButton}</div>
-    <article class="page">
-      <header class="doc-head">
-        <div class="brand"><img src="${logo}" alt="ميثاق"><div><h1>ميثاق</h1><p>منصة العقود الذكية العربية</p></div></div>
-        <div class="seal">وثيقة إلكترونية<br><small>${html(formatDateForDocument(contract.createdAt || contract.date))}</small></div>
-      </header>
-      <section class="doc-title"><h2>${html(typeName)}</h2><p>تم إنشاء هذه المسودة عبر منصة ميثاق بتاريخ ${html(arDate(contract.date))}</p></section>
-      <section class="grid">
-        <div class="box"><b>الطرف الأول</b>${html(contract.party1 || 'غير محدد')}</div>
-        <div class="box"><b>الطرف الثاني</b>${html(contract.party2 || 'غير محدد')}</div>
-        ${contract.amount ? `<div class="box"><b>القيمة/المبلغ</b>${html(contract.amount)}</div>` : ''}
-        ${contract.city ? `<div class="box"><b>المدينة</b>${html(contract.city)}</div>` : ''}
-        ${contract.subject ? `<div class="box"><b>موضوع العقد</b>${html(contract.subject)}</div>` : ''}
-        ${contract.duration ? `<div class="box"><b>مدة العقد</b>${html(contract.duration)}</div>` : ''}
-        ${contract.paymentMethod ? `<div class="box"><b>طريقة السداد</b>${html(contract.paymentMethod)}</div>` : ''}
-      </section>
-      <h3>بنود العقد</h3>
-      <ol class="clauses">${clauses}</ol>
-      ${contract.notes ? `<h3>ملاحظات إضافية</h3><p>${html(contract.notes)}</p>` : ''}
-      <section class="signatures">
-        <div class="sig-card"><b>توقيع الطرف الأول</b><div class="sig">${sig1}</div></div>
-        <div class="sig-card"><b>توقيع الطرف الثاني</b><div class="sig">${sig2}</div></div>
-      </section>
-      <div class="disclaimer">تنبيه: هذه الوثيقة مسودة تنظيمية قابلة للمراجعة القانونية، ولا تُعد بديلاً عن استشارة محامٍ مختص في الحالات المعقدة أو عالية القيمة.</div>
-      <footer class="foot"><span>معرّف العقد: ${html(contract.id || '')}</span><span>mithaq.local</span></footer>
-    </article>
-  </main>
-  <script>${printable ? 'setTimeout(()=>window.print(),550)' : ''}</script>
-</body>
-</html>`;
-}
-
 
 function findContract(id) {
   const contracts = readContracts();
@@ -469,21 +412,119 @@ function findContract(id) {
   return { contracts, index, contract: index >= 0 ? contracts[index] : null };
 }
 
+// ─── Public Contract HTML ─────────────────────────────────────
+function publicContractHtml(contract, printable) {
+  const typeName = CONTRACT_TYPES[contract.type] || 'عقد';
+  const clauses  = (contract.clauses || []).map(c => `<li>${esc(c)}</li>`).join('');
+  const sig1 = contract.signatures?.party1?.dataUrl
+    ? `<img src="${contract.signatures.party1.dataUrl}" alt="توقيع الطرف الأول">`
+    : '<span>لم يوقع بعد</span>';
+  const sig2 = contract.signatures?.party2?.dataUrl
+    ? `<img src="${contract.signatures.party2.dataUrl}" alt="توقيع الطرف الثاني">`
+    : '<span>لم يوقع بعد</span>';
+  const printBtn = printable ? '<button class="btn" onclick="window.print()">طباعة / حفظ PDF</button>' : '';
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${esc(typeName)} - ميثاق</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--green:#1D4A3E;--gold:#D4A843;--ivory:#FBF8EF;--ink:#18251F;--muted:#68786F;--line:#E7E1CE}
+    *{box-sizing:border-box}
+    body{margin:0;background:#F3F0E6;color:var(--ink);font-family:Cairo,Arial,sans-serif;line-height:1.9}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23D4A843' stroke-opacity='.35' stroke-width='1'%3E%3Cpath d='M60 10 73 47 110 60 73 73 60 110 47 73 10 60 47 47Z'/%3E%3Ccircle cx='60' cy='60' r='24'/%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px}
+    .shell{position:relative;max-width:920px;margin:28px auto;padding:0 16px}
+    .actions{display:flex;gap:10px;margin-bottom:16px}
+    .btn{border:0;border-radius:14px;background:var(--green);color:#fff;padding:12px 17px;font:800 15px Cairo;cursor:pointer}
+    .page{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:28px;padding:34px;box-shadow:0 24px 70px rgba(7,31,26,.12)}
+    .page:before{content:"";position:absolute;inset:14px;border:1px solid rgba(212,168,67,.24);border-radius:22px;pointer-events:none}
+    .page>*{position:relative;z-index:1}
+    .doc-head{display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:2px solid #F0EBDD;padding-bottom:20px;margin-bottom:24px}
+    .brand{display:flex;align-items:center;gap:13px}
+    .brand img{width:72px;height:72px}
+    .brand h1{margin:0;color:var(--green);font-size:1.55rem;line-height:1;font-weight:900}
+    .brand p{margin:5px 0 0;color:var(--muted);font-weight:700;font-size:.9rem}
+    .seal{min-width:120px;text-align:center;padding:10px 14px;border-radius:18px;background:linear-gradient(135deg,#FFF8DC,#fff);border:1px solid rgba(212,168,67,.35);color:var(--green);font-weight:900}
+    .doc-title{text-align:center;margin:18px 0 22px}
+    .doc-title h2{margin:0;color:var(--green);font-size:2rem;font-weight:900}
+    .doc-title p{margin:6px 0 0;color:var(--muted);font-weight:700}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+    .box{background:#FCFAF2;border:1px solid var(--line);border-radius:16px;padding:13px 15px}
+    .box b{display:block;color:var(--green);margin-bottom:3px}
+    h3{color:var(--green);font-size:1.25rem;margin:24px 0 10px;border-bottom:1px solid #F0EBDD;padding-bottom:8px}
+    ol{margin:0;padding:0 24px 0 0}
+    .clauses li{margin:0 0 10px;padding-right:4px;text-align:justify}
+    .signatures{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
+    .sig-card b{display:block;color:var(--green);margin-bottom:8px}
+    .sig{height:138px;border:1px dashed #B8C4BE;border-radius:18px;display:grid;place-items:center;color:var(--muted);background:#FFFEFA}
+    .sig img{max-width:94%;max-height:112px}
+    .disclaimer{margin-top:24px;padding:13px 15px;border-radius:16px;background:#F7F1DD;border:1px solid rgba(212,168,67,.28);color:#5B4A20;font-size:.9rem;font-weight:700}
+    .foot{display:flex;justify-content:space-between;gap:12px;margin-top:22px;color:var(--muted);font-size:.82rem;border-top:1px solid #F0EBDD;padding-top:14px}
+    @media print{body{background:#fff}.shell{max-width:none;margin:0;padding:0}.actions{display:none}.page{border:0;box-shadow:none;border-radius:0;padding:22mm 18mm}.page:before{inset:8mm;border-radius:0}@page{size:A4;margin:0}}
+    @media(max-width:650px){.doc-head,.grid,.signatures{display:block}.page{padding:22px}.brand img{width:58px;height:58px}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <div class="actions">${printBtn}</div>
+  <article class="page">
+    <header class="doc-head">
+      <div class="brand">
+        <img src="/mithaq-logo.svg" alt="ميثاق">
+        <div><h1>ميثاق</h1><p>منصة العقود الذكية العربية</p></div>
+      </div>
+      <div class="seal">وثيقة إلكترونية<br><small>${esc(docDate(contract.createdAt || contract.date))}</small></div>
+    </header>
+    <section class="doc-title">
+      <h2>${esc(typeName)}</h2>
+      <p>تم إنشاء هذه المسودة عبر منصة ميثاق بتاريخ ${esc(arDate(contract.date))}</p>
+    </section>
+    <section class="grid">
+      <div class="box"><b>الطرف الأول</b>${esc(contract.party1 || 'غير محدد')}</div>
+      <div class="box"><b>الطرف الثاني</b>${esc(contract.party2 || 'غير محدد')}</div>
+      ${contract.amount        ? `<div class="box"><b>القيمة/المبلغ</b>${esc(contract.amount)}</div>` : ''}
+      ${contract.city          ? `<div class="box"><b>المدينة</b>${esc(contract.city)}</div>` : ''}
+      ${contract.subject       ? `<div class="box"><b>موضوع العقد</b>${esc(contract.subject)}</div>` : ''}
+      ${contract.duration      ? `<div class="box"><b>مدة العقد</b>${esc(contract.duration)}</div>` : ''}
+      ${contract.paymentMethod ? `<div class="box"><b>طريقة السداد</b>${esc(contract.paymentMethod)}</div>` : ''}
+    </section>
+    <h3>بنود العقد</h3>
+    <ol class="clauses">${clauses}</ol>
+    ${contract.notes ? `<h3>ملاحظات إضافية</h3><p>${esc(contract.notes)}</p>` : ''}
+    <section class="signatures">
+      <div class="sig-card"><b>توقيع الطرف الأول</b><div class="sig">${sig1}</div></div>
+      <div class="sig-card"><b>توقيع الطرف الثاني</b><div class="sig">${sig2}</div></div>
+    </section>
+    <div class="disclaimer">تنبيه: هذه الوثيقة مسودة تنظيمية قابلة للمراجعة القانونية، ولا تُعد بديلاً عن استشارة محامٍ مختص في الحالات المعقدة أو عالية القيمة.</div>
+    <footer class="foot">
+      <span>معرّف العقد: ${esc(contract.id || '')}</span>
+      <span>${esc(PUBLIC_APP_URL)}</span>
+    </footer>
+  </article>
+</main>
+<script>${printable ? 'setTimeout(()=>window.print(),550)' : ''}</script>
+</body>
+</html>`;
+}
 
-
+// ─── Agents ───────────────────────────────────────────────────
 const AGENTS = [
-  { id: 'ceo', name: 'وكيل الرئيس التنفيذي', title: 'رؤية وأولويات', icon: '👑' },
-  { id: 'product', name: 'وكيل المنتج', title: 'تجربة المستخدم والميزات', icon: '🧭' },
-  { id: 'marketing', name: 'وكيل التسويق', title: 'المحتوى والحملات', icon: '📣' },
-  { id: 'sales', name: 'وكيل المبيعات', title: 'العملاء والتحويل', icon: '🤝' },
-  { id: 'finance', name: 'وكيل المالية', title: 'المدفوعات والإيرادات', icon: '💰' },
-  { id: 'legal', name: 'وكيل القانون', title: 'التنبيهات والمراجعات', icon: '⚖️' },
-  { id: 'support', name: 'وكيل الدعم', title: 'الأسئلة والمشاكل', icon: '💬' },
-  { id: 'cto', name: 'وكيل التقنية', title: 'الأخطاء والبنية', icon: '🛠️' },
-  { id: 'growth', name: 'وكيل النمو', title: 'الانتشار والشراكات', icon: '🚀' },
-  { id: 'designer', name: 'وكيل التصميم', title: 'قوالب الهوية والمحتوى', icon: '🎨' },
-  { id: 'meeting_manager', name: 'مسؤول الاجتماعات', title: 'تنسيق المجلس والخطط الأسبوعية', icon: '🏛️' },
-  { id: 'telegram_operator', name: 'مسؤول تلجرام', title: 'واجهة التواصل مع المؤسس', icon: '📲' }
+  { id: 'ceo',               name: 'وكيل الرئيس التنفيذي', title: 'رؤية وأولويات',                      icon: '👑' },
+  { id: 'product',           name: 'وكيل المنتج',           title: 'تجربة المستخدم والميزات',            icon: '🧭' },
+  { id: 'marketing',         name: 'وكيل التسويق',          title: 'المحتوى والحملات',                   icon: '📣' },
+  { id: 'sales',             name: 'وكيل المبيعات',         title: 'العملاء والتحويل',                   icon: '🤝' },
+  { id: 'finance',           name: 'وكيل المالية',          title: 'المدفوعات والإيرادات',               icon: '💰' },
+  { id: 'legal',             name: 'وكيل القانون',          title: 'التنبيهات والمراجعات',               icon: '⚖️' },
+  { id: 'support',           name: 'وكيل الدعم',            title: 'الأسئلة والمشاكل',                  icon: '💬' },
+  { id: 'cto',               name: 'وكيل التقنية',          title: 'الأخطاء والبنية',                   icon: '🛠️' },
+  { id: 'growth',            name: 'وكيل النمو',            title: 'الانتشار والشراكات',                 icon: '🚀' },
+  { id: 'designer',          name: 'وكيل التصميم',          title: 'قوالب الهوية والمحتوى',             icon: '🎨' },
+  { id: 'meeting_manager',   name: 'مسؤول الاجتماعات',      title: 'تنسيق المجلس والخطط الأسبوعية',    icon: '🏛️' },
+  { id: 'telegram_operator', name: 'مسؤول تلجرام',          title: 'واجهة التواصل مع المؤسس',           icon: '📲' }
 ];
 
 function countBy(items, selector) {
@@ -501,48 +542,39 @@ function topContractType(contracts) {
 
 function getAgentsSummary() {
   const contracts = readContracts();
-  const payments = readPayments();
-  const reviews = readReviews();
-  const paidPayments = payments.filter(p => p.status === 'paid');
-  const pendingPayments = payments.filter(p => ['pending', 'manual_review'].includes(p.status));
-  const signedContracts = contracts.filter(c => c.status === 'signed');
-  const partialContracts = contracts.filter(c => c.status === 'partially_signed');
-  const favoriteContracts = contracts.filter(c => c.favorite);
-  const topType = topContractType(contracts);
-  const revenueUsd = paidPayments.reduce((sum, p) => sum + Number(p.amountUsd || 0), 0);
+  const payments  = readPayments();
+  const reviews   = readReviews();
+  const paid      = payments.filter(p => p.status === 'paid');
+  const pending   = payments.filter(p => ['pending', 'manual_review'].includes(p.status));
+  const topType   = topContractType(contracts);
   return {
     date: new Date().toISOString(),
     counts: {
-      contracts: contracts.length,
-      payments: payments.length,
-      paidPayments: paidPayments.length,
-      pendingPayments: pendingPayments.length,
-      reviews: reviews.length,
-      pendingReviews: reviews.filter(r => r.status === 'pending').length,
-      signedContracts: signedContracts.length,
-      partialContracts: partialContracts.length,
-      favoriteContracts: favoriteContracts.length
+      contracts:       contracts.length,
+      payments:        payments.length,
+      paidPayments:    paid.length,
+      pendingPayments: pending.length,
+      reviews:         reviews.length,
+      pendingReviews:  reviews.filter(r => r.status === 'pending').length,
+      signedContracts: contracts.filter(c => c.status === 'signed').length,
+      partialContracts:contracts.filter(c => c.status === 'partially_signed').length,
+      favoriteContracts:contracts.filter(c => c.favorite).length
     },
-    revenue: { usd: revenueUsd },
+    revenue: { usd: paid.reduce((s, p) => s + Number(p.amountUsd || 0), 0) },
     topContractType: { name: topType[0], count: topType[1] },
-    paymentStatus: countBy(payments, p => p.status),
-    contractTypes: countBy(contracts, c => c.typeName || CONTRACT_TYPES[c.type] || c.type)
+    paymentStatus:   countBy(payments, p => p.status),
+    contractTypes:   countBy(contracts, c => c.typeName || CONTRACT_TYPES[c.type] || c.type)
   };
 }
 
 function buildAgentReport(agentId) {
   const summary = getAgentsSummary();
-  const c = summary.counts;
-  const agent = AGENTS.find(a => a.id === agentId) || AGENTS[0];
+  const c       = summary.counts;
+  const agent   = AGENTS.find(a => a.id === agentId) || AGENTS[0];
   const reports = {
     ceo: {
       focus: 'تحديد أولويات اليوم ومنع التشتت.',
-      insights: [
-        `عدد العقود الحالي: ${c.contracts}.`,
-        `المدفوعات التي تحتاج متابعة: ${c.pendingPayments}.`,
-        `طلبات المراجعة المعلقة: ${c.pendingReviews}.`,
-        `أكثر قالب مستخدم: ${summary.topContractType.name} (${summary.topContractType.count}).`
-      ],
+      insights: [`عدد العقود الحالي: ${c.contracts}.`, `المدفوعات التي تحتاج متابعة: ${c.pendingPayments}.`, `طلبات المراجعة المعلقة: ${c.pendingReviews}.`, `أكثر قالب مستخدم: ${summary.topContractType.name} (${summary.topContractType.count}).`],
       tasks: ['راجع المدفوعات المعلقة أولاً.', 'انشر رسالة واحدة واضحة: لا تبدأ العمل قبل عقد واضح.', 'اجمع 5 ملاحظات من مستخدمين حقيقيين.']
     },
     product: {
@@ -577,8 +609,8 @@ function buildAgentReport(agentId) {
     },
     cto: {
       focus: 'ثبات النسخة التجريبية.',
-      insights: ['التخزين JSON مناسب للتجربة فقط.', 'راقب port 5000 وتضارب الخوادم.', 'قبل النمو نحتاج قاعدة بيانات.'],
-      tasks: ['شغل npm run check قبل كل نشر.', 'انسخ مجلد data احتياطياً.', 'أخفِ أي زر تجريبي في الإنتاج.']
+      insights: ['التخزين JSON مناسب للتجربة فقط.', 'راقب تضارب الخوادم.', 'قبل النمو نحتاج قاعدة بيانات.'],
+      tasks: ['انسخ مجلد data احتياطياً.', 'أخفِ أي زر تجريبي في الإنتاج.', 'راجع سجلات الأخطاء أسبوعياً.']
     },
     growth: {
       focus: 'قنوات نمو رخيصة وسريعة.',
@@ -587,80 +619,71 @@ function buildAgentReport(agentId) {
     },
     designer: {
       focus: 'تحويل هوية ميثاق إلى قوالب ثابتة قابلة للتكرار.',
-      insights: ['لا نغير الهوية كل مرة: أخضر ميثاق + ذهب + Cairo + زخرفة خفيفة.', 'القوالب الأساسية: منشور واتساب، ستوري، كاروسيل، بطاقة باقة.', 'التغيير يكون في النص والصورة/الرمز فقط، لا في النظام البصري.'],
-      tasks: ['أنشئ قالب كاروسيل أسبوعي: مشكلة ← حل ← خطوات ← دعوة.', 'جهّز 7 عبارات تسويقية قصيرة للمستقلين.', 'راجع أن كل تصميم فيه شعار واضح ودعوة تجربة.']
+      insights: ['لا نغير الهوية كل مرة: أخضر ميثاق + ذهب + Cairo.', 'القوالب الأساسية: منشور واتساب، ستوري، كاروسيل، بطاقة باقة.', 'التغيير يكون في النص فقط، لا في النظام البصري.'],
+      tasks: ['أنشئ قالب كاروسيل أسبوعي.', 'جهّز 7 عبارات تسويقية قصيرة للمستقلين.', 'راجع أن كل تصميم فيه شعار واضح ودعوة تجربة.']
     },
     meeting_manager: {
       focus: 'إدارة اجتماعات مجلس ميثاق وتحويل النقاش إلى قرارات.',
-      insights: ['كل اجتماع يجب أن يخرج بقرارات لا بكلام عام.', 'أفضل اجتماع يومي: 5 دقائق فقط، مؤشرات + عوائق + 3 مهام.', 'عند غياب المؤسس، يرسل المجلس ملخصاً إلى تلجرام.'],
+      insights: ['كل اجتماع يجب أن يخرج بقرارات لا بكلام عام.', 'أفضل اجتماع يومي: 5 دقائق فقط.', 'عند غياب المؤسس، يرسل المجلس ملخصاً إلى تلجرام.'],
       tasks: ['أرسل تقرير مجلس ميثاق اليومي.', 'حوّل توصيات الوكلاء إلى Sprint أسبوعي.', 'رتّب الأولويات: دفع، تجربة المستخدم، تسويق.']
     },
     telegram_operator: {
       focus: 'أن يكون تلجرام هو قناة القيادة السريعة للمؤسس.',
-      insights: ['الأوامر الأساسية: /summary /meeting /payments /marketing /designer.', 'لا ترسل رسائل طويلة جداً إلا عند الطلب.', 'أي مدفوعات manual_review يجب أن تظهر كتذكير واضح.'],
+      insights: ['الأوامر الأساسية: /summary /meeting /payments /marketing /designer.', 'لا ترسل رسائل طويلة إلا عند الطلب.', 'أي مدفوعات manual_review يجب أن تظهر كتذكير.'],
       tasks: ['اختبر أمر /meeting داخل الجروب.', 'جهّز رسالة صباحية مختصرة.', 'أرسل تنبيه عند وجود مدفوعات معلقة.']
     }
   };
-  const report = reports[agent.id] || reports.ceo;
-  return { agent, summary, report };
+  return { agent, summary, report: reports[agent.id] || reports.ceo };
 }
-
 
 function getDesignTemplates() {
   return [
-    { id: 'whatsapp_post', name: 'منشور واتساب', size: 'مربع 1080×1080', use: 'مجموعات المستقلين', structure: ['عنوان ألم مباشر', '3 فوائد', 'دعوة للتجربة'] },
-    { id: 'story', name: 'ستوري سريع', size: 'عمودي 1080×1920', use: 'حالات واتساب/إنستغرام', structure: ['سؤال صادم', 'حل مختصر', 'اسحب/راسلني'] },
-    { id: 'carousel', name: 'كاروسيل تعليمي', size: '4 شرائح', use: 'لينكدإن وفيسبوك', structure: ['المشكلة', 'لماذا تهم؟', 'كيف يحلها ميثاق؟', 'CTA'] },
-    { id: 'pricing_card', name: 'بطاقة باقة', size: 'مربع', use: 'شرح الأسعار', structure: ['اسم الباقة', 'السعر', 'المميزات', 'زر وهمي'] }
+    { id: 'whatsapp_post', name: 'منشور واتساب',    size: 'مربع 1080×1080',   use: 'مجموعات المستقلين',       structure: ['عنوان ألم مباشر', '3 فوائد', 'دعوة للتجربة'] },
+    { id: 'story',         name: 'ستوري سريع',       size: 'عمودي 1080×1920', use: 'حالات واتساب/إنستغرام',   structure: ['سؤال صادم', 'حل مختصر', 'اسحب/راسلني'] },
+    { id: 'carousel',      name: 'كاروسيل تعليمي',  size: '4 شرائح',         use: 'لينكدإن وفيسبوك',         structure: ['المشكلة', 'لماذا تهم؟', 'كيف يحلها ميثاق؟', 'CTA'] },
+    { id: 'pricing_card',  name: 'بطاقة باقة',       size: 'مربع',            use: 'شرح الأسعار',             structure: ['اسم الباقة', 'السعر', 'المميزات', 'زر وهمي'] }
   ];
 }
 
 function buildCouncilMeeting() {
   const summary = getAgentsSummary();
-  const agenda = [
-    'مراجعة مؤشرات المنصة',
-    'تحديد أولويات المنتج',
-    'حملة تسويق اليوم',
-    'متابعة المدفوعات والمراجعات',
-    'إنتاج قالب تصميم جديد'
-  ];
-  const decisions = [
-    'التركيز التسويقي الحالي: المستقلون وأصحاب الخدمات.',
-    'عدم كشف كل الخطة للمنافسين؛ التسويق يكون حول الألم الأساسي فقط.',
-    'اعتماد قوالب تصميم ثابتة لهوية ميثاق وتغيير النصوص فقط.',
-    'مراجعة المدفوعات اليدوية قبل تفعيل أي باقة.',
-    'تحسين قالب عقد الخدمات قبل التوسع في قوالب كثيرة.'
-  ];
-  const weeklySprint = [
-    { owner: 'marketing', task: 'نشر 5 منشورات واتساب خلال الأسبوع بعنوان: لا تبدأ العمل قبل عقد واضح.' },
-    { owner: 'designer', task: 'إنتاج 4 تصاميم من قالب ميثاق: مشكلة/حل/خطوات/دعوة.' },
-    { owner: 'product', task: 'اختبار رحلة إنشاء عقد خدمات من الهاتف.' },
-    { owner: 'finance', task: 'تجهيز تعليمات شام كاش وUSDT بشكل أوضح.' },
-    { owner: 'legal', task: 'إضافة إخلاء مسؤولية مختصر أسفل العقود وصفحة الدفع.' }
-  ];
-  return { summary, agenda, decisions, weeklySprint, generatedAt: new Date().toISOString() };
+  return {
+    summary,
+    agenda: ['مراجعة مؤشرات المنصة', 'تحديد أولويات المنتج', 'حملة تسويق اليوم', 'متابعة المدفوعات والمراجعات', 'إنتاج قالب تصميم جديد'],
+    decisions: [
+      'التركيز التسويقي الحالي: المستقلون وأصحاب الخدمات.',
+      'عدم كشف كل الخطة للمنافسين؛ التسويق يكون حول الألم الأساسي فقط.',
+      'اعتماد قوالب تصميم ثابتة لهوية ميثاق وتغيير النصوص فقط.',
+      'مراجعة المدفوعات اليدوية قبل تفعيل أي باقة.',
+      'تحسين قالب عقد الخدمات قبل التوسع في قوالب كثيرة.'
+    ],
+    weeklySprint: [
+      { owner: 'marketing',  task: 'نشر 5 منشورات واتساب خلال الأسبوع.' },
+      { owner: 'designer',   task: 'إنتاج 4 تصاميم من قالب ميثاق.' },
+      { owner: 'product',    task: 'اختبار رحلة إنشاء عقد خدمات من الهاتف.' },
+      { owner: 'finance',    task: 'تجهيز تعليمات شام كاش وUSDT بشكل أوضح.' },
+      { owner: 'legal',      task: 'إضافة إخلاء مسؤولية مختصر أسفل العقود.' }
+    ],
+    generatedAt: new Date().toISOString()
+  };
 }
 
 function formatCouncilMeetingText() {
-  const meeting = buildCouncilMeeting();
+  const m = buildCouncilMeeting();
   return [
     '🏛️ اجتماع مجلس ميثاق',
-    `التاريخ: ${new Date(meeting.generatedAt).toLocaleString('ar-SY')}`,
-    '',
-    '📊 مؤشرات مختصرة:',
-    `- العقود: ${meeting.summary.counts.contracts}`,
-    `- المدفوعات المعلقة: ${meeting.summary.counts.pendingPayments}`,
-    `- طلبات المراجعة: ${meeting.summary.counts.pendingReviews}`,
-    `- أكثر قالب: ${meeting.summary.topContractType.name}`,
-    '',
-    '🧭 جدول الاجتماع:',
-    ...meeting.agenda.map(x => `- ${x}`),
-    '',
-    '✅ قرارات المجلس:',
-    ...meeting.decisions.map(x => `- ${x}`),
-    '',
-    '🚀 Sprint الأسبوع:',
-    ...meeting.weeklySprint.map(x => `- ${x.owner}: ${x.task}`)
+    `التاريخ: ${new Date(m.generatedAt).toLocaleString('ar-SY')}`,
+    '', '📊 مؤشرات مختصرة:',
+    `- العقود: ${m.summary.counts.contracts}`,
+    `- المدفوعات المعلقة: ${m.summary.counts.pendingPayments}`,
+    `- طلبات المراجعة: ${m.summary.counts.pendingReviews}`,
+    `- أكثر قالب: ${m.summary.topContractType.name}`,
+    '', '🧭 جدول الاجتماع:',
+    ...m.agenda.map(x => `- ${x}`),
+    '', '✅ قرارات المجلس:',
+    ...m.decisions.map(x => `- ${x}`),
+    '', '🚀 Sprint الأسبوع:',
+    ...m.weeklySprint.map(x => `- ${x.owner}: ${x.task}`)
   ].join('\n');
 }
 
@@ -669,25 +692,23 @@ function formatAgentReportText(agentId) {
   return [
     `${agent.icon} ${agent.name} — ${agent.title}`,
     `التركيز: ${report.focus}`,
-    '',
-    '📊 المؤشرات:',
+    '', '📊 المؤشرات:',
     `- العقود: ${summary.counts.contracts}`,
     `- المدفوعات المعلقة: ${summary.counts.pendingPayments}`,
     `- المدفوعات المؤكدة: ${summary.counts.paidPayments}`,
     `- طلبات المراجعة: ${summary.counts.pendingReviews}`,
     `- أكثر قالب: ${summary.topContractType.name}`,
-    '',
-    '💡 ملاحظات:',
+    '', '💡 ملاحظات:',
     ...report.insights.map(x => `- ${x}`),
-    '',
-    '✅ مهام مقترحة:',
+    '', '✅ مهام مقترحة:',
     ...report.tasks.map(x => `- ${x}`)
   ].join('\n');
 }
 
+// ─── Telegram ─────────────────────────────────────────────────
 function sendTelegramMessageTo(text, chatIdOverride) {
-  return new Promise((resolve, reject) => {
-    const token = process.env.TELEGRAM_BOT_TOKEN;
+  return new Promise((resolve) => {
+    const token  = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = chatIdOverride || process.env.TELEGRAM_CHAT_ID;
     if (!token || !chatId) {
       resolve({ ok: false, configured: false, message: 'TELEGRAM_BOT_TOKEN و TELEGRAM_CHAT_ID غير مضبوطين.' });
@@ -700,117 +721,71 @@ function sendTelegramMessageTo(text, chatIdOverride) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
     };
-    const req = https.request(options, res => {
+    const req = https.request(options, tgRes => {
       let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(data)); } catch (_) { resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, raw: data }); }
+      tgRes.on('data', chunk => { data += chunk; });
+      tgRes.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch (_) { resolve({ ok: tgRes.statusCode >= 200 && tgRes.statusCode < 300, raw: data }); }
       });
     });
-    req.on('error', reject);
+    req.on('error', err => resolve({ ok: false, error: err.message }));
     req.write(payload);
     req.end();
   });
 }
 
-function sendTelegramMessage(text) {
-  return sendTelegramMessageTo(text);
-}
+function sendTelegramMessage(text) { return sendTelegramMessageTo(text); }
 
 function buildTelegramReply(text) {
   const command = normalize(text).split(/\s+/)[0].toLowerCase();
   if (!command || command === '/start' || command === '/help') {
-    return [
-      '📲 مسؤول تلجرام — ميثاق',
-      'الأوامر المتاحة:',
-      '/summary — ملخص سريع',
-      '/meeting — اجتماع مجلس ميثاق',
-      '/payments — المدفوعات والمتابعة',
-      '/marketing — توصيات التسويق',
-      '/designer — توصيات التصميم',
-      '/ceo — أولويات اليوم'
-    ].join('\n');
+    return ['📲 مسؤول تلجرام — ميثاق', 'الأوامر المتاحة:', '/summary — ملخص سريع', '/meeting — اجتماع مجلس ميثاق', '/payments — المدفوعات والمتابعة', '/marketing — توصيات التسويق', '/designer — توصيات التصميم', '/ceo — أولويات اليوم'].join('\n');
   }
-  if (command === '/summary') return formatAgentReportText('ceo');
-  if (command === '/meeting') return formatCouncilMeetingText();
-  if (command === '/payments') return formatAgentReportText('finance');
+  if (command === '/summary')   return formatAgentReportText('ceo');
+  if (command === '/meeting')   return formatCouncilMeetingText();
+  if (command === '/payments')  return formatAgentReportText('finance');
   if (command === '/marketing') return formatAgentReportText('marketing');
-  if (command === '/designer') return formatAgentReportText('designer');
-  if (command === '/ceo') return formatAgentReportText('ceo');
-  if (command === '/agents') return AGENTS.map(a => `${a.icon} ${a.id} — ${a.name}`).join('\n');
+  if (command === '/designer')  return formatAgentReportText('designer');
+  if (command === '/ceo')       return formatAgentReportText('ceo');
+  if (command === '/agents')    return AGENTS.map(a => `${a.icon} ${a.id} — ${a.name}`).join('\n');
   return 'لم أفهم الأمر. أرسل /help لعرض أوامر مجلس ميثاق.';
 }
 
+// ─── Payment Plans ────────────────────────────────────────────
 function getPremiumPlan(planId) {
   const plans = {
-    basic: {
-      id: 'basic',
-      title: 'الباقة الأساسية',
-      amountUsd: 5,
-      amountSyp: 75000,
-      features: ['PDF احترافي', 'رابط مشاركة', 'حفظ دائم']
-    },
-    verified: {
-      id: 'verified',
-      title: 'باقة موثّق',
-      amountUsd: 9,
-      amountSyp: 135000,
-      features: ['PDF احترافي', 'رابط مشاركة', 'توقيع رقمي', 'ختم ميثاق', 'حفظ دائم']
-    },
-    freelancer: {
-      id: 'freelancer',
-      title: 'باقة المستقل',
-      amountUsd: 15,
-      amountSyp: 225000,
-      features: ['حتى 10 عقود', 'PDF وتوقيع', 'قوالب عمل حر وخدمات', 'أرشفة']
-    },
-    office: {
-      id: 'office',
-      title: 'باقة المكاتب',
-      amountUsd: 49,
-      amountSyp: 735000,
-      features: ['حتى 50 عقد', 'قوالب متعددة', 'أرشفة', 'دعم أسرع']
-    },
-    legal_review: {
-      id: 'legal_review',
-      title: 'مراجعة قانونية',
-      amountUsd: 25,
-      amountSyp: 375000,
-      features: ['مراجعة البنود', 'ملاحظات قانونية', 'تعديلات مقترحة']
-    }
+    basic:        { id: 'basic',        title: 'الباقة الأساسية', amountUsd: 5,  amountSyp: 75000,  features: ['PDF احترافي', 'رابط مشاركة', 'حفظ دائم'] },
+    verified:     { id: 'verified',     title: 'باقة موثّق',      amountUsd: 9,  amountSyp: 135000, features: ['PDF احترافي', 'رابط مشاركة', 'توقيع رقمي', 'ختم ميثاق', 'حفظ دائم'] },
+    freelancer:   { id: 'freelancer',   title: 'باقة المستقل',    amountUsd: 15, amountSyp: 225000, features: ['حتى 10 عقود', 'PDF وتوقيع', 'قوالب عمل حر وخدمات', 'أرشفة'] },
+    office:       { id: 'office',       title: 'باقة المكاتب',    amountUsd: 49, amountSyp: 735000, features: ['حتى 50 عقد', 'قوالب متعددة', 'أرشفة', 'دعم أسرع'] },
+    legal_review: { id: 'legal_review', title: 'مراجعة قانونية',  amountUsd: 25, amountSyp: 375000, features: ['مراجعة البنود', 'ملاحظات قانونية', 'تعديلات مقترحة'] }
   };
   return plans[planId] || plans.verified;
 }
 
 function createPaymentRecord({ contractId, method, planId, customerName, customerContact }) {
   const plan = getPremiumPlan(planId);
-  const id = 'pay_' + newId();
-  const now = new Date().toISOString();
+  const id   = 'pay_' + newId();
+  const now  = new Date().toISOString();
   const payment = {
-    id,
-    contractId,
-    method,
-    planId: plan.id,
-    planTitle: plan.title,
-    amountUsd: plan.amountUsd,
-    amountSyp: plan.amountSyp,
+    id, contractId, method,
+    planId: plan.id, planTitle: plan.title,
+    amountUsd: plan.amountUsd, amountSyp: plan.amountSyp,
     currency: method === 'sham_cash' ? 'SYP' : 'USDT',
     status: 'pending',
     customerName: normalize(customerName),
     customerContact: normalize(customerContact),
-    provider: method,
-    checkoutUrl: '',
-    walletAddress: method === 'crypto_usdt' ? (process.env.USDT_TRC20_ADDRESS || 'PUT_YOUR_USDT_TRC20_WALLET_HERE') : '',
+    provider: method, checkoutUrl: '',
+    walletAddress: method === 'crypto_usdt' ? (process.env.USDT_TRC20_ADDRESS || '') : '',
     network: method === 'crypto_usdt' ? 'TRC20' : '',
-    memo: id,
-    txid: '',
-    createdAt: now,
-    updatedAt: now
+    memo: id, txid: '',
+    createdAt: now, updatedAt: now
   };
   if (method === 'sham_cash') {
     payment.providerPaymentId = 'sham_' + id;
-    payment.checkoutUrl = process.env.SHAM_CASH_CHECKOUT_URL || '';
-    payment.instructions = 'ادفع عبر شام كاش ثم أدخل رقم العملية أو انتظر تأكيد الربط عبر API عند تفعيله.';
+    payment.checkoutUrl       = process.env.SHAM_CASH_CHECKOUT_URL || '';
+    payment.instructions      = 'ادفع عبر شام كاش ثم أدخل رقم العملية أو انتظر تأكيد الربط عبر API عند تفعيله.';
   }
   if (method === 'crypto_usdt') {
     payment.instructions = 'أرسل المبلغ على شبكة TRC20 ثم أدخل رقم العملية TXID للتأكيد اليدوي.';
@@ -821,16 +796,20 @@ function createPaymentRecord({ contractId, method, planId, customerName, custome
 function markContractPremium(contractId, paymentId) {
   const found = findContract(contractId);
   if (!found.contract) return null;
-  found.contract.premium = true;
+  found.contract.premium          = true;
   found.contract.premiumPaymentId = paymentId;
-  found.contract.updatedAt = new Date().toISOString();
-  found.contracts[found.index] = found.contract;
+  found.contract.updatedAt        = new Date().toISOString();
+  found.contracts[found.index]    = found.contract;
   writeContracts(found.contracts);
   return found.contract;
 }
 
+// ─── API Handler ──────────────────────────────────────────────
 async function handleApi(req, res, pathname) {
 
+  if (req.method === 'GET' && pathname === '/api/health') {
+    return sendJson(res, 200, { ok: true, status: 'online', service: 'Mithaq API', time: new Date().toISOString() });
+  }
 
   if (req.method === 'GET' && pathname === '/api/agents/council/meeting') {
     return sendJson(res, 200, { ok: true, meeting: buildCouncilMeeting(), text: formatCouncilMeetingText() });
@@ -855,90 +834,98 @@ async function handleApi(req, res, pathname) {
     return sendJson(res, 200, { ok: true, data: buildAgentReport(agentId), text: formatAgentReportText(agentId) });
   }
 
-  const agentTelegramMatch = pathname.match(/^\/api\/agents\/([^/]+)\/telegram$/);
-  if (req.method === 'POST' && agentTelegramMatch) {
-    const agentId = decodeURIComponent(agentTelegramMatch[1]);
-    const result = await sendTelegramMessage(formatAgentReportText(agentId));
-    return sendJson(res, result.ok ? 200 : 200, { ok: Boolean(result.ok), telegram: result });
+  const agentTgMatch = pathname.match(/^\/api\/agents\/([^/]+)\/telegram$/);
+  if (req.method === 'POST' && agentTgMatch) {
+    const agentId = decodeURIComponent(agentTgMatch[1]);
+    const result  = await sendTelegramMessage(formatAgentReportText(agentId));
+    return sendJson(res, 200, { ok: Boolean(result.ok), telegram: result });
   }
 
-
   if (req.method === 'GET' && pathname === '/api/telegram/status') {
-    return sendJson(res, 200, { ok: true, configured: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID), hasBotToken: Boolean(process.env.TELEGRAM_BOT_TOKEN), hasChatId: Boolean(process.env.TELEGRAM_CHAT_ID) });
+    return sendJson(res, 200, {
+      ok: true,
+      configured: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID),
+      hasBotToken: Boolean(process.env.TELEGRAM_BOT_TOKEN),
+      hasChatId:   Boolean(process.env.TELEGRAM_CHAT_ID)
+    });
   }
 
   if (req.method === 'POST' && pathname === '/api/telegram/webhook') {
     const update = parseBody(await readBody(req));
     if (!update) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
     const message = update.message || update.edited_message || {};
-    const chatId = message.chat && message.chat.id;
-    const text = message.text || '';
-    if (chatId && text) {
-      const reply = buildTelegramReply(text);
-      await sendTelegramMessageTo(reply, chatId);
-    }
+    const chatId  = message.chat && message.chat.id;
+    const text    = message.text || '';
+    if (chatId && text) await sendTelegramMessageTo(buildTelegramReply(text), chatId);
     return sendJson(res, 200, { ok: true });
   }
 
   if (req.method === 'POST' && pathname === '/api/telegram/daily-summary') {
-    const text = ['📌 تقرير مجلس ميثاق اليومي', '', formatAgentReportText('ceo'), '', '—', formatAgentReportText('finance')].join('\n');
+    const text   = ['📌 تقرير مجلس ميثاق اليومي', '', formatAgentReportText('ceo'), '', '—', formatAgentReportText('finance')].join('\n');
     const result = await sendTelegramMessage(text);
-    return sendJson(res, result.ok ? 200 : 200, { ok: Boolean(result.ok), telegram: result });
+    return sendJson(res, 200, { ok: Boolean(result.ok), telegram: result });
   }
 
-
   if (req.method === 'GET' && pathname === '/api/payments/plans') {
-    return sendJson(res, 200, { ok: true, plans: ['basic','verified','freelancer','office','legal_review'].map(getPremiumPlan), methods: ['sham_cash', 'crypto_usdt'] });
+    return sendJson(res, 200, {
+      ok: true,
+      plans:   ['basic', 'verified', 'freelancer', 'office', 'legal_review'].map(getPremiumPlan),
+      methods: ['sham_cash', 'crypto_usdt']
+    });
   }
 
   if (req.method === 'POST' && pathname === '/api/payments/create') {
     const body = parseBody(await readBody(req));
     if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
     const contractId = normalize(body.contractId);
-    const method = normalize(body.method);
-    const planId = normalize(body.planId) || 'documentation';
+    const method     = normalize(body.method);
+    const planId     = normalize(body.planId) || 'verified';
     if (!contractId) return sendJson(res, 422, { ok: false, message: 'رقم العقد مطلوب.' });
     if (!['sham_cash', 'crypto_usdt'].includes(method)) return sendJson(res, 422, { ok: false, message: 'طريقة الدفع غير مدعومة حالياً.' });
     const found = findContract(contractId);
     if (!found.contract) return sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
-    const payment = createPaymentRecord({ contractId, method, planId, customerName: body.customerName, customerContact: body.customerContact });
+    const payment  = createPaymentRecord({ contractId, method, planId, customerName: body.customerName, customerContact: body.customerContact });
     const payments = readPayments();
     payments.unshift(payment);
     writePayments(payments);
     return sendJson(res, 201, { ok: true, payment });
   }
 
-  const paymentMatch = pathname.match(/^\/api\/payments\/([^/]+)$/);
+  const paymentMatch  = pathname.match(/^\/api\/payments\/([^/]+)$/);
+  const proofMatch    = pathname.match(/^\/api\/payments\/([^/]+)\/proof$/);
+  const confirmMatch  = pathname.match(/^\/api\/payments\/([^/]+)\/confirm-demo$/);
+
   if (req.method === 'GET' && paymentMatch) {
-    const id = decodeURIComponent(paymentMatch[1]);
-    const payment = readPayments().find(p => String(p.id) === String(id));
-    return payment ? sendJson(res, 200, { ok: true, payment }) : sendJson(res, 404, { ok: false, message: 'عملية الدفع غير موجودة.' });
+    const id      = decodeURIComponent(paymentMatch[1]);
+    const payment = readPayments().find(p => String(p.id) === id);
+    return payment
+      ? sendJson(res, 200, { ok: true, payment })
+      : sendJson(res, 404, { ok: false, message: 'عملية الدفع غير موجودة.' });
   }
 
-  const proofMatch = pathname.match(/^\/api\/payments\/([^/]+)\/proof$/);
   if (req.method === 'POST' && proofMatch) {
-    const id = decodeURIComponent(proofMatch[1]);
+    const id   = decodeURIComponent(proofMatch[1]);
     const body = parseBody(await readBody(req));
     if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
     const payments = readPayments();
-    const index = payments.findIndex(p => String(p.id) === String(id));
+    const index    = payments.findIndex(p => String(p.id) === id);
     if (index < 0) return sendJson(res, 404, { ok: false, message: 'عملية الدفع غير موجودة.' });
-    payments[index].txid = normalize(body.txid || body.operationId);
-    payments[index].payerNote = normalize(body.note);
-    payments[index].status = 'manual_review';
-    payments[index].updatedAt = new Date().toISOString();
+    payments[index].txid       = normalize(body.txid || body.operationId);
+    payments[index].payerNote  = normalize(body.note);
+    payments[index].status     = 'manual_review';
+    payments[index].updatedAt  = new Date().toISOString();
     writePayments(payments);
     return sendJson(res, 200, { ok: true, payment: payments[index], message: 'تم استلام إثبات الدفع وسيتم التحقق منه.' });
   }
 
-  const confirmMatch = pathname.match(/^\/api\/payments\/([^/]+)\/confirm-demo$/);
   if (req.method === 'POST' && confirmMatch) {
-    if (process.env.ALLOW_DEMO_CONFIRM !== 'true') return sendJson(res, 403, { ok: false, message: 'تأكيد الدفع التجريبي معطل في هذه البيئة.' });
-    const id = decodeURIComponent(confirmMatch[1]);
+    if (process.env.ALLOW_DEMO_CONFIRM !== 'true')
+      return sendJson(res, 403, { ok: false, message: 'تأكيد الدفع التجريبي معطل في هذه البيئة.' });
+    const id       = decodeURIComponent(confirmMatch[1]);
     const payments = readPayments();
-    const index = payments.findIndex(p => String(p.id) === String(id));
+    const index    = payments.findIndex(p => String(p.id) === id);
     if (index < 0) return sendJson(res, 404, { ok: false, message: 'عملية الدفع غير موجودة.' });
-    payments[index].status = 'paid';
+    payments[index].status    = 'paid';
     payments[index].updatedAt = new Date().toISOString();
     const contract = markContractPremium(payments[index].contractId, payments[index].id);
     writePayments(payments);
@@ -949,33 +936,33 @@ async function handleApi(req, res, pathname) {
     const body = parseBody(await readBody(req));
     if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
     const providerPaymentId = normalize(body.providerPaymentId || body.payment_id || body.id);
-    const status = normalize(body.status).toLowerCase();
-    const payments = readPayments();
-    const index = payments.findIndex(p => String(p.providerPaymentId) === providerPaymentId || String(p.id) === providerPaymentId);
+    const status            = normalize(body.status).toLowerCase();
+    const payments          = readPayments();
+    const index             = payments.findIndex(p => String(p.providerPaymentId) === providerPaymentId || String(p.id) === providerPaymentId);
     if (index < 0) return sendJson(res, 404, { ok: false, message: 'عملية الدفع غير موجودة.' });
-    payments[index].status = ['paid', 'success', 'confirmed'].includes(status) ? 'paid' : status || 'pending';
+    payments[index].status         = ['paid', 'success', 'confirmed'].includes(status) ? 'paid' : (status || 'pending');
     payments[index].webhookPayload = body;
-    payments[index].updatedAt = new Date().toISOString();
+    payments[index].updatedAt      = new Date().toISOString();
     let contract = null;
     if (payments[index].status === 'paid') contract = markContractPremium(payments[index].contractId, payments[index].id);
     writePayments(payments);
     return sendJson(res, 200, { ok: true, payment: payments[index], contract });
   }
 
-  if (req.method === 'GET' && pathname === '/api/health') return sendJson(res, 200, { ok: true, status: 'online', service: 'Mithaq API', time: new Date().toISOString() });
-
   if (req.method === 'GET' && pathname === '/api/contracts') {
     const contracts = readContracts().sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
     return sendJson(res, 200, { ok: true, contracts });
   }
 
-  const idMatch = pathname.match(/^\/api\/contracts\/([^/]+)$/);
-  const favMatch = pathname.match(/^\/api\/contracts\/([^/]+)\/favorite$/);
+  const idMatch   = pathname.match(/^\/api\/contracts\/([^/]+)$/);
+  const favMatch  = pathname.match(/^\/api\/contracts\/([^/]+)\/favorite$/);
   const signMatch = pathname.match(/^\/api\/contracts\/([^/]+)\/signatures$/);
 
   if (req.method === 'GET' && idMatch) {
     const { contract } = findContract(decodeURIComponent(idMatch[1]));
-    return contract ? sendJson(res, 200, { ok: true, contract }) : sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
+    return contract
+      ? sendJson(res, 200, { ok: true, contract })
+      : sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
   }
 
   if (req.method === 'POST' && pathname === '/api/generate-contract') {
@@ -985,7 +972,7 @@ async function handleApi(req, res, pathname) {
     if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
     const validation = validatePayload(body, false);
     if (!validation.ok) return sendJson(res, 422, { ok: false, message: validation.message });
-    const contract = makeContract(validation.data);
+    const contract  = makeContract(validation.data);
     const contracts = readContracts();
     contracts.unshift(contract);
     writeContracts(contracts);
@@ -993,7 +980,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === 'PUT' && idMatch) {
-    const id = decodeURIComponent(idMatch[1]);
+    const id   = decodeURIComponent(idMatch[1]);
     const found = findContract(id);
     if (!found.contract) return sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
     const body = parseBody(await readBody(req));
@@ -1001,16 +988,16 @@ async function handleApi(req, res, pathname) {
     const validation = validatePayload(Object.assign({}, found.contract, body), false);
     if (!validation.ok) return sendJson(res, 422, { ok: false, message: validation.message });
     const updated = Object.assign({}, found.contract, validation.data, { typeName: CONTRACT_TYPES[validation.data.type], updatedAt: new Date().toISOString() });
-    updated.content = buildContractContent(updated);
+    updated.content              = buildContractContent(updated);
     found.contracts[found.index] = updated;
     writeContracts(found.contracts);
     return sendJson(res, 200, { ok: true, contract: updated });
   }
 
   if (req.method === 'DELETE' && idMatch) {
-    const id = decodeURIComponent(idMatch[1]);
+    const id        = decodeURIComponent(idMatch[1]);
     const contracts = readContracts();
-    const next = contracts.filter(c => String(c.id) !== String(id));
+    const next      = contracts.filter(c => String(c.id) !== id);
     if (next.length === contracts.length) return sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
     writeContracts(next);
     return sendJson(res, 200, { ok: true, message: 'تم حذف العقد بنجاح.' });
@@ -1019,8 +1006,8 @@ async function handleApi(req, res, pathname) {
   if ((req.method === 'POST' || req.method === 'PATCH') && favMatch) {
     const found = findContract(decodeURIComponent(favMatch[1]));
     if (!found.contract) return sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
-    found.contract.favorite = !Boolean(found.contract.favorite);
-    found.contract.updatedAt = new Date().toISOString();
+    found.contract.favorite      = !Boolean(found.contract.favorite);
+    found.contract.updatedAt     = new Date().toISOString();
     found.contracts[found.index] = found.contract;
     writeContracts(found.contracts);
     return sendJson(res, 200, { ok: true, contract: found.contract });
@@ -1031,18 +1018,18 @@ async function handleApi(req, res, pathname) {
     if (!found.contract) return sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
     const body = parseBody(await readBody(req));
     if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
-    const party = body.party === 'party2' ? 'party2' : 'party1';
-    const name = normalize(body.name) || (party === 'party1' ? found.contract.party1 : found.contract.party2);
+    const party   = body.party === 'party2' ? 'party2' : 'party1';
+    const name    = normalize(body.name) || (party === 'party1' ? found.contract.party1 : found.contract.party2);
     const dataUrl = normalize(body.signatureData || body.dataUrl);
     if (!dataUrl.startsWith('data:image/png;base64,')) return sendJson(res, 422, { ok: false, message: 'التوقيع غير صحيح.' });
     const metadata = getRequestMetadata(req);
-    found.contract.signatures = found.contract.signatures || {};
+    found.contract.signatures       = found.contract.signatures || {};
     found.contract.signatureMetadata = Array.isArray(found.contract.signatureMetadata) ? found.contract.signatureMetadata : [];
     found.contract.signatures[party] = { name, dataUrl, signedAt: metadata.timestamp, metadata };
     found.contract.signatureMetadata.push({ party, name, ...metadata });
-    found.contract.status = found.contract.signatures.party1 && found.contract.signatures.party2 ? 'signed' : 'partially_signed';
+    found.contract.status    = found.contract.signatures.party1 && found.contract.signatures.party2 ? 'signed' : 'partially_signed';
     found.contract.updatedAt = new Date().toISOString();
-    found.contract.content = buildContractContent(found.contract);
+    found.contract.content   = buildContractContent(found.contract);
     found.contracts[found.index] = found.contract;
     writeContracts(found.contracts);
     return sendJson(res, 200, { ok: true, contract: found.contract });
@@ -1052,9 +1039,9 @@ async function handleApi(req, res, pathname) {
     const body = parseBody(await readBody(req));
     if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
     const contractId = normalize(body.contractId);
-    const name = normalize(body.name);
-    const email = normalize(body.email);
-    const note = normalize(body.note);
+    const name       = normalize(body.name);
+    const email      = normalize(body.email);
+    const note       = normalize(body.note);
     if (!contractId || !name || !email) return sendJson(res, 422, { ok: false, message: 'رقم العقد والاسم والبريد مطلوبة.' });
     const found = findContract(contractId);
     if (!found.contract) return sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
@@ -1062,89 +1049,121 @@ async function handleApi(req, res, pathname) {
     const reviews = readReviews();
     reviews.unshift(request);
     writeReviews(reviews);
-    found.contract.reviewStatus = 'pending';
+    found.contract.reviewStatus  = 'pending';
     found.contracts[found.index] = found.contract;
     writeContracts(found.contracts);
     return sendJson(res, 201, { ok: true, request });
   }
 
-  if (req.method === 'GET' && pathname === '/api/review-requests') return sendJson(res, 200, { ok: true, requests: readReviews() });
+  if (req.method === 'GET' && pathname === '/api/review-requests') {
+    return sendJson(res, 200, { ok: true, requests: readReviews() });
+  }
 
   return sendJson(res, 404, { ok: false, message: 'المسار غير موجود.' });
 }
 
-
+// ─── Static File Serving ──────────────────────────────────────
 function getMimeType(filePath) {
-  const ext = path.extname(filePath).toLowerCase();
   const types = {
-    '.svg': 'image/svg+xml; charset=utf-8',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
+    '.html': 'text/html; charset=utf-8',
+    '.svg':  'image/svg+xml; charset=utf-8',
+    '.png':  'image/png',
+    '.jpg':  'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.webp': 'image/webp',
-    '.ico': 'image/x-icon',
-    '.css': 'text/css; charset=utf-8',
-    '.js': 'application/javascript; charset=utf-8'
+    '.ico':  'image/x-icon',
+    '.css':  'text/css; charset=utf-8',
+    '.js':   'application/javascript; charset=utf-8'
   };
-  return types[ext] || 'application/octet-stream';
+  return types[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
 }
 
-function serveAsset(res, assetPath) {
-  const safeName = path.basename(assetPath);
-  const filePath = path.join(ASSETS_DIR, safeName);
-  if (!filePath.startsWith(ASSETS_DIR) || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
-    sendText(res, 404, 'الأصل غير موجود.');
-    return;
+function serveStaticFile(res, filePath) {
+  // Security: prevent path traversal
+  if (!filePath.startsWith(ROOT_DIR + path.sep) && filePath !== ROOT_DIR) {
+    return sendText(res, 403, 'غير مسموح.');
+  }
+  // Security: never serve the data directory
+  if (filePath.startsWith(DATA_DIR)) {
+    return sendText(res, 403, 'غير مسموح.');
+  }
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    return sendText(res, 404, 'الملف غير موجود.');
   }
   const body = fs.readFileSync(filePath);
   res.writeHead(200, commonHeaders({
-    'Content-Type': getMimeType(filePath),
+    'Content-Type':  getMimeType(filePath),
     'Content-Length': body.length,
     'Cache-Control': 'public, max-age=86400'
   }));
   res.end(body);
 }
 
-
-function serveHtmlFile(res, filePath, missingMessage) {
-  if (!fs.existsSync(filePath)) return sendText(res, 404, missingMessage || 'الملف غير موجود.');
+function serveHtmlFile(res, filePath, missingMsg) {
+  if (!fs.existsSync(filePath)) return sendText(res, 404, missingMsg || 'الملف غير موجود.');
   sendHtml(res, 200, fs.readFileSync(filePath, 'utf8'));
 }
 
 function serveFrontend(res) {
-  if (!fs.existsSync(FRONTEND_FILE)) return sendText(res, 404, 'frontend/index.html غير موجود.');
+  if (!fs.existsSync(FRONTEND_FILE)) return sendText(res, 404, 'index.html غير موجود.');
   sendHtml(res, 200, fs.readFileSync(FRONTEND_FILE, 'utf8'));
 }
 
+// ─── HTTP Server ──────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
-  const parsed = url.parse(req.url || '/', true);
+  const parsed   = url.parse(req.url || '/', true);
   const pathname = parsed.pathname || '/';
+
   if (req.method === 'OPTIONS') return handleOptions(res);
+
   try {
+    // API
     if (pathname.startsWith('/api/')) return await handleApi(req, res, pathname);
-    if (req.method === 'GET' && pathname.startsWith('/assets/')) return serveAsset(res, pathname.replace('/assets/', ''));
-    if (req.method === 'GET' && pathname === '/mithaq-logo.svg') return serveAsset(res, 'mithaq-logo.svg');
-    if (req.method === 'GET' && pathname === '/favicon.ico') return serveAsset(res, 'favicon.svg');
-    if (req.method === 'GET' && pathname === '/favicon.svg') return serveAsset(res, 'favicon.svg');
-    const share = pathname.match(/^\/share\/([^/]+)$/);
-    const print = pathname.match(/^\/print\/([^/]+)$/);
-    if ((req.method === 'GET') && (share || print)) {
-      const id = decodeURIComponent((share || print)[1]);
+
+    if (req.method !== 'GET') return sendText(res, 405, 'Method Not Allowed');
+
+    // Main page
+    if (pathname === '/' || pathname === '/index.html') return serveFrontend(res);
+
+    // Named HTML pages
+    if (pathname === '/marketing')     return serveHtmlFile(res, MARKETING_FILE,     'ملف التسويق غير موجود.');
+    if (pathname === '/brand')         return serveHtmlFile(res, BRAND_FILE,          'ملف الهوية غير موجود.');
+    if (pathname === '/agents')        return serveHtmlFile(res, AGENTS_FILE,         'ملف مجلس ميثاق غير موجود.');
+    if (pathname === '/design-studio') return serveHtmlFile(res, DESIGN_STUDIO_FILE,  'ملف استوديو التصميم غير موجود.');
+
+    // Share / Print
+    const shareMatch = pathname.match(/^\/share\/([^/]+)$/);
+    const printMatch = pathname.match(/^\/print\/([^/]+)$/);
+    if (shareMatch || printMatch) {
+      const id = decodeURIComponent((shareMatch || printMatch)[1]);
       const { contract } = findContract(id);
-      return contract ? sendHtml(res, 200, publicContractHtml(contract, Boolean(print))) : sendText(res, 404, 'العقد غير موجود.');
+      return contract
+        ? sendHtml(res, 200, publicContractHtml(contract, Boolean(printMatch)))
+        : sendText(res, 404, 'العقد غير موجود.');
     }
-    if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html' || pathname === '/frontend/index.html')) return serveFrontend(res);
-    if (req.method === 'GET' && pathname === '/marketing') return serveHtmlFile(res, MARKETING_FILE, 'ملف التسويق غير موجود.');
-    if (req.method === 'GET' && pathname === '/brand') return serveHtmlFile(res, BRAND_FILE, 'ملف الهوية غير موجود.');
-    if (req.method === 'GET' && pathname === '/agents') return serveHtmlFile(res, AGENTS_FILE, 'ملف مجلس ميثاق غير موجود.');
-    if (req.method === 'GET' && pathname === '/design-studio') return serveHtmlFile(res, DESIGN_STUDIO_FILE, 'ملف استوديو التصميم غير موجود.');
-    if (req.method === 'GET') return serveFrontend(res);
-    return sendText(res, 404, 'الصفحة غير موجودة.');
+
+    // Static assets (SVG, PNG, CSS, JS, etc.) — NOT json to protect data files
+    if (/\.(svg|png|jpg|jpeg|webp|ico|css|js)$/i.test(pathname)) {
+      const safeName = decodeURIComponent(pathname).replace(/^\/+/, '').replace(/\.\./g, '');
+      const filePath = path.join(ROOT_DIR, safeName);
+      return serveStaticFile(res, filePath);
+    }
+
+    // Fallback
+    return serveFrontend(res);
+
   } catch (error) {
-    console.error(error);
+    console.error('Server error:', error);
     return sendJson(res, 500, { ok: false, message: 'حدث خطأ داخلي في الخادم.' });
   }
 });
 
+// ─── Start ────────────────────────────────────────────────────
 ensureStores();
-server.listen(PORT, HOST, () => console.log(`Mithaq backend is running on http://localhost:${PORT}`));
+checkEnv();
+server.listen(PORT, HOST, () => {
+  console.log(`✅ Mithaq is running → http://localhost:${PORT}`);
+  console.log(`📁 Root : ${ROOT_DIR}`);
+  console.log(`📄 index: ${FRONTEND_FILE}`);
+  console.log(`💾 Data : ${DATA_DIR}`);
+});
