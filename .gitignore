@@ -1,0 +1,6 @@
+# Temporary test / debug artifacts (E2E scripts, CDP browser profiles, JSON dumps)
+.tmp*
+*.tmp
+.tmp-cdp-profile*/
+*.log
+node_modules/

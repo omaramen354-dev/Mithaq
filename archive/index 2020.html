@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)http://127.0.0.1:53877/index.html -->
+<html lang="ar" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ميثاق – MITHAQ | عقودك بثقة وسهولة</title>
+  <link href="./ميثاق – MITHAQ _ عقودك بثقة وسهولة_files/css2" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="./ميثاق – MITHAQ _ عقودك بثقة وسهولة_files/jspdf.umd.min.js.download"></script>
+  <style>
+    :root {
+      --green: #1D4A3E;
+      --gold: #D4A843;
+      --gold-light: #F0C85A;
+      --gold-dark: #B8922E;
+      --ivory: #F4F1E1;
+      --white: #FFFFFF;
+      --text: #333333;
+      --green-light: #2a6355;
+      --sidebar-width: 265px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Naskh Arabic', serif;
+      background-color: var(--white);
+      color: var(--text);
+      direction: rtl;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, .logo-text, .nav-link span, .btn {
+      font-family: 'Cairo', sans-serif;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--ivory); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 0; right: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: linear-gradient(180deg, #152f27 0%, var(--green) 40%, #1a3e33 100%);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      box-shadow: -4px 0 30px rgba(0,0,0,0.25);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+    }
+
+    /* Sidebar inner top ornament */
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 26px 18px 20px;
+      border-bottom: 1px solid rgba(201,160,61,0.2);
+    }
+
+    /* ===== LOGO SVG ===== */
+    .logo-svg-wrap {
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 3px 10px rgba(212,168,67,0.5));
+    }
+
+    .logo-text-block {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .logo-text-block .arabic {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--gold);
+      font-family: 'Cairo', sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    .logo-text-block .english {
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(212,168,67,0.55);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .sidebar-tagline {
+      padding: 10px 18px 16px;
+      font-size: 11.5px;
+      color: rgba(244,241,225,0.45);
+      font-family: 'Cairo', sans-serif;
+      border-bottom: 1px solid rgba(201,160,61,0.1);
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav { padding: 12px 0; flex: 1; }
+
+    .nav-section-title {
+      padding: 10px 18px 4px;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: rgba(212,168,67,0.4);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 18px;
+      color: rgba(244,241,225,0.72);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.25s ease;
+      position: relative;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: right;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .nav-link i {
+      width: 20px;
+      text-align: center;
+      color: rgba(212,168,67,0.65);
+      font-size: 14px;
+      transition: color 0.25s;
+      flex-shrink: 0;
+    }
+
+    .nav-link:hover {
+      background: rgba(212,168,67,0.1);
+      color: var(--white);
+      padding-right: 24px;
+    }
+
+    .nav-link:hover i { color: var(--gold); }
+
+    .nav-link.active {
+      background: linear-gradient(90deg, rgba(212,168,67,0.15), transparent);
+      color: var(--gold);
+      border-right: 3px solid var(--gold);
+    }
+
+    .nav-link.active i { color: var(--gold); }
+
+    .nav-badge {
+      margin-right: auto;
+      background: var(--gold);
+      color: var(--green);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .sidebar-footer {
+      padding: 16px 18px;
+      border-top: 1px solid rgba(212,168,67,0.15);
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(212,168,67,0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(212,168,67,0.18);
+    }
+
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green);
+      font-weight: 900; font-size: 14px; flex-shrink: 0;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .user-info .name {
+      font-size: 13px; font-weight: 700;
+      color: var(--ivory);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .user-info .role {
+      font-size: 10px;
+      color: rgba(212,168,67,0.65);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main-wrapper {
+      margin-right: var(--sidebar-width);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--white);
+      transition: margin-right 0.3s ease;
+    }
+
+    /* ===== TOP BAR ===== */
+    .topbar {
+      background: var(--white);
+      padding: 13px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(29,74,62,0.09);
+      position: sticky;
+      top: 0; z-index: 50;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-title {
+      font-size: 15px; font-weight: 700;
+      color: var(--green);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .topbar-actions { display: flex; align-items: center; gap: 9px; }
+
+    .icon-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1px solid rgba(29,74,62,0.13);
+      background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--green); font-size: 14px;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .icon-btn:hover { background: var(--green); color: var(--gold); border-color: var(--green); }
+
+    .notif-dot {
+      position: absolute; top: 6px; left: 6px;
+      width: 7px; height: 7px;
+      background: var(--gold);
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .hamburger {
+      display: none; cursor: pointer;
+      font-size: 20px; color: var(--green); padding: 5px;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      background: linear-gradient(145deg, #122e26 0%, var(--green) 45%, #1f5244 100%);
+      padding: 64px 44px 72px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .hero-ornament {
+      position: absolute; inset: 0;
+      opacity: 0.05; pointer-events: none; overflow: hidden;
+    }
+
+    /* Gold shimmer line on hero top */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--gold) 30%, var(--gold-light) 50%, var(--gold) 70%, transparent 100%);
+    }
+
+    .hero-content { position: relative; z-index: 2; flex: 1; }
+
+    /* Platform name banner */
+    .platform-name-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .platform-logo-inline {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .platform-logo-inline .logo-mini {
+      width: 38px; height: 38px;
+      filter: drop-shadow(0 2px 8px rgba(212,168,67,0.6));
+    }
+
+    .platform-name-text {
+      font-family: 'Cairo', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    .platform-name-sep {
+      width: 1px; height: 28px;
+      background: rgba(212,168,67,0.3);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(212,168,67,0.14);
+      border: 1px solid rgba(212,168,67,0.35);
+      color: var(--gold);
+      padding: 5px 14px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 4vw, 50px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.28;
+      margin: 16px 0 14px;
+    }
+
+    .hero h1 span { color: var(--gold); }
+
+    .hero-tagline {
+      font-size: clamp(17px, 2vw, 22px);
+      font-weight: 700;
+      color: rgba(212,168,67,0.8);
+      font-family: 'Cairo', sans-serif;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero p {
+      font-size: clamp(13px, 1.5vw, 16px);
+      color: rgba(244,241,225,0.75);
+      max-width: 470px;
+      line-height: 2;
+      margin-bottom: 34px;
+      font-family: 'Noto Naskh Arabic', serif;
+    }
+
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+    .btn {
+      padding: 13px 28px;
+      border-radius: 12px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.28s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      color: var(--green);
+      box-shadow: 0 4px 20px rgba(212,168,67,0.4);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(212,168,67,0.55);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 2px solid rgba(255,255,255,0.35);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.7);
+      transform: translateY(-2px);
+    }
+
+    /* Hero Visual / Mockup */
+    .hero-visual { position: relative; z-index: 2; flex-shrink: 0; }
+
+    .hero-card-mockup {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(212,168,67,0.28);
+      border-radius: 22px;
+      padding: 28px;
+      width: 275px;
+      backdrop-filter: blur(12px);
+    }
+
+    .mockup-header { display: flex; align-items: center; gap: 11px; margin-bottom: 20px; }
+
+    .mockup-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green); font-size: 20px;
+    }
+
+    .mockup-title { font-family: 'Cairo', sans-serif; font-weight: 700; color: var(--white); font-size: 14px; }
+    .mockup-subtitle { font-size: 10.5px; color: rgba(244,241,225,0.55); margin-top: 2px; }
+
+    .mockup-lines { display: flex; flex-direction: column; gap: 8px; }
+
+    .mockup-line { height: 8px; border-radius: 6px; background: rgba(255,255,255,0.1); }
+    .mockup-line.gold { background: rgba(212,168,67,0.45); width: 68%; }
+    .mockup-line.w-full { width: 100%; }
+    .mockup-line.w-80 { width: 80%; }
+    .mockup-line.w-60 { width: 60%; }
+    .mockup-line.w-45 { width: 45%; }
+
+    .mockup-badge {
+      margin-top: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(212,168,67,0.18);
+      border: 1px solid rgba(212,168,67,0.38);
+      color: var(--gold);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+    }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      background: var(--ivory);
+      padding: 22px 44px;
+      display: flex;
+      border-bottom: 1px solid rgba(29,74,62,0.07);
+    }
+
+    .stat-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 0 26px;
+      border-left: 1px solid rgba(29,74,62,0.1);
+    }
+
+    .stat-item:last-child { border-left: none; }
+    .stat-item:first-child { padding-right: 0; }
+
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 13px;
+      background: var(--green);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gold); font-size: 18px; flex-shrink: 0;
+    }
+
+    .stat-num {
+      font-size: 23px;
+      font-weight: 900;
+      color: var(--green);
+      font-family: 'Cairo', sans-serif;
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #777;
+      margin-top: 3px;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    /* ===== SECTIONS ===== */
+    .section { padding: 52px 44px; }
+
+    .section-header { margin-bottom: 34px; }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gold-dark);
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      font-family: 'Cairo', sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .section-label::before {
+      content: '';
+      width: 22px; height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 2px;
+    }
+
+    .section-title {
+      font-size: clamp(20px, 2.5vw, 28px);
+      font-weight: 800;
+      color: var(--green);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    /* ===== CONTRACT CARDS ===== */
+    .contracts-section { background: var(--white); }
+
+    .contracts-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 18px;
+    }
+
+    .contract-card {
+      background: var(--ivory);
+      border: 1.5px solid rgba(212,168,67,0.3);
+      border-radius: 20px;
+      padding: 28px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 14px rgba(29,74,62,0.05);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .contract-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .contract-card:hover::before { transform: scaleX(1); }
+
+    .contract-card:hover {
+      transform: translateY(-7px);
+      box-shadow: 0 14px 36px rgba(29,74,62,0.13);
+      border-color: var(--gold);
+      background: var(--white);
+    }
+
+    .contract-icon {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gold); font-size: 25px;
+      box-shadow: 0 4px 16px rgba(29,74,62,0.22);
+      transition: transform 0.3s;
+    }
+
+    .contract-card:hover .contract-icon { transform: scale(1.1) rotate(-6deg); }
+
+    .contract-name {
+      font-size: 15px; font-weight: 700;
+      color: var(--green); font-family: 'Cairo', sans-serif;
+    }
+
+    .contract-desc {
+      font-size: 12px; color: #888;
+      line-height: 1.65;
+      font-family: 'Noto Naskh Arabic', serif;
+    }
+
+    .contract-count {
+      font-size: 11px;
+      color: var(--gold-dark);
+      font-weight: 700;
+      font-family: 'Cairo', sans-serif;
+      background: rgba(212,168,67,0.12);
+      border: 1px solid rgba(212,168,67,0.25);
+      padding: 3px 12px;
+      border-radius: 20px;
+    }
+
+    /* ===== FEATURES ===== */
+    .features-section {
+      background: linear-gradient(135deg, #f9f7ef, var(--ivory));
+      position: relative; overflow: hidden;
+    }
+
+    .features-ornament {
+      position: absolute;
+      bottom: -50px; left: -50px;
+      width: 220px; height: 220px;
+      opacity: 0.05; pointer-events: none;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 32px 22px;
+      box-shadow: 0 2px 18px rgba(29,74,62,0.06);
+      border: 1px solid rgba(29,74,62,0.07);
+      transition: all 0.3s ease;
+      position: relative; overflow: hidden;
+    }
+
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; right: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--gold));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover::after { transform: scaleX(1); }
+    .feature-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(29,74,62,0.11); }
+
+    .feature-icon {
+      width: 54px; height: 54px;
+      border-radius: 15px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 18px;
+    }
+
+    .feature-icon.green { background: rgba(29,74,62,0.09); color: var(--green); }
+    .feature-icon.gold { background: rgba(212,168,67,0.12); color: var(--gold-dark); }
+
+    .feature-title {
+      font-size: 16px; font-weight: 700;
+      color: var(--green); margin-bottom: 9px;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .feature-desc {
+      font-size: 13px; color: #666;
+      line-height: 1.85;
+      font-family: 'Noto Naskh Arabic', serif;
+    }
+
+    /* ===== RECENT CONTRACTS TABLE ===== */
+    .recent-section { background: var(--white); }
+
+    .recent-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .view-all {
+      color: var(--gold-dark);
+      font-size: 13px; font-weight: 600;
+      text-decoration: none;
+      font-family: 'Cairo', sans-serif;
+      display: flex; align-items: center; gap: 6px;
+      cursor: pointer; transition: color 0.2s;
+    }
+
+    .view-all:hover { color: var(--green); }
+
+    .contracts-table {
+      background: var(--white);
+      border-radius: 18px;
+      border: 1px solid rgba(29,74,62,0.09);
+      overflow: hidden;
+      box-shadow: 0 2px 18px rgba(29,74,62,0.05);
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 2fr 1.4fr 1fr 1fr 1fr;
+      padding: 14px 22px;
+      background: rgba(29,74,62,0.04);
+      border-bottom: 1px solid rgba(29,74,62,0.07);
+      font-size: 12px; font-weight: 700;
+      color: var(--green);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 2fr 1.4fr 1fr 1fr 1fr;
+      padding: 16px 22px;
+      border-bottom: 1px solid rgba(29,74,62,0.05);
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .table-row:last-child { border-bottom: none; }
+    .table-row:hover { background: rgba(244,241,225,0.5); }
+
+    .table-row .contract-title {
+      font-size: 14px; font-weight: 600;
+      color: var(--text); font-family: 'Cairo', sans-serif;
+    }
+
+    .table-row .contract-parties {
+      font-size: 12px; color: #999;
+      margin-top: 2px;
+      font-family: 'Noto Naskh Arabic', serif;
+    }
+
+    .type-badge {
+      display: inline-flex;
+      padding: 4px 11px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .type-rent { background: rgba(29,74,62,0.09); color: var(--green); }
+    .type-sale { background: rgba(212,168,67,0.13); color: #8a6618; }
+    .type-service { background: rgba(80,120,200,0.1); color: #3a5fc8; }
+    .type-freelance { background: rgba(150,60,120,0.1); color: #963c78; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center; gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .status-badge::before {
+      content: ''; width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+
+    .status-active { background: rgba(34,197,94,0.1); color: #16a34a; }
+    .status-active::before { background: #16a34a; }
+    .status-pending { background: rgba(251,146,60,0.1); color: #ea7c20; }
+    .status-pending::before { background: #ea7c20; }
+    .status-draft { background: rgba(148,163,184,0.14); color: #64748b; }
+    .status-draft::before { background: #94a3b8; }
+
+    .date-text { font-size: 12px; color: #999; font-family: 'Cairo', sans-serif; }
+
+    .row-actions { display: flex; gap: 7px; }
+
+    .action-icon {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      border: 1px solid rgba(29,74,62,0.13);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #aaa; font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .action-icon:hover { background: var(--green); color: var(--gold); border-color: var(--green); }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: linear-gradient(170deg, #122e26 0%, var(--green) 60%);
+      color: rgba(244,241,225,0.72);
+      padding: 44px 44px 24px;
+      position: relative; overflow: hidden;
+    }
+
+    .footer::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .footer-ornament {
+      position: absolute;
+      top: -10px; left: -10px;
+      opacity: 0.05; pointer-events: none;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 44px;
+      margin-bottom: 36px;
+    }
+
+    .footer-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+
+    .footer-logo-svg { width: 42px; height: 42px; filter: drop-shadow(0 2px 8px rgba(212,168,67,0.5)); }
+
+    .footer-logo-name {
+      font-size: 21px; font-weight: 900;
+      color: var(--gold); font-family: 'Cairo', sans-serif;
+    }
+
+    .footer-desc {
+      font-size: 13px; line-height: 2; margin-bottom: 18px;
+      font-family: 'Noto Naskh Arabic', serif;
+    }
+
+    .social-links { display: flex; gap: 10px; }
+
+    .social-link {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid rgba(212,168,67,0.28);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(212,168,67,0.65); font-size: 13px;
+      cursor: pointer; transition: all 0.25s;
+    }
+
+    .social-link:hover { background: var(--gold); color: var(--green); border-color: var(--gold); }
+
+    .footer-heading {
+      font-size: 15px; font-weight: 700;
+      color: var(--gold); margin-bottom: 16px;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+    .footer-links li a {
+      color: rgba(244,241,225,0.6);
+      text-decoration: none; font-size: 13px;
+      font-family: 'Cairo', sans-serif;
+      transition: color 0.2s;
+      display: flex; align-items: center; gap: 7px;
+    }
+
+    .footer-links li a::before { content: '›'; color: var(--gold); }
+    .footer-links li a:hover { color: var(--gold); }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(212,168,67,0.15);
+      padding-top: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; color: rgba(244,241,225,0.4);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .footer-bottom .gold { color: var(--gold); }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(8,25,20,0.75);
+      backdrop-filter: blur(7px);
+      z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      background: var(--white);
+      border-radius: 24px;
+      width: 100%; max-width: 540px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+      overflow: hidden;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(35px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, var(--green) 0%, #1f5244 100%);
+      padding: 26px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: relative; overflow: hidden;
+    }
+
+    .modal-header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .modal-header-content .label {
+      font-size: 10.5px; color: rgba(212,168,67,0.65);
+      font-family: 'Cairo', sans-serif;
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    .modal-header-content h3 {
+      font-size: 20px; font-weight: 800;
+      color: var(--white); font-family: 'Cairo', sans-serif; margin-top: 4px;
+    }
+
+    .modal-close {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: var(--white); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; transition: all 0.2s;
+    }
+
+    .modal-close:hover { background: rgba(255,255,255,0.22); }
+
+    .modal-body { padding: 30px 28px; }
+
+    .modal-steps {
+      display: flex; gap: 0; margin-bottom: 26px;
+      background: var(--ivory); border-radius: 12px; padding: 4px;
+    }
+
+    .step {
+      flex: 1; text-align: center; padding: 8px;
+      border-radius: 10px; font-size: 12px; font-weight: 600;
+      color: #bbb; font-family: 'Cairo', sans-serif;
+      transition: all 0.3s; cursor: pointer;
+    }
+
+    .step.active { background: var(--green); color: var(--gold); }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13.5px; font-weight: 600;
+      color: var(--green); margin-bottom: 8px;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .form-label i { color: var(--gold-dark); font-size: 13px; }
+    .form-label .optional { font-size: 11px; color: #bbb; font-weight: 400; }
+
+    .form-input, .form-select {
+      width: 100%; padding: 12px 16px;
+      border: 1.5px solid rgba(29,74,62,0.18);
+      border-radius: 12px;
+      font-family: 'Cairo', sans-serif; font-size: 14px;
+      color: var(--text); background: var(--white);
+      transition: all 0.25s; outline: none; direction: rtl;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(29,74,62,0.07);
+    }
+
+    .form-input::placeholder { color: #ccc; }
+
+    .form-select {
+      cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%231D4A3E' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+      background-size: 18px; padding-left: 40px;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .modal-footer { padding: 0 28px 28px; display: flex; gap: 12px; }
+
+    .btn-modal-primary {
+      flex: 1; padding: 13px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--green); border: none;
+      border-radius: 12px;
+      font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 15px;
+      cursor: pointer; transition: all 0.25s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .btn-modal-primary:hover {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(212,168,67,0.4);
+    }
+
+    .btn-modal-secondary {
+      padding: 13px 20px;
+      background: var(--ivory); color: var(--green);
+      border: 1.5px solid rgba(29,74,62,0.18);
+      border-radius: 12px;
+      font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 14px;
+      cursor: pointer; transition: all 0.25s;
+    }
+
+    .btn-modal-secondary:hover { background: rgba(29,74,62,0.06); }
+
+    /* ===== SIDEBAR OVERLAY ===== */
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 90;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1100px) {
+      .contracts-grid { grid-template-columns: repeat(3, 1fr); }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+    }
+
+    @media (max-width: 900px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar { transform: translateX(100%); width: 265px; }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .main-wrapper { margin-right: 0; }
+      .hamburger { display: flex; }
+      .hero { padding: 40px 24px 52px; flex-direction: column; }
+      .hero-visual { display: none; }
+      .stats-bar { padding: 16px 24px; flex-wrap: wrap; gap: 18px; }
+      .stat-item { border-left: none; padding: 0; min-width: 42%; }
+      .section { padding: 36px 24px; }
+      .contracts-grid { grid-template-columns: repeat(2, 1fr); }
+      .table-header, .table-row { grid-template-columns: 2fr 1fr 1fr; }
+      .table-header > *:nth-child(4),
+      .table-header > *:nth-child(5),
+      .table-row > *:nth-child(4),
+      .table-row > *:nth-child(5) { display: none; }
+      .footer { padding: 30px 24px 20px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 22px; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+      .topbar { padding: 12px 20px; }
+    }
+
+    @media (max-width: 600px) {
+      .contracts-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .hero-actions { flex-direction: column; }
+      .hero-actions .btn { width: 100%; justify-content: center; }
+      .platform-name-text { font-size: 17px; }
+    }
+
+    @media (max-width: 400px) {
+      .contracts-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0; transform: translateY(18px);
+      animation: fadeInUp 0.5s forwards;
+    }
+
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+    .fade-in:nth-child(1) { animation-delay: 0.05s; }
+    .fade-in:nth-child(2) { animation-delay: 0.13s; }
+    .fade-in:nth-child(3) { animation-delay: 0.21s; }
+    .fade-in:nth-child(4) { animation-delay: 0.29s; }
+    .fade-in:nth-child(5) { animation-delay: 0.37s; }
+
+    /* ===== COUNTER ANIMATION ===== */
+    .stat-num { transition: none; }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed; bottom: 28px; left: 28px;
+      background: var(--green); color: var(--white);
+      padding: 14px 22px; border-radius: 14px;
+      font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+      z-index: 9999;
+      display: flex; align-items: center; gap: 10px;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.4s ease;
+      border-right: 4px solid var(--gold);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast i { color: var(--gold); font-size: 18px; }
+
+    /* ===== "قريباً" EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 44px 20px;
+      color: #bbb;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .empty-state i {
+      font-size: 42px;
+      color: rgba(212,168,67,0.3);
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .empty-state p {
+      font-size: 15px;
+      color: #ccc;
+      line-height: 1.8;
+    }
+
+    .empty-state span {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 12px;
+      background: rgba(29,74,62,0.07);
+      color: var(--green);
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(29,74,62,0.12);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR OVERLAY ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+
+  <div class="sidebar-logo">
+    <!-- LOGO SVG -->
+    <svg class="logo-svg-wrap" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer ring -->
+      <circle cx="50" cy="50" r="47" fill="#1D4A3E" stroke="#D4A843" stroke-width="2.5"></circle>
+      <!-- Inner geometric ornament -->
+      <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(212,168,67,0.35)" stroke-width="1"></circle>
+      <polygon points="50,16 81,34 81,66 50,84 19,66 19,34" fill="none" stroke="rgba(212,168,67,0.25)" stroke-width="1"></polygon>
+      <!-- Quill / Pen shape -->
+      <g transform="translate(50,50) rotate(-15)">
+        <!-- Pen body -->
+        <rect x="-4" y="-22" width="8" height="30" rx="4" fill="#D4A843"></rect>
+        <!-- Pen nib -->
+        <polygon points="0,12 -5,24 5,24" fill="#F0C85A"></polygon>
+        <polygon points="0,20 -2,28 2,28" fill="#1D4A3E"></polygon>
+        <!-- Pen top -->
+        <rect x="-4" y="-28" width="8" height="8" rx="3" fill="#B8922E"></rect>
+      </g>
+      <!-- Contract lines suggestion -->
+      <line x1="27" y1="68" x2="50" y2="68" stroke="rgba(212,168,67,0.4)" stroke-width="1.5" stroke-linecap="round"></line>
+      <line x1="27" y1="72" x2="45" y2="72" stroke="rgba(212,168,67,0.25)" stroke-width="1" stroke-linecap="round"></line>
+    </svg>
+
+    <div class="logo-text-block">
+      <span class="arabic">ميثاق</span>
+      <span class="english">MITHAQ</span>
+    </div>
+  </div>
+
+  <div class="sidebar-tagline">منصة العقود الذكية العربية</div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">الرئيسية</div>
+    <button class="nav-link active" onclick="setActive(this)">
+      <i class="fas fa-house"></i>
+      <span>لوحة التحكم</span>
+    </button>
+    <button class="nav-link" onclick="setActive(this); openModal()">
+      <i class="fas fa-file-circle-plus"></i>
+      <span>إنشاء عقد جديد</span>
+    </button>
+
+    <div class="nav-section-title" style="margin-top:10px">إدارة</div>
+    <button class="nav-link" onclick="setActive(this)">
+      <i class="fas fa-file-contract"></i>
+      <span>العقود</span>
+      <span class="nav-badge" id="sidebarContractsCount">1</span>
+    </button>
+    <button class="nav-link" onclick="setActive(this)">
+      <i class="fas fa-layer-group"></i>
+      <span>القوالب</span>
+    </button>
+    <button class="nav-link" onclick="setActive(this)">
+      <i class="fas fa-heart"></i>
+      <span>المفضلة</span>
+      <span class="nav-badge" id="sidebarFavCount">0</span>
+    </button>
+    <button class="nav-link" onclick="setActive(this)">
+      <i class="fas fa-signature"></i>
+      <span>التوقيعات</span>
+    </button>
+
+    <div class="nav-section-title" style="margin-top:10px">الحساب</div>
+    <button class="nav-link" onclick="setActive(this)">
+      <i class="fas fa-gear"></i>
+      <span>إعدادات الحساب</span>
+    </button>
+    <button class="nav-link" onclick="setActive(this)">
+      <i class="fas fa-circle-question"></i>
+      <span>المساعدة</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">م</div>
+      <div class="user-info">
+        <div class="name">المستخدم</div>
+        <div class="role">عضو جديد</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== MAIN WRAPPER ===== -->
+<div class="main-wrapper">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-right">
+      <span class="hamburger" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </span>
+      <span class="topbar-title">
+        <i class="fas fa-house" style="color:var(--gold-dark);margin-left:7px"></i>
+        الرئيسية
+      </span>
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn" title="البحث"><i class="fas fa-magnifying-glass"></i></div>
+      <div class="icon-btn" title="الإشعارات">
+        <i class="fas fa-bell"></i>
+        <span class="notif-dot"></span>
+      </div>
+      <div class="icon-btn" title="الرسائل"><i class="fas fa-envelope"></i></div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <!-- Andalusian ornament BG -->
+    <div class="hero-ornament" aria-hidden="true">
+      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="and1" x="0" y="0" width="90" height="90" patternUnits="userSpaceOnUse">
+            <g fill="none" stroke="#ffffff" stroke-width="0.7">
+              <polygon points="45,3 84,25 84,65 45,87 6,65 6,25"></polygon>
+              <polygon points="45,14 72,30 72,60 45,76 18,60 18,30"></polygon>
+              <polygon points="45,25 60,34 60,56 45,65 30,56 30,34"></polygon>
+              <line x1="45" y1="3" x2="45" y2="87"></line>
+              <line x1="6" y1="25" x2="84" y2="65"></line>
+              <line x1="84" y1="25" x2="6" y2="65"></line>
+            </g>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#and1)"></rect>
+      </svg>
+    </div>
+
+    <div class="hero-content">
+      <!-- Platform name display at top -->
+      <div class="platform-name-banner">
+        <div class="platform-logo-inline">
+          <svg class="logo-mini" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="47" fill="#1D4A3E" stroke="#D4A843" stroke-width="2.5"></circle>
+            <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(212,168,67,0.35)" stroke-width="1"></circle>
+            <polygon points="50,16 81,34 81,66 50,84 19,66 19,34" fill="none" stroke="rgba(212,168,67,0.25)" stroke-width="1"></polygon>
+            <g transform="translate(50,50) rotate(-15)">
+              <rect x="-4" y="-22" width="8" height="30" rx="4" fill="#D4A843"></rect>
+              <polygon points="0,12 -5,24 5,24" fill="#F0C85A"></polygon>
+              <polygon points="0,20 -2,28 2,28" fill="#1D4A3E"></polygon>
+              <rect x="-4" y="-28" width="8" height="8" rx="3" fill="#B8922E"></rect>
+            </g>
+          </svg>
+          <span class="platform-name-text">منصة ميثاق</span>
+        </div>
+        <div class="platform-name-sep"></div>
+        <div class="hero-badge">
+          <i class="fas fa-wand-magic-sparkles"></i>
+          العقود الذكية الأولى عربياً
+        </div>
+      </div>
+
+      <h1>أنشئ عقدك<br><span>بثقة وسهولة</span></h1>
+      <div class="hero-tagline">عقودك بثقة وسهولة — في دقائق</div>
+      <p>ميثاق تمكّنك من إنشاء عقودك القانونية بدقة واحترافية كاملة، مدعومة بالذكاء الاصطناعي وموثّقة قانونياً لحماية حقوقك.</p>
+
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="openModal()">
+          <i class="fas fa-file-circle-plus"></i>
+          إنشاء عقد جديد
+        </button>
+        <button class="btn btn-outline">
+          <i class="fas fa-rotate-left"></i>
+          استرداد عقد
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-card-mockup">
+        <div class="mockup-header">
+          <div class="mockup-icon"><i class="fas fa-file-contract"></i></div>
+          <div>
+            <div class="mockup-title">منصة ميثاق</div>
+            <div class="mockup-subtitle">جاهز للإطلاق قريباً</div>
+          </div>
+        </div>
+        <div class="mockup-lines">
+          <div class="mockup-line gold"></div>
+          <div class="mockup-line w-full"></div>
+          <div class="mockup-line w-80"></div>
+          <div class="mockup-line w-60"></div>
+          <div class="mockup-line w-full"></div>
+          <div class="mockup-line w-45"></div>
+        </div>
+        <div class="mockup-badge">
+          <i class="fas fa-rocket"></i>
+          قريباً — Stay Tuned
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STATS BAR (Dynamic Counters) ===== -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
+      <div>
+        <div class="stat-num" id="stat-contracts">1</div>
+        <div class="stat-label">عقد منشأ</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <div>
+        <div class="stat-num" id="stat-users">0</div>
+        <div class="stat-label">مستخدم نشط</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+      <div>
+        <div class="stat-num" id="stat-templates">0</div>
+        <div class="stat-label">قالب جاهز</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon"><i class="fas fa-shield-halved"></i></div>
+      <div>
+        <div class="stat-num" id="stat-security">100<span style="font-size:16px">%</span></div>
+        <div class="stat-label">أمان وحماية</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONTRACT TYPES ===== -->
+  <section class="section contracts-section">
+    <div class="section-header">
+      <div class="section-label">أنواع العقود</div>
+      <h2 class="section-title">اختر نوع عقدك</h2>
+    </div>
+    <div class="contracts-grid">
+      <div class="contract-card fade-in" onclick="openModalWithType(&#39;إيجار&#39;)">
+        <div class="contract-icon"><i class="fas fa-building"></i></div>
+        <div class="contract-name">عقد إيجار</div>
+        <div class="contract-desc">للعقارات السكنية والتجارية بشروط واضحة</div>
+        <div class="contract-count" id="cnt-rent">0 عقد</div>
+      </div>
+      <div class="contract-card fade-in" onclick="openModalWithType(&#39;بيع وشراء&#39;)">
+        <div class="contract-icon"><i class="fas fa-handshake"></i></div>
+        <div class="contract-name">بيع وشراء</div>
+        <div class="contract-desc">نقل ملكية الأصول والممتلكات بشكل قانوني</div>
+        <div class="contract-count" id="cnt-sale">0 عقد</div>
+      </div>
+      <div class="contract-card fade-in" onclick="openModalWithType(&#39;خدمات&#39;)">
+        <div class="contract-icon"><i class="fas fa-briefcase"></i></div>
+        <div class="contract-name">عقد خدمات</div>
+        <div class="contract-desc">تحديد الخدمات والأتعاب والمواعيد النهائية</div>
+        <div class="contract-count" id="cnt-service">0 عقد</div>
+      </div>
+      <div class="contract-card fade-in" onclick="openModalWithType(&#39;عمل حر&#39;)">
+        <div class="contract-icon"><i class="fas fa-laptop-code"></i></div>
+        <div class="contract-name">عمل حر</div>
+        <div class="contract-desc">حماية حقوق المستقلين وأصحاب المشاريع</div>
+        <div class="contract-count" id="cnt-freelance">0 عقد</div>
+      </div>
+      <div class="contract-card fade-in" onclick="openModalWithType(&#39;تعهد وإقرار&#39;)">
+        <div class="contract-icon"><i class="fas fa-scroll"></i></div>
+        <div class="contract-name">تعهد وإقرار</div>
+        <div class="contract-desc">وثائق الإقرار الرسمية ذات الطابع القانوني</div>
+        <div class="contract-count" id="cnt-pledge">0 عقد</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="section features-section">
+    <svg class="features-ornament" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g fill="none" stroke="#1D4A3E" stroke-width="1.5">
+        <circle cx="100" cy="100" r="90"></circle>
+        <circle cx="100" cy="100" r="70"></circle>
+        <circle cx="100" cy="100" r="50"></circle>
+        <polygon points="100,10 190,55 190,145 100,190 10,145 10,55"></polygon>
+        <polygon points="100,30 170,67 170,133 100,170 30,133 30,67"></polygon>
+      </g>
+    </svg>
+
+    <div class="section-header">
+      <div class="section-label">مميزاتنا</div>
+      <h2 class="section-title">لماذا ميثاق؟</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon green"><i class="fas fa-shield-halved"></i></div>
+        <div class="feature-title">أمن وسرية تامة</div>
+        <div class="feature-desc">بياناتك محمية بتشفير من الدرجة البنكية. لا يمكن لأحد الاطلاع على عقودك سواك.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon gold"><i class="fas fa-bolt"></i></div>
+        <div class="feature-title">سريع وسهل الاستخدام</div>
+        <div class="feature-desc">أنشئ عقدك الاحترافي في أقل من 5 دقائق دون الحاجة لأي خبرة قانونية مسبقة.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green"><i class="fas fa-robot"></i></div>
+        <div class="feature-title">ذكاء اصطناعي ذكي</div>
+        <div class="feature-desc">محرك الذكاء الاصطناعي يُكمل بنود العقد تلقائياً ويقترح صياغات قانونية دقيقة.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon gold"><i class="fas fa-scale-balanced"></i></div>
+        <div class="feature-title">عقود قانونية موثوقة</div>
+        <div class="feature-desc">جميع قوالبنا مراجعة من قِبل مختصين قانونيين معتمدين وفق الأنظمة المعمول بها.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RECENT CONTRACTS ===== -->
+  <section class="section recent-section">
+    <div class="recent-header">
+      <div>
+        <div class="section-label">العقود الأخيرة</div>
+        <h2 class="section-title">آخر العقود المنشأة</h2>
+      </div>
+      <a class="view-all">عرض الكل <i class="fas fa-arrow-left"></i></a>
+    </div>
+
+    <div class="contracts-table" id="contractsTable">
+      <div class="table-header">
+        <div>العقد</div>
+        <div>نوع العقد</div>
+        <div>الحالة</div>
+        <div>التاريخ</div>
+        <div>إجراءات</div>
+      </div>
+      <!-- Rows injected by JS -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <i class="fas fa-file-circle-plus"></i>
+        <p>لا توجد عقود بعد<br>ابدأ بإنشاء أول عقد لك الآن</p>
+        <span>منصة ميثاق جاهزة لخدمتك</span>
+      </div>
+    <div class="table-row">
+        <div>
+          <div class="contract-title">عقد ??? ????? — ???? ???</div>
+          <div class="contract-parties">???? ??? &amp; ???? ???????</div>
+        </div>
+        <div><span class="type-badge type-rent">??? ?????</span></div>
+        <div><span class="status-badge status-active">نشط</span></div>
+        <div class="date-text">١٨ مايو ٢٠٢٦</div>
+        <div class="row-actions">
+          <div class="action-icon" title="عرض"><i class="fas fa-eye"></i></div>
+          <div class="action-icon" title="تعديل"><i class="fas fa-pen"></i></div>
+          <div class="action-icon" title="تحميل PDF" onclick="downloadContractPDF(&#39;mpb9pawcnoba&#39;)"><i class="fas fa-download"></i></div>
+        </div>
+      </div></div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <svg class="footer-ornament" width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g fill="none" stroke="#D4A843" stroke-width="1">
+        <polygon points="120,5 228,65 228,175 120,235 12,175 12,65"></polygon>
+        <polygon points="120,25 205,75 205,165 120,215 35,165 35,75"></polygon>
+        <polygon points="120,48 182,84 182,156 120,192 58,156 58,84"></polygon>
+        <circle cx="120" cy="120" r="42"></circle>
+        <circle cx="120" cy="120" r="65"></circle>
+      </g>
+    </svg>
+
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">
+          <svg class="footer-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="47" fill="#1D4A3E" stroke="#D4A843" stroke-width="2.5"></circle>
+            <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(212,168,67,0.35)" stroke-width="1"></circle>
+            <polygon points="50,16 81,34 81,66 50,84 19,66 19,34" fill="none" stroke="rgba(212,168,67,0.25)" stroke-width="1"></polygon>
+            <g transform="translate(50,50) rotate(-15)">
+              <rect x="-4" y="-22" width="8" height="30" rx="4" fill="#D4A843"></rect>
+              <polygon points="0,12 -5,24 5,24" fill="#F0C85A"></polygon>
+              <polygon points="0,20 -2,28 2,28" fill="#1D4A3E"></polygon>
+              <rect x="-4" y="-28" width="8" height="8" rx="3" fill="#B8922E"></rect>
+            </g>
+          </svg>
+          <span class="footer-logo-name">ميثاق</span>
+        </div>
+        <p class="footer-desc">منصة ميثاق — الحل الأمثل لإنشاء العقود الذكية والقانونية بسهولة وسرعة واحترافية عالية، مدعومة بتقنيات الذكاء الاصطناعي.</p>
+        <div class="social-links">
+          <div class="social-link"><i class="fab fa-twitter"></i></div>
+          <div class="social-link"><i class="fab fa-linkedin-in"></i></div>
+          <div class="social-link"><i class="fab fa-instagram"></i></div>
+          <div class="social-link"><i class="fab fa-youtube"></i></div>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">الخدمات</div>
+        <ul class="footer-links">
+          <li><a>إنشاء عقد جديد</a></li>
+          <li><a>مكتبة القوالب</a></li>
+          <li><a>التوقيع الرقمي</a></li>
+          <li><a>الذكاء الاصطناعي</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">الشركة</div>
+        <ul class="footer-links">
+          <li><a>من نحن</a></li>
+          <li><a>الشركاء</a></li>
+          <li><a>المدونة</a></li>
+          <li><a>وظائف</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">الدعم</div>
+        <ul class="footer-links">
+          <li><a>مركز المساعدة</a></li>
+          <li><a>سياسة الخصوصية</a></li>
+          <li><a>الشروط والأحكام</a></li>
+          <li><a>تواصل معنا</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2025 <span class="gold">ميثاق – MITHAQ</span>. جميع الحقوق محفوظة.</span>
+      <span>صُنع بـ <span class="gold">♥</span> في المملكة العربية السعودية 🇸🇦</span>
+    </div>
+  </footer>
+
+</div><!-- end main-wrapper -->
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <div class="modal-header-content">
+        <div class="label">ميثاق – MITHAQ</div>
+        <h3 id="modalTitle">إنشاء عقد جديد</h3>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="إغلاق">
+        <i class="fas fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-steps">
+        <div class="step active">١ – بيانات العقد</div>
+        <div class="step">٢ – المراجعة</div>
+        <div class="step">٣ – التوليد</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="contractType">
+          <i class="fas fa-list-ul"></i>
+          نوع العقد
+        </label>
+        <select class="form-select" id="contractType">
+          <option value="">— اختر نوع العقد —</option>
+          <option value="إيجار">عقد إيجار</option>
+          <option value="بيع وشراء">عقد بيع وشراء</option>
+          <option value="خدمات">عقد خدمات</option>
+          <option value="عمل حر">عقد عمل حر</option>
+          <option value="تعهد وإقرار">تعهد وإقرار</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="party1">
+            <i class="fas fa-user"></i>
+            اسم الطرف الأول
+          </label>
+          <input type="text" class="form-input" id="party1" placeholder="مثال: أحمد علي السلمي">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="party2">
+            <i class="fas fa-user-tie"></i>
+            اسم الطرف الثاني
+          </label>
+          <input type="text" class="form-input" id="party2" placeholder="مثال: شركة المستقبل">
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:20px">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="amount">
+            <i class="fas fa-coins"></i>
+            المبلغ <span class="optional">(اختياري)</span>
+          </label>
+          <input type="number" class="form-input" id="amount" placeholder="مثال: 15000">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="contractDate">
+            <i class="fas fa-calendar-days"></i>
+            تاريخ العقد
+          </label>
+          <input type="date" class="form-input" id="contractDate">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-secondary" onclick="closeModal()">إلغاء</button>
+      <button class="btn-modal-primary" onclick="generateContract()">
+        <i class="fas fa-wand-magic-sparkles"></i>
+        توليد العقد
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <i class="fas fa-circle-check"></i>
+  <span id="toastMsg">تمت العملية بنجاح!</span>
+</div>
+
+<script>
+  // ===================================================
+  // ===== API BASE =====================================
+  // ===================================================
+  const API_BASE = 'http://localhost:5000/api';
+
+  // ===================================================
+  // ===== DATA STORE ===================================
+  // ===================================================
+  const AppData = {
+    contracts: [],       // { id, type, party1, party2, amount, date, status, generatedText }
+    totalUsers: 0,
+    totalTemplates: 0,
+    security: 100,
+  };
+
+  // ===================================================
+  // ===== COMPUTED =====================================
+  // ===================================================
+  function getContractsByType(type) {
+    return AppData.contracts.filter(c => c.type === type).length;
+  }
+
+  // ===================================================
+  // ===== UI REFRESH ===================================
+  // ===================================================
+  async function refreshUI() {
+    try {
+      const res  = await fetch(`${API_BASE}/contracts`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.contracts)) {
+        AppData.contracts = data.contracts;
+      }
+      // fall back to stats endpoint if needed
+      if (AppData.contracts.length === 0) {
+        const sRes  = await fetch(`${API_BASE}/stats`);
+        const sData = await sRes.json();
+        if (sData.success) {
+          AppData.contracts  = sData.stats?.contracts ?? 0;
+        }
+      }
+    } catch (err) {
+      console.warn('تعذر الاتصال بالخادم:', err.message);
+    }
+
+    animateNumber('stat-contracts', AppData.contracts.length);
+    animateNumber('stat-users',      AppData.totalUsers);
+    animateNumber('stat-templates',  AppData.totalTemplates);
+    document.getElementById('stat-security').innerHTML =
+      AppData.security + '<span style="font-size:16px">%</span>';
+
+    document.getElementById('cnt-rent').textContent      = getContractsByType('إيجار') + ' عقد';
+    document.getElementById('cnt-sale').textContent      = getContractsByType('بيع وشراء') + ' عقد';
+    document.getElementById('cnt-service').textContent   = getContractsByType('خدمات') + ' عقد';
+    document.getElementById('cnt-freelance').textContent = getContractsByType('عمل حر') + ' عقد';
+    document.getElementById('cnt-pledge').textContent    = getContractsByType('تعهد وإقرار') + ' عقد';
+
+    document.getElementById('sidebarContractsCount').textContent = AppData.contracts.length;
+    document.getElementById('sidebarFavCount').textContent       = 0;
+
+    renderContractsTable();
+  }
+
+  // ===================================================
+  // ===== ANIMATED COUNTER =============================
+  // ===================================================
+  function animateNumber(elementId, target) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const duration = 900;
+    const start = performance.now();
+    const from = parseInt(el.textContent) || 0;
+
+    function step(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(from + (target - from) * eased);
+      el.textContent = current;
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ===================================================
+  // ===== CONTRACTS TABLE ==============================
+  // ===================================================
+  function renderContractsTable() {
+    const table = document.getElementById('contractsTable');
+    const empty = document.getElementById('emptyState');
+    const rows  = table.querySelectorAll('.table-row');
+    rows.forEach(r => r.remove());
+
+    const contracts = Array.isArray(AppData.contracts)
+      ? AppData.contracts
+      : [];
+
+    if (contracts.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+
+    const typeMap = {
+      'إيجار':       { cls: 'type-rent',     label: 'إيجار' },
+      'بيع وشراء':   { cls: 'type-sale',     label: 'بيع وشراء' },
+      'خدمات':       { cls: 'type-service',  label: 'خدمات' },
+      'عمل حر':      { cls: 'type-freelance',label: 'عمل حر' },
+      'تعهد وإقرار': { cls: 'type-rent',     label: 'تعهد وإقرار' },
+    };
+
+    const shown = [...contracts].reverse().slice(0, 6);
+
+    shown.forEach(c => {
+      const tm       = typeMap[c.type] || { cls: 'type-rent', label: c.type };
+      const dateStr  = c.date
+        ? new Date(c.date).toLocaleDateString('ar-SA', { year:'numeric', month:'long', day:'numeric' })
+        : '—';
+
+      const row = document.createElement('div');
+      row.className = 'table-row';
+      row.innerHTML = `
+        <div>
+          <div class="contract-title">عقد ${c.type} — ${c.party1}</div>
+          <div class="contract-parties">${c.party1} & ${c.party2}</div>
+        </div>
+        <div><span class="type-badge ${tm.cls}">${tm.label}</span></div>
+        <div><span class="status-badge status-${c.status === 'نشط' ? 'active' : 'pending'}">${c.status === 'نشط' ? 'نشط' : 'قيد المعالجة'}</span></div>
+        <div class="date-text">${dateStr}</div>
+        <div class="row-actions">
+          <div class="action-icon" title="عرض"><i class="fas fa-eye"></i></div>
+          <div class="action-icon" title="تعديل"><i class="fas fa-pen"></i></div>
+          <div class="action-icon" title="تحميل PDF" onclick="downloadContractPDF('${c.id}')"><i class="fas fa-download"></i></div>
+        </div>
+      `;
+      table.appendChild(row);
+    });
+  }
+
+  // ===================================================
+  // ===== DOWNLOAD PDF =================================
+  // ===================================================
+  function downloadContractPDF(contractId) {
+    const contract =
+      AppData.contracts.find(c => c.id === contractId) ||
+      AppData.contracts[AppData.contracts.length - 1];
+
+    if (!contract) { showToast('العقد غير موجود', true); return; }
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // ── Header ───────────────────────────────────────
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(29, 74, 62);
+      doc.text('ميثاق – MITHAQ', 105, 22, { align: 'center', lang: 'ar' });
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(120, 120, 120);
+      doc.text(fromArabicNumerals('عقد ') + contract.type, 105, 32, { align: 'center' });
+
+      doc.setDrawColor(212, 168, 67);
+      doc.setLineWidth(0.8);
+      doc.line(20, 38, 190, 38);
+
+      // ── Contract body ─────────────────────────────────
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(30, 30, 30);
+
+      const text = contract.generatedText || '';
+      const splitLines = doc.splitTextToSize(text, 170);
+
+      doc.text(splitLines, 20, 48);
+      doc.setFontSize(9);
+      doc.setTextColor(140, 140, 140);
+      doc.text('— نهاية العقد —', 105, doc.lastAutoPage ? doc.internal.pageSize.height - 15 : 270, { align: 'center' });
+
+      // ── Footer ────────────────────────────────────────
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(180, 180, 180);
+        doc.text('© 2025 منصة ميثاق | ' + contract.type, 105, 287, { align: 'center' });
+      }
+
+      const filename = fromArabicNumerals(`عقد_${contract.type}_${contract.party1}`) + '.pdf';
+      doc.save(filename);
+      showToast('تم تحميل العقد بنجاح');
+    } catch (err) {
+      console.error('PDF error:', err);
+      showToast('حدث خطأ أثناء تحميل PDF', true);
+    }
+  }
+
+  // Helper: replace Arabic-Indic digits with ASCII
+  function fromArabicNumerals(str) {
+    return str.replace(/[٠-٩]/g, d => String.fromCharCode(d.charCodeAt(0) - 0x0660 + 48));
+  }
+
+  // ===================================================
+  // ===== SIDEBAR TOGGLE ===============================
+  // ===================================================
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+
+  // ===================================================
+  // ===== NAV ACTIVE ===================================
+  // ===================================================
+  function setActive(el) {
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ===================================================
+  // ===== MODAL ========================================
+  // ===================================================
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('contractDate').value = today;
+  }
+
+  function openModalWithType(type) {
+    openModal();
+    setTimeout(() => {
+      const sel = document.getElementById('contractType');
+      for (let opt of sel.options) {
+        if (opt.value === type) { opt.selected = true; break; }
+      }
+    }, 50);
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  // ===================================================
+  // ===== GENERATE CONTRACT ============================
+  // ===================================================
+  async function generateContract() {
+    const type   = document.getElementById('contractType').value;
+    const p1     = document.getElementById('party1').value.trim();
+    const p2     = document.getElementById('party2').value.trim();
+    const amount = document.getElementById('amount').value.trim();
+    const date   = document.getElementById('contractDate').value;
+
+    if (!type) { showToast('الرجاء اختيار نوع العقد', true); return; }
+    if (!p1)   { showToast('الرجاء إدخال اسم الطرف الأول', true); return; }
+    if (!p2)   { showToast('الرجاء إدخال اسم الطرف الثاني', true); return; }
+
+    showToast('جاري توليد العقدensus الذكاء الاصطناعي...');
+
+    try {
+      const res  = await fetch(`${API_BASE}/generate-contract`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, party1: p1, party2: p2, amount, date }),
+      });
+      const data = await res.json();
+
+      if (data.success && data.contract) {
+        AppData.contracts.push(data.contract);   // local optimistic update
+        closeModal();
+        await refreshUI();
+        alert(
+          '✅ تم توليد العقد بنجاح!\n\n' +
+          '📋 نوع العقد: ' + type + '\n' +
+          '👤 الطرف الأول: ' + p1 + '\n' +
+          '👤 الطرف الثاني: ' + p2 + '\n\n' +
+          (data.contract.generatedText || 'تم حفظ العقد في قاعدة البيانات')
+        );
+
+        // Reset form
+        document.getElementById('contractType').value = '';
+        document.getElementById('party1').value = '';
+        document.getElementById('party2').value = '';
+        document.getElementById('amount').value = '';
+        showToast('تم إنشاء العقد بنجاح وإضافته للقائمة!');
+      } else {
+        showToast(data.message || 'حدث خطأ في الخادم', true);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('تعذر الاتصال بالخادم. تأكد من تشغيل npm run dev.', true);
+    }
+  }
+
+  // ===================================================
+  // ===== TOAST ========================================
+  // ===================================================
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.style.background = isError ? '#7a1a1a' : 'var(--green)';
+    toast.querySelector('i').className = isError
+      ? 'fas fa-triangle-exclamation'
+      : 'fas fa-circle-check';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3500);
+  }
+
+  // ===================================================
+  // ===== KEYBOARD =====================================
+  // ===================================================
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // ===================================================
+  // ===== INIT =========================================
+  // ===================================================
+  document.addEventListener('DOMContentLoaded', async () => {
+    await refreshUI();
+  });
+</script>
+<!-- Code injected by live-server -->
+<script type="text/javascript">
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function() {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					head.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					head.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function(msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			console.log('Live reload enabled.');
+		})();
+	}
+	// ]]>
+</script>
+
+
+</body></html>

@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <title>ميثاق — مكونات الواجهة UI Kit | Mithaq Components</title>
+
+  <!-- الخطوط -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind Play CDN (بيئة تطوير/عرض فقط) — defer حتى لا يحجب تحميل الصفحة -->
+  <script src="https://cdn.tailwindcss.com" defer></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+
+  <!-- ===== خلفية الصفحة + حركات مخصصة ===== -->
+  <style>
+    body {
+      font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+      background-color: #060D0B;
+      background-image:
+        radial-gradient(1100px 520px at 88% -8%, rgba(212, 168, 67, 0.13), transparent 62%),
+        radial-gradient(1000px 600px at -12% 108%, rgba(29, 74, 62, 0.42), transparent 64%),
+        radial-gradient(700px 380px at 50% 118%, rgba(212, 168, 67, 0.05), transparent 70%);
+      background-attachment: fixed;
+      color: #F2EFE6;
+    }
+    button, input, select, textarea { font-family: inherit; }
+    .page-grain { opacity: .5; }
+    /* شريط التقدم في الـ Toast */
+    .mq-toast { animation: mqToastIn .34s cubic-bezier(.2,.8,.2,1) both; }
+    .mq-toast-leave { transition: opacity .26s ease, transform .26s ease; opacity: 0 !important; transform: translateY(-10px) scale(.97) !important; }
+    @keyframes mqToastIn { from { opacity: 0; transform: translateY(-14px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .mq-pop-in { animation: mqPopIn .18s ease-out both; transform-origin: top; }
+    @keyframes mqPopIn { from { opacity: 0; transform: translateY(-6px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
+    ::-webkit-scrollbar { width: 9px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,.03); }
+    ::-webkit-scrollbar-thumb { background: rgba(212,168,67,.35); border-radius: 99px; }
+    ::selection { background: rgba(212,168,67,.35); color: #fff; }
+  </style>
+
+  <!-- ===== مكونات Tailwind قابلة لإعادة الاستخدام ===== -->
+  <style type="text/tailwindcss">
+    @layer components {
+      .glass {
+        @apply rounded-3xl border border-white/10 bg-[#0E1C17]/75 backdrop-blur-2xl;
+        box-shadow: 0 30px 80px -28px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.06);
+      }
+      .mq-field { @apply flex flex-col gap-1.5; }
+      .mq-label { @apply flex items-center gap-1.5 text-[13px] font-bold text-[#9FB3AA]; }
+      .mq-label .need { @apply text-[#D4A843]; }
+      .mq-input {
+        @apply w-full rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-[15px] font-semibold text-[#F2EFE6]
+          placeholder:text-white/25 outline-none transition duration-200
+          focus:border-[#D4A843]/70 focus:bg-white/[0.08] focus:ring-4 focus:ring-[#D4A843]/15
+          hover:border-white/20;
+      }
+      .mq-trigger {
+        @apply flex w-full cursor-pointer select-none items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3
+          text-start text-[15px] font-semibold text-[#F2EFE6] outline-none transition duration-200
+          hover:border-white/25 hover:bg-white/[0.08]
+          focus:border-[#D4A843]/70 focus:ring-4 focus:ring-[#D4A843]/15;
+      }
+      .mq-pop-panel {
+        @apply absolute start-0 top-[calc(100%+8px)] z-50 w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0B1813]/95 backdrop-blur-2xl shadow-[0_24px_70px_-16px_rgba(0,0,0,.9)];
+      }
+      .mq-error { @apply hidden items-center gap-1.5 text-[12px] font-semibold text-rose-300; }
+      .mq-error.show { @apply flex; }
+      .mq-field.invalid .mq-input,
+      .mq-field.invalid .mq-trigger {
+        @apply border-rose-400/60 bg-rose-500/[0.06] focus:border-rose-400/80 focus:ring-rose-400/20;
+      }
+      .mq-btn {
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-2.5
+          text-[13px] font-bold text-[#F2EFE6] transition duration-200 hover:bg-white/[0.12] hover:border-white/20
+          focus:outline-none focus:ring-4 focus:ring-[#D4A843]/15;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen antialiased">
+  <!-- ================= HEADER ================= -->
+  <header class="relative z-10 mx-auto w-full max-w-5xl px-4 pt-10 sm:px-6">
+    <div class="glass p-6 sm:p-9">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <img src="assets/mithaq-logo.svg" alt="ميثاق" class="h-14 w-14 drop-shadow-[0_10px_24px_rgba(212,168,67,.25)]" />
+          <div>
+            <h1 class="text-2xl font-black tracking-tight sm:text-3xl">
+              ميثاق <span class="text-[#D4A843]">| مكونات الواجهة</span>
+            </h1>
+            <p class="mt-1 text-sm font-semibold text-[#9FB3AA]">UI Kit — مكونات إدخال وإشعارات عصرية RTL + Glassmorphism</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="rounded-full border border-[#D4A843]/30 bg-[#D4A843]/10 px-3.5 py-1.5 text-[11.5px] font-extrabold text-[#D4A843]">Dark / Glass UI v1</span>
+          <a href="/" class="mq-btn">المنصة الرئيسية</a>
+        </div>
+      </div>
+      <p class="mt-5 max-w-3xl text-[14.5px] leading-7 font-semibold text-[#F2EFE6]/80">
+        مجموعة مكونات جاهزة للتطبيق في نماذج العقود: نظام إشعارات Toast زجاجي مع شريط تقدّم ذاتي، حقل مدينة قابل للبحث،
+        منتقي تاريخ داكن بلا `<code class="rounded bg-white/10 px-1 text-[#D4A843]" dir="ltr">&lt;input type="date"&gt;</code>`،
+        حقل مدة مع وحدة، مبلغ مع عملة، وطريقة دفع صارمة — كلها بدون أي عناصر بيضاء كلاسيكية.
+      </p>
+    </div>
+  </header>
+
+  <!-- ================= صندوق تجربة الـ Toast ================= -->
+  <section class="relative z-10 mx-auto mt-6 w-full max-w-5xl px-4 sm:px-6">
+    <div class="glass p-6 sm:p-7">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-black">1 — نظام الإشعارات <span class="text-[#D4A843]">Toast</span></h2>
+          <p class="mt-1 text-[13px] leading-6 font-semibold text-[#9FB3AA]">
+            يظهر أعلى الزاوية (يسار في RTL) بزجاجية داكنة، شريط توقّت سفلي يتوقف عند التمرير، وزر إغلاق.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2.5">
+          <button class="mq-btn !text-emerald-200 hover:!bg-emerald-400/10" data-demo-toast="success">نجاح ✓</button>
+          <button class="mq-btn !text-sky-200 hover:!bg-sky-400/10" data-demo-toast="info">معلومة ℹ</button>
+          <button class="mq-btn !text-amber-200 hover:!bg-amber-400/10" data-demo-toast="warning">تحذير ⚠</button>
+          <button class="mq-btn !text-rose-200 hover:!bg-rose-400/10" data-demo-toast="error">خطأ ✕</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= النموذج التجريبي ================= -->
+  <main class="relative z-10 mx-auto mt-6 w-full max-w-5xl px-4 pb-28 sm:px-6">
+    <form id="demoForm" class="glass p-6 sm:p-8" novalidate>
+      <div class="mb-7 flex flex-wrap items-end justify-between gap-3 border-b border-white/10 pb-5">
+        <div>
+          <h2 class="text-lg font-black">نموذج إنشاء عقد — المعاينة الحية</h2>
+          <p class="mt-1 text-[13px] font-semibold text-[#9FB3AA]">جرّب كل مكوّن، ثم اضغط «حفظ» لمشاهدة التحقق والإشعارات.</p>
+        </div>
+        <span class="rounded-full border border-[#1D4A3E] bg-[#1D4A3E]/25 px-3.5 py-1.5 text-[11.5px] font-extrabold text-emerald-100">الحقول المطلوبة تُميَّز بعلامة <span class="text-[#D4A843]">*</span></span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <!-- المدينة (Combobox) -->
+        <div class="md:col-span-1">
+          <div class="mq-field" id="field-city" data-field="city">
+            <label class="mq-label" for="cityTrigger"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-[#D4A843]"></i> المدينة <span class="need">*</span></label>
+            <div class="relative">
+              <div class="flex items-center gap-2.5">
+                <span class="ps-3 text-[#D4A843]"><i data-lucide="building-2" class="h-[18px] w-[18px]"></i></span>
+                <button type="button" id="cityTrigger" class="mq-trigger !rounded-s-none !border-s-0 !py-3.5" aria-haspopup="listbox" aria-expanded="false">
+                  <span id="cityValue" class="flex-1 truncate text-white/30">اختر المدينة من القائمة</span>
+                  <i data-lucide="chevrons-up-down" class="h-4 w-4 shrink-0 text-white/30"></i>
+                </button>
+                <button type="button" id="cityClear" class="mq-btn !px-2.5 !py-3.5" title="مسح" style="display:none">
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <!-- لوحة القائمة -->
+              <div id="cityPanel" class="mq-pop-panel mq-pop-in hidden" role="listbox" aria-label="المدن">
+                <div class="flex items-center gap-2.5 border-b border-white/10 px-3.5 py-2.5">
+                  <i data-lucide="search" class="h-4 w-4 shrink-0 text-[#9FB3AA]"></i>
+                  <input id="citySearch" type="text" autocomplete="off" spellcheck="false"
+                    placeholder="ابحث عن مدينة..." dir="auto"
+                    class="w-full bg-transparent text-[14px] font-semibold text-[#F2EFE6] outline-none placeholder:text-white/25" />
+                </div>
+                <ul id="cityList" class="no-scrollbar max-h-64 overflow-y-auto p-1.5"></ul>
+              </div>
+            </div>
+            <p class="mq-error" data-error><i data-lucide="circle-alert" class="h-3.5 w-3.5"></i><span>الرجاء اختيار المدينة من القائمة.</span></p>
+            <input type="hidden" name="city" value="" />
+          </div>
+        </div>
+
+        <!-- التاريخ (Date Picker) -->
+        <div class="md:col-span-1">
+          <div class="mq-field" id="field-date" data-field="date">
+            <label class="mq-label" for="dateTrigger"><i data-lucide="calendar-days" class="h-3.5 w-3.5 text-[#D4A843]"></i> تاريخ العقد <span class="need">*</span></label>
+            <div class="relative">
+              <button type="button" id="dateTrigger" class="mq-trigger" aria-haspopup="dialog" aria-expanded="false">
+                <i data-lucide="calendar-days" class="h-[18px] w-[18px] shrink-0 text-[#D4A843]"></i>
+                <span id="dateValue" class="flex flex-1 flex-col leading-tight">
+                  <span id="dateMain" class="text-white/30">اختر التاريخ</span>
+                  <span id="dateSub" class="text-[11px] font-semibold text-white/20"></span>
+                </span>
+                <i data-lucide="chevrons-up-down" class="h-4 w-4 shrink-0 text-white/30"></i>
+              </button>
+
+              <!-- التقويم المنبثق -->
+              <div id="datePanel" class="mq-pop-panel mq-pop-in hidden w-[300px]" role="dialog" aria-label="منتقي التاريخ">
+                <div class="flex items-center justify-between gap-1 border-b border-white/10 px-3 py-2.5">
+                  <button type="button" class="mq-btn !rounded-xl !px-2.5 !py-2" data-date-step="-12" title="السنة السابقة"><i data-lucide="chevrons-right" class="h-4 w-4"></i></button>
+                  <button type="button" class="mq-btn !rounded-xl !px-2.5 !py-2" data-date-step="-1" title="الشهر السابق"><i data-lucide="chevron-right" class="h-4 w-4"></i></button>
+                  <div id="dateCaption" class="text-[14px] font-extrabold text-[#F2EFE6]"></div>
+                  <button type="button" class="mq-btn !rounded-xl !px-2.5 !py-2" data-date-step="1" title="الشهر التالي"><i data-lucide="chevron-left" class="h-4 w-4"></i></button>
+                  <button type="button" class="mq-btn !rounded-xl !px-2.5 !py-2" data-date-step="12" title="السنة التالية"><i data-lucide="chevrons-left" class="h-4 w-4"></i></button>
+                </div>
+                <div id="dateWeek" class="grid grid-cols-7 gap-0.5 border-b border-white/10 px-2 py-1.5 text-center text-[11px] font-bold text-[#9FB3AA]"></div>
+                <div id="dateGrid" class="grid grid-cols-7 gap-0.5 p-2"></div>
+                <div class="flex items-center justify-between gap-2 border-t border-white/10 px-3 py-2.5">
+                  <button type="button" id="dateToday" class="mq-btn !py-2 text-[12px]"><i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i> اليوم</button>
+                  <button type="button" id="dateClear" class="mq-btn !py-2 text-[12px]"><i data-lucide="x" class="h-3.5 w-3.5"></i> مسح</button>
+                </div>
+              </div>
+            </div>
+            <p class="mq-error" data-error><i data-lucide="circle-alert" class="h-3.5 w-3.5"></i><span>الرجاء اختيار تاريخ العقد.</span></p>
+            <input type="hidden" name="date" value="" />
+          </div>
+        </div>
+
+        <!-- مدة العقد -->
+        <div class="md:col-span-1">
+          <div class="mq-field" id="field-duration" data-field="duration">
+            <label class="mq-label" for="durationInput"><i data-lucide="timer" class="h-3.5 w-3.5 text-[#D4A843]"></i> مدة العقد <span class="text-[#9FB3AA]/70">(اختياري)</span></label>
+            <div class="flex items-stretch">
+              <input id="durationInput" type="text" inputmode="numeric" dir="ltr" autocomplete="off" maxlength="4"
+                placeholder="6" class="mq-input !rounded-s-none !rounded-e-2xl !border-s-0 !text-end !pe-3" />
+              <button type="button" id="durationUnit" class="relative shrink-0 cursor-pointer rounded-s-2xl border border-white/10 border-e-0 bg-white/[0.06] px-4 text-[14px] font-extrabold text-[#F2EFE6] outline-none transition hover:bg-white/[0.12] focus:ring-4 focus:ring-[#D4A843]/15" aria-haspopup="listbox" aria-expanded="false">
+                <span id="durationUnitText">شهر</span>
+                <i data-lucide="chevron-down" class="me-1 inline h-3.5 w-3.5 text-[#D4A843]"></i>
+              </button>
+              <div id="durationPanel" class="mq-pop-panel mq-pop-in hidden w-[140px] !top-[calc(100%+6px)]" role="listbox">
+                <button type="button" class="flex w-full items-center justify-between px-4 py-2.5 text-[14px] font-bold text-[#F2EFE6] transition hover:bg-[#D4A843]/15" data-unit="day">يوم</button>
+                <button type="button" class="flex w-full items-center justify-between px-4 py-2.5 text-[14px] font-bold text-[#F2EFE6] transition hover:bg-[#D4A843]/15" data-unit="month">شهر</button>
+                <button type="button" class="flex w-full items-center justify-between px-4 py-2.5 text-[14px] font-bold text-[#F2EFE6] transition hover:bg-[#D4A843]/15" data-unit="year">سنة</button>
+              </div>
+            </div>
+            <p class="mq-error" data-error><i data-lucide="circle-alert" class="h-3.5 w-3.5"></i><span>أدخل رقماً صحيحاً (1 – 9999).</span></p>
+            <input type="hidden" name="duration" value="" />
+          </div>
+        </div>
+
+        <!-- المبلغ + العملة -->
+        <div class="md:col-span-1">
+          <div class="mq-field" id="field-money" data-field="money">
+            <label class="mq-label" for="amountInput"><i data-lucide="coins" class="h-3.5 w-3.5 text-[#D4A843]"></i> المبلغ <span class="text-[#9FB3AA]/70">(اختياري)</span></label>
+            <div class="flex items-stretch">
+              <input id="amountInput" type="text" inputmode="decimal" dir="ltr" autocomplete="off"
+                placeholder="0.00" class="mq-input !rounded-s-none !rounded-e-2xl !border-s-0 !text-end !pe-3" />
+              <button type="button" id="currencyTrigger" class="relative shrink-0 cursor-pointer rounded-s-2xl border border-white/10 border-e-0 bg-white/[0.06] px-3 outline-none transition hover:bg-white/[0.12] focus:ring-4 focus:ring-[#D4A843]/15" aria-haspopup="listbox" aria-expanded="false">
+                <span id="currencyChip" class="flex items-center gap-2 text-[14px] font-extrabold text-[#F2EFE6]">
+                  <span class="grid h-7 w-7 place-items-center rounded-lg border border-[#D4A843]/30 bg-[#D4A843]/15 text-[12px] text-[#D4A843]">$</span>
+                  <span class="flex flex-col items-start leading-none">
+                    <span id="currencyCode">USD</span>
+                    <i data-lucide="chevron-down" class="mt-1 h-3 w-3 text-[#9FB3AA]"></i>
+                  </span>
+                </span>
+              </button>
+              <div id="currencyPanel" class="mq-pop-panel mq-pop-in hidden w-[248px] !top-[calc(100%+6px)]" role="listbox">
+                <ul id="currencyList" class="no-scrollbar max-h-64 overflow-y-auto p-1.5"></ul>
+              </div>
+            </div>
+            <p class="mq-error" data-error><i data-lucide="circle-alert" class="h-3.5 w-3.5"></i><span>أدخل مبلغاً صحيحاً بمنزلتين عشريتين كحد أقصى.</span></p>
+            <input type="hidden" name="amount" value="" />
+            <input type="hidden" name="currency" value="USD" />
+          </div>
+        </div>
+
+        <!-- طريقة الدفع -->
+        <div class="md:col-span-2">
+          <div class="mq-field" id="field-payment" data-field="payment">
+            <label class="mq-label" for="paymentTrigger"><i data-lucide="credit-card" class="h-3.5 w-3.5 text-[#D4A843]"></i> طريقة الدفع <span class="text-[#9FB3AA]/70">(اختياري)</span></label>
+            <div class="relative max-w-xl">
+              <button type="button" id="paymentTrigger" class="mq-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span id="paymentChip" class="flex items-center gap-2.5">
+                  <span class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-[#D4A843]"><i data-lucide="banknote" class="h-[18px] w-[18px]"></i></span>
+                  <span id="paymentValue" class="text-white/30">اختر طريقة الدفع</span>
+                </span>
+                <i data-lucide="chevrons-up-down" class="ms-auto h-4 w-4 shrink-0 text-white/30"></i>
+              </button>
+              <div id="paymentPanel" class="mq-pop-panel mq-pop-in hidden w-full" role="listbox">
+                <ul id="paymentList" class="p-1.5"></ul>
+              </div>
+            </div>
+            <p class="mq-error" data-error><i data-lucide="circle-alert" class="h-3.5 w-3.5"></i><span>الرجاء اختيار طريقة دفع.</span></p>
+            <input type="hidden" name="paymentMethod" value="" />
+          </div>
+        </div>
+      </div>
+
+      <!-- أزرار النموذج -->
+      <div class="mt-8 flex flex-wrap items-center gap-3 border-t border-white/10 pt-6">
+        <button type="submit" class="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-gradient-to-l from-[#D4A843] to-[#F6D979] px-7 py-3.5 text-[15px] font-black text-[#0B1A12] shadow-[0_14px_34px_-10px_rgba(212,168,67,.55)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#D4A843]/30">
+          <i data-lucide="shield-check" class="h-5 w-5"></i> حفظ وتوليد العقد
+        </button>
+        <button type="button" id="demoReset" class="mq-btn !px-5 !py-3.5 text-[13.5px]"><i data-lucide="eraser" class="h-4 w-4"></i> مسح الحقول</button>
+      </div>
+    </form>
+
+    <!-- ================= معاينة النتيجة ================= -->
+    <section class="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div class="glass p-6 sm:p-7">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-lg font-black">معاينة القيم <span class="text-[#D4A843]">(JSON)</span></h2>
+          <button type="button" id="copyResult" class="mq-btn !py-2 text-[12px]"><i data-lucide="copy" class="h-3.5 w-3.5"></i> نسخ</button>
+        </div>
+        <pre id="jsonPreview" dir="ltr" class="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-left font-mono text-[12.5px] leading-6 text-emerald-200/90"></pre>
+      </div>
+
+      <div class="glass p-6 sm:p-7">
+        <h2 class="text-lg font-black">طريقة الاستخدام</h2>
+        <p class="mt-2 text-[13px] leading-6 font-semibold text-[#9FB3AA]">
+          كل مكوّن مستقل وقابل لإعادة الاستخدام. القيم تُقرأ من الحقول المخفية
+          <code class="mx-0.5 rounded bg-white/10 px-1.5 py-0.5 text-[11.5px] text-[#D4A843]" dir="ltr">&lt;input name="city"&gt;</code>
+          أسفل كل حقل، أو عبر دوال البرمجة في أسفل هذا الملف.
+        </p>
+        <pre dir="ltr" class="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-left font-mono text-[12px] leading-6 text-[#F2EFE6]/90">/* قراءة القيم من الحقول المخفية */
+const data = {
+  city:          form.elements.city.value,          // "دمشق"
+  date:          form.elements.date.value,          // "2026-09-03"
+  duration:      form.elements.duration.value,      // "6 أشهر"
+  amount:        form.elements.amount.value,        // "1500"
+  currency:      form.elements.currency.value,      // "USD"
+  paymentMethod: form.elements.paymentMethod.value, // "تحويل بنكي"
+};</pre>
+        <details class="group mt-4">
+          <summary class="cursor-pointer text-[13px] font-extrabold text-[#D4A843] transition hover:text-[#F6D979]">عرض أمثلة استدعاء المكونات (API)</summary>
+          <pre dir="ltr" class="mt-3 overflow-x-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-left font-mono text-[11.5px] leading-6 text-[#F2EFE6]/85">// Toast
+MQ.toast({ type: 'success', title: 'تم إنشاء العقد بنجاح', message: '…', duration: 5200 });
+
+// Combobox المدينة — يمنع الإدخال العشوائي
+MQ.combobox({ root: '#cityWrap', items: cities, onChange: v => console.log(v) });
+
+// منتقي التاريخ — يمنع إدخال التاريخ يدوياً
+MQ.datePicker({ root: '#dateWrap', onChange: iso => console.log(iso) });
+
+// مدة العقد + المبلغ هما InputGroup خالصان بدون مكتبات خارجية
+// (استمع إلى event 'input' ثم اقرأ القيمة من hidden input)</pre>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== حاوية الـ Toast (أعلى الزاوية — منطقية مع RTL) ===== -->
+  <!-- الزاوية: end-4 = يسار في RTL / يمين في LTR (منطقية ومتغيرة تلقائياً) -->
+  <div id="toastStack" class="pointer-events-none fixed end-4 top-4 z-[9999] flex w-[min(24rem,calc(100vw-2rem))] flex-col items-stretch gap-2.5"></div>
+
+  <script>
+    'use strict';
+    /* =========================================================
+       ميثاق UI KIT — مكونات معيارية قابلة لإعادة الاستخدام
+       Tailwind CSS + Lucide Icons + Cairo — RTL
+    ========================================================= */
+    (function () {
+      const $ = (s, r) => (r || document).querySelector(s);
+      const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+      const esc = (t) => String(t).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      const normAr = (s) => String(s || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').trim();
+      const arDigits = (s) => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+      const pad = (n) => String(n).padStart(2, '0');
+      const isoOf = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      const todayISO = () => isoOf(new Date());
+
+      const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+      const WEEK_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+      const WEEK_SHORT = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+
+      const TOAST_META = {
+        success: { title: 'تمت العملية بنجاح', bar: '#34D399', icon: 'circle-check', text: 'text-emerald-200', ring: 'ring-emerald-400/30', chip: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/25' },
+        error:   { title: 'حدث خطأ',           bar: '#FB7185', icon: 'circle-x',      text: 'text-rose-200',     ring: 'ring-rose-400/30',     chip: 'bg-rose-400/10 text-rose-300 border-rose-400/25' },
+        warning: { title: 'تنبيه',             bar: '#FBBF24', icon: 'triangle-alert', text: 'text-amber-200',   ring: 'ring-amber-400/30',    chip: 'bg-amber-400/10 text-amber-300 border-amber-400/25' },
+        info:    { title: 'ملاحظة',            bar: '#7DD3FC', icon: 'info',          text: 'text-sky-200',     ring: 'ring-sky-400/30',      chip: 'bg-sky-400/10 text-sky-300 border-sky-400/25' }
+      };
+
+      /* ---------------- Toast System ---------------- */
+      function ensureToastStack() {
+        let stack = $('#toastStack');
+        if (!stack) {
+          stack = document.createElement('div');
+          stack.id = 'toastStack';
+          stack.className = 'pointer-events-none fixed end-4 top-4 z-[9999] flex w-[min(24rem,calc(100vw-2rem))] flex-col items-stretch gap-2.5';
+          document.body.appendChild(stack);
+        }
+        return stack;
+      }
+      function toast(opts) {
+        const meta = TOAST_META[opts.type] || TOAST_META.success;
+        const dur = opts.duration == null ? 5200 : opts.duration;
+        const stack = ensureToastStack();
+        const el = document.createElement('div');
+        el.className = 'mq-toast pointer-events-auto relative overflow-hidden rounded-2xl border border-white/10 bg-[#0B1813]/85 backdrop-blur-2xl shadow-[0_24px_60px_-14px_rgba(0,0,0,.85)]';
+        el.style.setProperty('--mqbar', meta.bar);
+        el.innerHTML =
+          '<div class="flex items-start gap-3 px-4 py-3.5">' +
+            '<span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border ' + meta.chip + ' ring-4 ' + meta.ring + '"><i data-lucide="' + meta.icon + '" class="h-5 w-5"></i></span>' +
+            '<div class="min-w-0 flex-1">' +
+              '<div class="text-[13.5px] font-extrabold ' + meta.text + '">' + esc(opts.title || meta.title) + '</div>' +
+              (opts.message ? '<div class="mt-0.5 text-[12px] leading-5 font-semibold text-[#F2EFE6]/70">' + esc(opts.message) + '</div>' : '') +
+            '</div>' +
+            '<button type="button" class="rounded-lg p-1 text-white/35 transition hover:bg-white/10 hover:text-white" aria-label="إغلاق"><i data-lucide="x" class="h-4 w-4"></i></button>' +
+          '</div>' +
+          '<div class="h-[3px] w-full bg-white/[0.06]"><div class="mq-tbar h-full rounded-full" style="width:100%;background:var(--mqbar)"></div></div>';
+        stack.prepend(el);
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } }, el);
+
+        // شريط التقدم — يتوقف عند التمرير
+        const bar = el.querySelector('.mq-tbar');
+        let remaining = dur, started = performance.now(), raf = 0, paused = false;
+        const tick = (now) => {
+          if (paused) return;
+          remaining -= (now - started); started = now;
+          if (remaining <= 0) { remove(); return; }
+          bar.style.width = Math.max(0, (remaining / dur) * 100) + '%';
+          raf = requestAnimationFrame(tick);
+        };
+        const remove = () => {
+          cancelAnimationFrame(raf);
+          el.classList.add('mq-toast-leave');
+          setTimeout(() => el.remove(), 300);
+        };
+        el.addEventListener('mouseenter', () => { paused = true; cancelAnimationFrame(raf); });
+        el.addEventListener('mouseleave', () => { paused = false; started = performance.now(); raf = requestAnimationFrame(tick); });
+        el.querySelector('button').addEventListener('click', remove);
+        raf = requestAnimationFrame(tick);
+        return el;
+      }
+
+      /* ---------------- إدارة القوائم المنبثقة ---------------- */
+      const popups = [];
+      const controls = {}; // مراجع المكونات لإعادة التهيئة/المسح
+      function registerPopup(rootEl, panel, trigger, onOpen, onClose) {
+        const state = { open: false, rootEl: rootEl };
+        const open = () => {
+          if (state.open) return;
+          state.open = true;
+          popups.forEach(p => p !== state && p.closePopup());
+          panel.classList.remove('hidden');
+          trigger.setAttribute('aria-expanded', 'true');
+          if (onOpen) onOpen();
+        };
+        const close = () => {
+          if (!state.open) return;
+          state.open = false;
+          panel.classList.add('hidden');
+          trigger.setAttribute('aria-expanded', 'false');
+          if (onClose) onClose();
+        };
+        state.closePopup = close;
+        popups.push(state);
+        return { open, close, isOpen: () => state.open };
+      }
+      document.addEventListener('click', (e) => {
+        popups.forEach(p => {
+          if (!p.rootEl.contains(e.target)) p.closePopup();
+        });
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') popups.forEach(p => p.closePopup());
+      });
+
+      /* ---------------- أدوات الحقول ---------------- */
+      function setError(fieldRoot, show, msg) {
+        fieldRoot.classList.toggle('invalid', show);
+        const err = $('[data-error]', fieldRoot);
+        if (!err) return;
+        err.classList.toggle('show', show);
+        if (show && msg) $('span', err).textContent = msg;
+      }
+      function markValid(fieldRoot) { setError(fieldRoot, false); }
+
+      /* ---------------- Combobox (المدينة) ---------------- */
+      const CITIES = [
+        { v: 'دمشق', c: 'سوريا' }, { v: 'حلب', c: 'سوريا' }, { v: 'حمص', c: 'سوريا' }, { v: 'حماة', c: 'سوريا' },
+        { v: 'اللاذقية', c: 'سوريا' }, { v: 'طرطوس', c: 'سوريا' }, { v: 'إدلب', c: 'سوريا' }, { v: 'الرقة', c: 'سوريا' },
+        { v: 'دير الزور', c: 'سوريا' }, { v: 'الحسكة', c: 'سوريا' }, { v: 'درعا', c: 'سوريا' }, { v: 'السويداء', c: 'سوريا' },
+        { v: 'الرياض', c: 'السعودية' }, { v: 'جدة', c: 'السعودية' }, { v: 'مكة المكرمة', c: 'السعودية' },
+        { v: 'المدينة المنورة', c: 'السعودية' }, { v: 'الدمام', c: 'السعودية' }, { v: 'الخبر', c: 'السعودية' },
+        { v: 'دبي', c: 'الإمارات' }, { v: 'أبوظبي', c: 'الإمارات' }, { v: 'الشارقة', c: 'الإمارات' },
+        { v: 'عمّان', c: 'الأردن' }, { v: 'بيروت', c: 'لبنان' }, { v: 'القاهرة', c: 'مصر' }, { v: 'الإسكندرية', c: 'مصر' },
+        { v: 'بغداد', c: 'العراق' }, { v: 'البصرة', c: 'العراق' }, { v: 'أربيل', c: 'العراق' },
+        { v: 'مدينة الكويت', c: 'الكويت' }, { v: 'الدوحة', c: 'قطر' }, { v: 'المنامة', c: 'البحرين' },
+        { v: 'مسقط', c: 'عُمان' }, { v: 'صنعاء', c: 'اليمن' }, { v: 'إسطنبول', c: 'تركيا' }, { v: 'أنقرة', c: 'تركيا' }
+      ];
+
+      function initCombobox() {
+        const field = $('#field-city');
+        const trigger = $('#cityTrigger'), valueEl = $('#cityValue'), clearBtn = $('#cityClear');
+        const search = $('#citySearch'), list = $('#cityList'), panel = $('#cityPanel');
+        const hidden = $('input[name=city]', field);
+        let selected = null, results = [], activeIdx = -1;
+
+        let lastQuery = '';
+        const render = () => {
+          const q = normAr(search.value);
+          const qChanged = q !== lastQuery;
+          lastQuery = q;
+          results = CITIES.filter(c => !q || normAr(c.v + ' ' + c.c).includes(q));
+          if (qChanged) activeIdx = results.findIndex(c => selected && c.v === selected.v);
+          else activeIdx = Math.max(0, Math.min(activeIdx, results.length - 1));
+          if (!results.length) {
+            list.innerHTML = '<li class="px-3.5 py-6 text-center text-[12.5px] font-bold text-[#9FB3AA]">لا توجد نتائج مطابقة</li>';
+            return;
+          }
+          list.innerHTML = results.map((c, i) => {
+            const sel = selected && c.v === selected.v;
+            return '<li>' +
+              '<button type="button" role="option" aria-selected="' + sel + '" data-i="' + i + '"' +
+              ' class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-start transition ' +
+              (i === activeIdx ? 'bg-[#D4A843]/15' : 'hover:bg-white/[0.07]') + '">' +
+              '<span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.05] text-[#D4A843]"><i data-lucide="building-2" class="h-4 w-4"></i></span>' +
+              '<span class="min-w-0 flex-1"><span class="block truncate text-[13.5px] font-extrabold text-[#F2EFE6]">' + esc(c.v) + '</span>' +
+              '<span class="block text-[11px] font-semibold text-[#9FB3AA]">' + esc(c.c) + '</span></span>' +
+              (sel ? '<i data-lucide="check" class="h-[18px] w-[18px] shrink-0 text-[#D4A843]"></i>' : '') +
+              '</button></li>';
+          }).join('');
+          if (window.lucide) lucide.createIcons();
+          const act = list.querySelector('[data-i="' + activeIdx + '"]');
+          if (act) act.scrollIntoView({ block: 'nearest' });
+        };
+        const commit = (c) => {
+          selected = c || null;
+          if (c) {
+            valueEl.textContent = c.v;
+            valueEl.classList.remove('text-white/30'); valueEl.classList.add('text-[#F2EFE6]');
+            hidden.value = c.v; clearBtn.style.display = '';
+          } else {
+            valueEl.textContent = 'اختر المدينة من القائمة';
+            valueEl.classList.add('text-white/30'); valueEl.classList.remove('text-[#F2EFE6]');
+            hidden.value = ''; clearBtn.style.display = 'none';
+          }
+          markValid(field); refreshPreview();
+        };
+
+        const pop = registerPopup(field, panel, trigger,
+          () => { search.value = ''; render(); setTimeout(() => search.focus(), 40); },
+          () => { if (!selected) { valueEl.textContent = 'اختر المدينة من القائمة'; } }
+        );
+
+        trigger.addEventListener('click', () => pop.isOpen() ? pop.close() : pop.open());
+        clearBtn.addEventListener('click', () => { commit(null); search.value = ''; });
+        search.addEventListener('input', render);
+        search.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, results.length - 1); render(); }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); render(); }
+          else if (e.key === 'Enter') { e.preventDefault(); if (results[activeIdx]) commit(results[activeIdx]); pop.close(); }
+          else if (e.key === 'Escape') { pop.close(); }
+        });
+        list.addEventListener('click', (e) => {
+          const btn = e.target.closest('button[data-i]');
+          if (!btn) return;
+          commit(results[Number(btn.dataset.i)]);
+          pop.close();
+        });
+
+        // منع الإدخال العشوائي: القيمة لا تُحفظ إلا بالاختيار من القائمة فقط
+        panel.addEventListener('click', (e) => e.stopPropagation());
+        commit(null);
+        controls.city = { commit: commit };
+      }
+
+      /* ---------------- Date Picker ---------------- */
+      function initDatePicker() {
+        const field = $('#field-date');
+        const trigger = $('#dateTrigger'), main = $('#dateMain'), sub = $('#dateSub');
+        const panel = $('#datePanel'), grid = $('#dateGrid'), week = $('#dateWeek'), caption = $('#dateCaption');
+        const hidden = $('input[name=date]', field);
+        let view = new Date(), selectedISO = null;
+
+        week.innerHTML = WEEK_SHORT.map(d => '<div>' + d + '</div>').join('');
+        const captionTxt = () => caption.textContent = MONTHS_AR[view.getMonth()] + ' ' + view.getFullYear();
+
+        const render = () => {
+          captionTxt();
+          const y = view.getFullYear(), m = view.getMonth();
+          const firstDow = new Date(y, m, 1).getDay(); // 0 = الأحد
+          const daysInMonth = new Date(y, m + 1, 0).getDate();
+          let html = '';
+          for (let i = 0; i < firstDow; i++) html += '<div></div>';
+          const tISO = todayISO();
+          for (let d = 1; d <= daysInMonth; d++) {
+            const iso = y + '-' + pad(m + 1) + '-' + pad(d);
+            const isSel = iso === selectedISO, isToday = iso === tISO;
+            let cls = 'mx-auto grid h-9 w-9 place-items-center rounded-xl text-[13px] font-bold transition duration-150 ';
+            if (isSel) cls += 'bg-gradient-to-br from-[#D4A843] to-[#F6D979] text-[#0B1A12] shadow-[0_6px_18px_-6px_rgba(212,168,67,.6)]';
+            else if (isToday) cls += 'border border-[#D4A843]/60 text-[#D4A843] hover:bg-[#D4A843]/10';
+            else cls += 'border border-transparent text-[#F2EFE6]/85 hover:bg-white/[0.08]';
+            html += '<button type="button" data-iso="' + iso + '" class="' + cls + '">' + d + '</button>';
+          }
+          grid.innerHTML = html;
+        };
+        const setValue = (iso) => {
+          selectedISO = iso;
+          if (iso) {
+            const d = new Date(iso + 'T00:00:00');
+            main.textContent = WEEK_AR[d.getDay()] + '، ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()] + ' ' + d.getFullYear();
+            main.classList.remove('text-white/30'); main.classList.add('text-[#F2EFE6]');
+            sub.textContent = iso.replace(/-/g, '/'); // التنسيق العربي المطلوب: YYYY/MM/DD
+            sub.classList.remove('text-white/20'); sub.classList.add('text-[#9FB3AA]');
+            hidden.value = iso;
+          } else {
+            main.textContent = 'اختر التاريخ';
+            main.classList.add('text-white/30'); main.classList.remove('text-[#F2EFE6]');
+            sub.textContent = ''; hidden.value = '';
+          }
+          markValid(field); refreshPreview();
+        };
+        const pop = registerPopup(field, panel, trigger,
+          () => {
+            if (selectedISO) view = new Date(selectedISO + 'T00:00:00');
+            else view = new Date();
+            render();
+          },
+          () => {}
+        );
+
+        trigger.addEventListener('click', () => pop.isOpen() ? pop.close() : pop.open());
+        $$('[data-date-step]', panel).forEach(btn => btn.addEventListener('click', () => {
+          const step = Number(btn.dataset.dateStep);
+          view = new Date(view.getFullYear(), view.getMonth() + step, 1);
+          render();
+        }));
+        $('#dateToday').addEventListener('click', () => { setValue(todayISO()); pop.close(); });
+        $('#dateClear').addEventListener('click', () => { setValue(null); pop.close(); });
+        grid.addEventListener('click', (e) => {
+          const btn = e.target.closest('button[data-iso]');
+          if (!btn) return;
+          setValue(btn.dataset.iso); pop.close();
+        });
+        setValue(null);
+        controls.date = { setValue: setValue };
+      }
+
+      /* ---------------- Duration (رقم + وحدة) ---------------- */
+      function initDuration() {
+        const field = $('#field-duration');
+        const input = $('#durationInput'), unitBtn = $('#durationUnit'), unitText = $('#durationUnitText');
+        const panel = $('#durationPanel'), hidden = $('input[name=duration]', field);
+        const UNIT_LABEL = { day: 'يوم', month: 'شهر', year: 'سنة' };
+        const PLURAL = {
+          day:   { 1: 'يوم', 2: 'يومان',  b: 'أيام',  m: 'يوماً' },
+          month: { 1: 'شهر', 2: 'شهران', b: 'أشهر',  m: 'شهراً' },
+          year:  { 1: 'سنة', 2: 'سنتان', b: 'سنوات', m: 'سنة' }
+        };
+        let unit = 'month';
+        const unitAr = (n, u) => {
+          const t = PLURAL[u];
+          if (n === 1) return t[1]; if (n === 2) return t[2];
+          return (n >= 3 && n <= 10) ? t.b : t.m;
+        };
+        const refresh = () => {
+          const n = Number(input.value || '0');
+          if (!input.value) { hidden.value = ''; markValid(field); refreshPreview(); return; }
+          if (!Number.isInteger(n) || n < 1 || n > 9999) { setError(field, true); refreshPreview(); return; }
+          hidden.value = n + ' ' + unitAr(n, unit);
+          markValid(field); refreshPreview();
+        };
+        const resetUnit = (u) => {
+          unit = u || 'month';
+          unitText.textContent = UNIT_LABEL[unit];
+        };
+        const pop = registerPopup(field, panel, unitBtn, null, null);
+
+        input.addEventListener('input', () => {
+          // أرقام فقط + تحويل الأرقام العربية إلى إنجليزية
+          input.value = arDigits(input.value).replace(/[^\d]/g, '').slice(0, 4);
+          refresh();
+        });
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === '.') e.preventDefault();
+        });
+        input.addEventListener('blur', refresh);
+        unitBtn.addEventListener('click', () => pop.isOpen() ? pop.close() : pop.open());
+        $$('button[data-unit]', panel).forEach(b => b.addEventListener('click', () => {
+          resetUnit(b.dataset.unit);
+          pop.close(); refresh();
+        }));
+        panel.addEventListener('click', (e) => e.stopPropagation());
+        refresh();
+        controls.duration = {
+          clear: () => { input.value = ''; resetUnit('month'); refresh(); },
+          refresh: refresh
+        };
+      }
+
+      /* ---------------- Amount + Currency ---------------- */
+      function initMoney() {
+        const field = $('#field-money');
+        const input = $('#amountInput');
+        const curTrigger = $('#currencyTrigger'), curChipSym = $('#currencyChip span:first-child');
+        const curCode = $('#currencyCode'), curPanel = $('#currencyPanel'), curList = $('#currencyList');
+        const hiddenAmount = $('input[name=amount]', field), hiddenCur = $('input[name=currency]', field);
+
+        const CURRENCIES = [
+          { code: 'USD', name: 'دولار أمريكي', sym: '$' },
+          { code: 'EUR', name: 'يورو', sym: '€' },
+          { code: 'SYP', name: 'ليرة سورية', sym: 'ل.س' },
+          { code: 'SAR', name: 'ريال سعودي', sym: 'ر.س' },
+          { code: 'AED', name: 'درهم إماراتي', sym: 'د.إ' },
+          { code: 'USDT', name: 'عملة رقمية — تيثر', sym: '₮' },
+          { code: 'JOD', name: 'دينار أردني', sym: 'د.أ' },
+          { code: 'EGP', name: 'جنيه مصري', sym: 'ج.م' },
+          { code: 'KWD', name: 'دينار كويتي', sym: 'د.ك' },
+          { code: 'QAR', name: 'ريال قطري', sym: 'ر.ق' },
+          { code: 'TRY', name: 'ليرة تركية', sym: '₺' },
+          { code: 'IQD', name: 'دينار عراقي', sym: 'د.ع' }
+        ];
+        let cur = CURRENCIES[0];
+
+        const renderCurs = () => {
+          curList.innerHTML = CURRENCIES.map(c => {
+            const sel = c.code === cur.code;
+            return '<li><button type="button" data-code="' + c.code + '" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-start transition hover:bg-white/[0.07] ' + (sel ? 'bg-[#D4A843]/15' : '') + '">' +
+              '<span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[#D4A843]/25 bg-[#D4A843]/10 text-[13px] font-black text-[#D4A843]">' + esc(c.sym) + '</span>' +
+              '<span class="flex-1"><span class="block text-[13.5px] font-extrabold text-[#F2EFE6]" dir="ltr">' + esc(c.code) + '</span>' +
+              '<span class="block text-[11.5px] font-semibold text-[#9FB3AA]">' + esc(c.name) + '</span></span>' +
+              (sel ? '<i data-lucide="check" class="h-4 w-4 shrink-0 text-[#D4A843]"></i>' : '') +
+              '</button></li>';
+          }).join('');
+          if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } }, curList);
+        };
+        const setCur = (c) => {
+          cur = c;
+          curChipSym.textContent = c.sym;
+          curCode.textContent = c.code;
+          hiddenCur.value = c.code;
+          renderCurs(); refreshPreview();
+        };
+        const sanitize = (raw) => {
+          // توحيد الفواصل: ، أو ٫ (عربي) = فاصلة عشرية، و ٬ = فاصل آلاف يُحذف
+          let s = arDigits(raw)
+            .replace(/٫/g, '.').replace(/،/g, '.')
+            .replace(/٬/g, '')
+            .replace(/[^\d.]/g, '');
+          const parts = s.split('.');
+          if (parts.length > 2) s = parts[0] + '.' + parts.slice(1).join('');
+          const dec = s.split('.')[1];
+          if (dec && dec.length > 2) s = s.split('.')[0] + '.' + dec.slice(0, 2);
+          return s;
+        };
+        const refresh = () => {
+          const raw = input.value.replace(/,/g, '').trim();
+          if (!raw) { hiddenAmount.value = ''; markValid(field); refreshPreview(); return; }
+          const n = Number(raw);
+          if (!isFinite(n) || n <= 0) { setError(field, true); refreshPreview(); return; }
+          hiddenAmount.value = String(n);
+          markValid(field); refreshPreview();
+        };
+        input.addEventListener('input', () => { input.value = sanitize(input.value); refresh(); });
+        input.addEventListener('keydown', (e) => {
+          if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+        });
+        input.addEventListener('blur', () => {
+          const raw = input.value.replace(/,/g, '').trim();
+          if (!raw) return;
+          const n = Number(raw);
+          if (isFinite(n) && n > 0) input.value = n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+        });
+        const pop = registerPopup(field, curPanel, curTrigger, renderCurs, null);
+        curTrigger.addEventListener('click', () => pop.isOpen() ? pop.close() : pop.open());
+        curList.addEventListener('click', (e) => {
+          const btn = e.target.closest('button[data-code]');
+          if (!btn) return;
+          setCur(CURRENCIES.find(c => c.code === btn.dataset.code));
+          pop.close();
+        });
+        curPanel.addEventListener('click', (e) => e.stopPropagation());
+        setCur(CURRENCIES[0]);
+        controls.money = {
+          clear: () => { input.value = ''; setCur(CURRENCIES[0]); refresh(); },
+          refresh: refresh
+        };
+      }
+
+      /* ---------------- Payment Method ---------------- */
+      function initPayment() {
+        const field = $('#field-payment');
+        const trigger = $('#paymentTrigger'), chip = $('#paymentChip'), valueEl = $('#paymentValue');
+        const panel = $('#paymentPanel'), list = $('#paymentList'), hidden = $('input[name=paymentMethod]', field);
+
+        const METHODS = [
+          { v: 'تحويل بنكي', d: 'من حساب إلى حساب مصرفي', icon: 'landmark' },
+          { v: 'كاش / نقداً', d: 'تسليم نقدي مباشر', icon: 'banknote' },
+          { v: 'شام كاش', d: 'Sham Cash — محفظة محلية', icon: 'wallet' },
+          { v: 'عملات رقمية USDT', d: 'USDT — شبكة TRC20', icon: 'bitcoin' },
+          { v: 'دفع إلكتروني', d: 'بطاقة / بوابة دفع إلكترونية', icon: 'credit-card' }
+        ];
+        let sel = null;
+
+        const render = () => {
+          list.innerHTML = METHODS.map((m, i) => {
+            const active = sel && sel.v === m.v;
+            return '<li><button type="button" data-i="' + i + '" class="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-start transition hover:bg-white/[0.07] ' + (active ? 'bg-[#D4A843]/15' : '') + '">' +
+              '<span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-[#D4A843]"><i data-lucide="' + m.icon + '" class="h-[18px] w-[18px]"></i></span>' +
+              '<span class="flex-1"><span class="block text-[13.5px] font-extrabold text-[#F2EFE6]">' + esc(m.v) + '</span>' +
+              '<span class="block text-[11.5px] font-semibold text-[#9FB3AA]">' + esc(m.d) + '</span></span>' +
+              (active ? '<i data-lucide="check" class="h-4 w-4 shrink-0 text-[#D4A843]"></i>' : '') +
+              '</button></li>';
+          }).join('');
+          if (window.lucide) lucide.createIcons();
+        };
+        const setVal = (m) => {
+          sel = m || null;
+          if (m) {
+            chip.innerHTML = '<span class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-[#D4A843]"><i data-lucide="' + m.icon + '" class="h-[18px] w-[18px]"></i></span>' +
+              '<span class="text-[#F2EFE6] font-extrabold">' + esc(m.v) + '</span>';
+            valueEl.textContent = ''; // النص أصبح داخل chip
+            hidden.value = m.v;
+          } else {
+            chip.innerHTML = '<span class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-[#D4A843]"><i data-lucide="banknote" class="h-[18px] w-[18px]"></i></span>';
+            valueEl.textContent = 'اختر طريقة الدفع';
+            hidden.value = '';
+          }
+          if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } }, chip);
+          markValid(field); refreshPreview();
+        };
+        const pop = registerPopup(field, panel, trigger, render, null);
+        trigger.addEventListener('click', () => pop.isOpen() ? pop.close() : pop.open());
+        list.addEventListener('click', (e) => {
+          const btn = e.target.closest('button[data-i]');
+          if (!btn) return;
+          setVal(METHODS[Number(btn.dataset.i)]); pop.close();
+        });
+        setVal(null);
+        controls.payment = { setVal: setVal };
+      }
+
+      /* ---------------- معاينة JSON ---------------- */
+      const jsonEl = $('#jsonPreview');
+      function refreshPreview() {
+        const form = $('#demoForm');
+        const d = form.elements.date.value;
+        const moneyRaw = form.elements.amount.value;
+        jsonEl.textContent = JSON.stringify({
+          city: form.elements.city.value || null,
+          date: d || null,
+          duration: form.elements.duration.value || null,
+          amount: moneyRaw ? Number(moneyRaw) : null,
+          currency: form.elements.currency.value,
+          paymentMethod: form.elements.paymentMethod.value || null
+        }, null, 2);
+      }
+
+      /* ---------------- تحقق النموذج ---------------- */
+      function validateForm() {
+        let ok = true;
+        const cityF = $('#field-city'), dateF = $('#field-date');
+        if (!$('input[name=city]', cityF).value) { setError(cityF, true, 'الرجاء اختيار المدينة من القائمة.'); ok = false; }
+        else markValid(cityF);
+        if (!$('input[name=date]', dateF).value) { setError(dateF, true, 'الرجاء اختيار تاريخ العقد.'); ok = false; }
+        else markValid(dateF);
+        // الحقول الاختيارية تُتحقق فقط إن مُلئت
+        const durF = $('#field-duration'), monF = $('#field-money');
+        const durVal = $('#durationInput').value, monVal = $('#amountInput').value;
+        if (durVal && !/^\d+$/.test(durVal.trim())) { setError(durF, true, 'أدخل رقماً صحيحاً (1 – 9999).'); ok = false; }
+        else if (durVal && (Number(durVal) < 1 || Number(durVal) > 9999)) { setError(durF, true, 'أدخل رقماً صحيحاً (1 – 9999).'); ok = false; }
+        else markValid(durF);
+        if (monVal && (!isFinite(Number(monVal.replace(/,/g, ''))) || Number(monVal.replace(/,/g, '')) <= 0)) {
+          setError(monF, true, 'أدخل مبلغاً صحيحاً بمنزلتين عشريتين كحد أقصى.'); ok = false;
+        } else markValid(monF);
+        return ok;
+      }
+
+      /* ---------------- ربط الأحداث ---------------- */
+      function boot() {
+        initCombobox();
+        initDatePicker();
+        initDuration();
+        initMoney();
+        initPayment();
+        refreshPreview();
+
+        $('#demoForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          if (!validateForm()) {
+            toast({ type: 'error', title: 'حدث خطأ', message: 'أكمل الحقول المطلوبة المميزة بالأحمر.' });
+            return;
+          }
+          const f = $('#demoForm').elements;
+          const msg = 'تم حفظ العقد بنجاح في ' + (f.city.value || 'المدينة') + ' — المدة: ' + (f.duration.value || 'غير محددة');
+          toast({ type: 'success', title: 'تم إنشاء العقد بنجاح', message: msg });
+        });
+        $('#demoReset').addEventListener('click', () => {
+          if (controls.city) controls.city.commit(null);
+          if (controls.date) controls.date.setValue(null);
+          if (controls.duration) controls.duration.clear();
+          if (controls.money) controls.money.clear();
+          if (controls.payment) controls.payment.setVal(null);
+          refreshPreview();
+          toast({ type: 'info', title: 'تم مسح الحقول', message: 'يمكنك البدء من جديد.' });
+        });
+        $('#copyResult').addEventListener('click', () => {
+          const txt = jsonEl.textContent;
+          const done = () => toast({ type: 'success', title: 'تم نسخ البيانات', message: 'لصقها في أي مكان بسهولة.' });
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done);
+          else {
+            const ta = document.createElement('textarea');
+            ta.value = txt; document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); done(); } catch (err) { toast({ type: 'error', title: 'تعذر النسخ' }); }
+            ta.remove();
+          }
+        });
+        $$('[data-demo-toast]').forEach(btn => btn.addEventListener('click', () => {
+          const t = btn.dataset.demoToast;
+          const msgs = {
+            success: { title: 'تم إنشاء العقد بنجاح', message: 'تم الحفظ والتوقيع رقمياً ونسخ الرابط للمشاركة.' },
+            info: { title: 'ملاحظة', message: 'سيتوقف شريط التقدم تلقائياً عند مرور المؤشر فوق الإشعار.' },
+            warning: { title: 'تحذير', message: 'البنود [بين أقواس] لم تُعبأ بعد — راجع الحقول قبل التوليد.' },
+            error: { title: 'حدث خطأ', message: 'تعذّر حفظ العقد، تحقق من اتصالك ثم أعد المحاولة.' }
+          };
+          toast({ type: t, title: msgs[t].title, message: msgs[t].message, duration: 5600 });
+        }));
+
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+      }
+
+      /* ============ واجهة برمجية عامة (API) ============ */
+      window.MQ = {
+        toast: toast,
+        combobox: initCombobox,
+        datePicker: initDatePicker,
+        refreshPreview: refreshPreview,
+        version: '1.0.0'
+      };
+
+      // التهيئة فوراً (السكربت في نهاية body) — لا ننتظر أي CDN خارجي
+      try { boot(); } catch (err) { console.error('MQ boot error:', err); }
+
+      // رسم أيقونات Lucide عند وصول المكتبة متأخرة (defer) — مع إعادة رسم المكونات الديناميكية
+      (function ensureIcons() {
+        if (window.lucide) {
+          try { lucide.createIcons({ attrs: { 'stroke-width': 2 } }); } catch (e) {}
+        } else {
+          setTimeout(ensureIcons, 120);
+        }
+      })();
+    })();
+  </script>
+</body>
+</html>

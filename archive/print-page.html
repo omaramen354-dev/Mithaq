@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>عقد خدمات - ميثاق</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--kufic-ink:#111827;--kufic-gold:#D97706;--ink:#18251F;--muted:#6B7280;--line:#E5E7EB}
+    *{box-sizing:border-box}
+    body{margin:0;background:#F5F6F8;color:var(--ink);font-family:Cairo,Arial,sans-serif;font-size:12px;line-height:1.45}
+    .shell{max-width:860px;margin:20px auto;padding:0 14px}
+    .actions{display:flex;gap:10px;margin-bottom:12px}.btn{border:0;border-radius:10px;background:var(--kufic-ink);color:#fff;padding:10px 15px;font:800 14px Cairo;cursor:pointer}
+    .page{background:#fff;border:1px solid var(--line);border-radius:10px;padding:24px;box-shadow:0 10px 30px rgba(17,24,39,.08)}
+    /* ===== COMPACT HEADER (<=55px) ===== */
+    .doc-head{display:flex;align-items:center;gap:10px;height:48px;padding:0 0 8px;border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:9px;min-width:0}
+    .brand img{width:34px;height:34px;flex:0 0 auto}
+    .brand .t{display:flex;flex-direction:column;line-height:1.05}
+    .brand .t b{font-size:15px;font-weight:900;color:var(--kufic-ink);letter-spacing:.5px}
+    .brand .t small{font-size:8.5px;font-weight:600;color:var(--muted);letter-spacing:.2px;white-space:nowrap}
+    .seal{margin-inline-start:auto;text-align:right;font-size:9px;color:var(--muted);font-weight:700;line-height:1.25}
+    .seal b{display:block;color:var(--kufic-gold);font-size:10px}
+    .doc-title{text-align:center;margin:10px 0 12px}.doc-title h2{margin:0;font-size:15px;font-weight:900;color:var(--kufic-ink)}.doc-title p{margin:2px 0 0;font-size:10px;color:var(--muted);font-weight:600}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.box{background:#FAFAFA;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:11.5px}.box b{display:block;color:var(--kufic-ink);margin-bottom:1px;font-size:10px;text-transform:uppercase;letter-spacing:.4px}
+    h3{font-size:14px;font-weight:900;color:var(--kufic-ink);margin:12px 0 6px;border-bottom:1px solid var(--line);padding-bottom:4px}
+    ol{margin:0;padding:0 20px 0 0}.clauses li{margin:0 0 5px;padding-right:2px;text-align:justify}
+    /* ===== SIGNATURES + QR side-by-side, kept on one page ===== */
+    .bottom-row{display:flex;gap:12px;align-items:stretch;margin-top:14px;page-break-inside:avoid;break-inside:avoid}
+    .sig-card{flex:1 1 0;border:1px solid var(--line);border-radius:8px;padding:8px 10px;page-break-inside:avoid;break-inside:avoid}
+    .sig-card b{display:block;font-size:10.5px;color:var(--kufic-ink);margin-bottom:5px}
+    .sig{height:64px;border:1px dashed #C7CDD4;border-radius:6px;display:grid;place-items:center;color:var(--muted);font-size:10px;background:#FCFCFD}.sig img{max-width:90%;max-height:56px}
+    .qr-card{flex:0 0 150px;border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;page-break-inside:avoid;break-inside:avoid}
+    .qr-card b{display:block;font-size:10.5px;color:var(--kufic-ink);margin-bottom:5px}
+    .qr-card canvas{width:110px;height:110px;border:1px solid var(--line);border-radius:6px}
+    .qr-card small{display:block;margin-top:4px;font-size:8.5px;color:var(--muted)}
+    .disclaimer{margin-top:10px;padding:8px 10px;border-radius:8px;background:#FDF6E7;border:1px solid #F1E2C0;color:#7A5B16;font-size:9.5px;font-weight:600}
+    .foot{display:flex;justify-content:space-between;gap:10px;margin-top:10px;color:var(--muted);font-size:9px;border-top:1px solid var(--line);padding-top:6px}
+    @media print{
+      html,body{margin:0!important;padding:0!important}
+      body{background:#fff}
+      .shell{max-width:none;margin:0;padding:0}.actions{display:none}
+      /* ورقة A4 بمقاس صريح — هوامش الصفحة صفر والحشوة داخل الورقة (210×297mm ثابتة)
+         تصفير هامش الورقة و min-height في الطباعة يمنع انزلاق جزء من الورقة إلى صفحة بيضاء */
+      .page{border:0;box-shadow:none;border-radius:0;width:210mm;margin:0!important;min-height:0;padding:14mm 15mm 12mm;box-sizing:border-box}
+      @page{size:210mm 297mm;margin:0}
+      .clauses li{page-break-inside:avoid;orphans:2;widows:2}
+      .grid{page-break-inside:avoid}
+      .bottom-row,.sig-card,.qr-card{page-break-inside:avoid;break-inside:avoid}
+      .disclaimer,.foot{page-break-inside:avoid}
+    }
+    @media(max-width:650px){.bottom-row{flex-direction:column}.qr-card{flex:1 1 auto}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="actions"><button class="btn" onclick="window.print()">طباعة / حفظ PDF</button></div>
+    <article class="page">
+      <header class="doc-head">
+        <div class="brand">
+          <img src="/assets/mithaq-logo.svg" alt="ميثاق — ختم كوفي مربع">
+          <div class="t"><b>مِــيــثَــاق</b><small>منظومة العقود والتوثيق الإلكتروني</small></div>
+        </div>
+        <div class="seal"><b>وثيقة إلكترونية</b>٣١‏/٠٨‏/٢٠٢٦</div>
+      </header>
+      <section class="doc-title"><h2>عقد خدمات</h2><p>تم إنشاء هذه المسودة عبر منصة ميثاق بتاريخ ٣١ آب ٢٠٢٦</p></section>
+      <section class="grid">
+        <div class="box"><b>الطرف الأول</b>���� ����</div>
+        <div class="box"><b>الطرف الثاني</b>���� �����</div>
+        <div class="box"><b>القيمة/المبلغ</b>500 �����</div>
+        <div class="box"><b>المدينة</b>����</div>
+        <div class="box"><b>موضوع العقد</b>����� ���� ��������</div>
+        <div class="box"><b>مدة العقد</b>30 �����</div>
+        
+      </section>
+      <h3>بنود العقد</h3>
+      <ol class="clauses"><li>يقر الطرفان بأهليتهما القانونية، ويتفقان على أن الطرف الثاني ���� ����� يلتزم بتقديم الخدمات المبينة في ����� ���� �������� لصالح الطرف الأول ���� ���� وفق نطاق العمل والمخرجات والجداول الزمنية المتفق عليها.</li><li>يلتزم الطرف الأول بتزويد الطرف الثاني بجميع البيانات والموافقات والمواد اللازمة لتنفيذ الخدمة في الوقت المناسب، كما يلتزم بسداد المقابل المالي وقدره 500 ����� وفق مواعيد السداد دفعة واحدة.</li><li>يلتزم الطرف الثاني ببذل العناية المهنية المعتادة وتنفيذ الخدمة وفق الأصول الفنية والمهنية، وتسليم المخرجات في موعد أقصاه 30 �����، ما لم يحدث تأخير بسبب الطرف الأول أو قوة قاهرة.</li><li>يحق للطرف الأول طلب تعديلات معقولة ضمن نطاق الخدمة المتفق عليه، أما الأعمال أو التعديلات الخارجة عن النطاق فتعد أعمالاً إضافية لا تنفذ إلا بعد اتفاق خطي على مدتها وتكلفتها.</li><li>تظل المعلومات والبيانات المتبادلة بين الطرفين سرية، ولا يجوز لأي طرف إفشاؤها أو استخدامها لغير أغراض تنفيذ هذا العقد، إلا بموافقة خطية أو بموجب التزام قانوني.</li><li>في حال الإخلال الجوهري، يوجه الطرف المتضرر إخطاراً خطياً للطرف الآخر يمنحه مهلة 15 لتصحيح الإخلال، فإن لم يتم التصحيح جاز للطرف المتضرر إنهاء العقد والمطالبة بحقوقه النظامية.</li></ol>
+      
+      <div class="bottom-row">
+        <div class="sig-card"><b>توقيع الطرف الأول</b><div class="sig"><span>لم يوقع بعد</span></div></div>
+        <div class="sig-card"><b>توقيع الطرف الثاني</b><div class="sig"><span>لم يوقع بعد</span></div></div>
+        <div class="qr-card"><b>رمز التحقق</b><canvas class="qr-canvas" data-url="/share/a44f9449-af5f-489c-9a0a-4eecfe72d71c"></canvas><small>امسح للتحقق من العقد</small></div>
+      </div>
+      <div class="disclaimer">تنبيه: هذه الوثيقة مسودة تنظيمية قابلة للمراجعة القانونية، ولا تُعد بديلاً عن استشارة محامٍ مختص في الحالات المعقدة أو عالية القيمة.</div>
+      <footer class="foot"><span>معرّف العقد: a44f9449-af5f-489c-9a0a-4eecfe72d71c</span><span style="color:#1D4A3E;font-weight:700">🇸🇾 ميثاق — منصة العقود الذكية العربية</span></footer>
+    </article>
+  </main>
+  <script>
+    setTimeout(()=>window.print(),550)
+    // Render the verification QR into each .qr-canvas (deterministic pattern,
+    // same generator as the dashboard's generateQRCode).
+    (function () {
+      document.querySelectorAll('canvas.qr-canvas').forEach(function (canvas) {
+        var text = location.origin + (canvas.getAttribute('data-url') || '');
+        var size = 220, modules = 25, cell = Math.floor(size / modules);
+        canvas.width = size; canvas.height = size;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#111827';
+        var hash = 0;
+        for (var i = 0; i < text.length; i++) hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
+        function finder(x, y) {
+          for (var r = 0; r < 7; r++) for (var c = 0; c < 7; c++) {
+            if (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
+              ctx.fillRect((x + c) * cell, (y + r) * cell, cell, cell);
+            }
+          }
+        }
+        finder(0, 0); finder(modules - 7, 0); finder(0, modules - 7);
+        var seed = Math.abs(hash);
+        for (var r = 8; r < modules - 8; r++) for (var c = 8; c < modules - 8; c++) {
+          seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+          if (seed % 3 === 0) ctx.fillRect(c * cell, r * cell, cell, cell);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
