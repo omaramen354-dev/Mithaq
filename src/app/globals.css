@@ -1,0 +1,156 @@
+:root {
+  --ink: #18251f;
+  --green: #1d4a3e;
+  --green-2: #157347;
+  --gold: #d97706;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --bg: #f5f6f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+a {
+  color: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--green);
+  color: #fff;
+  padding: 11px 18px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 0.15s ease;
+}
+.btn:hover {
+  filter: brightness(1.08);
+}
+.btn-wa {
+  background: #25d366;
+}
+.btn-soft {
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.card {
+  width: 100%;
+  max-width: 860px;
+  margin: 24px auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: #fdf6e7;
+  border: 1px solid #f1e2c0;
+  color: #8a6414;
+}
+.badge.signed {
+  background: #e9f6ee;
+  border-color: #bfe3cd;
+  color: var(--green-2);
+}
+.badge.partial {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 640px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.box {
+  background: #fafafa;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.box b {
+  display: block;
+  color: var(--green);
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.clauses {
+  padding-inline-start: 22px;
+  margin: 8px 0 0;
+}
+.clauses li {
+  margin-bottom: 8px;
+  text-align: justify;
+  font-size: 13.5px;
+}
+
+/* ===== طباعة A4 — صفحة /print/[id] ===== */
+.sheet {
+  max-width: 800px;
+}
+@media print {
+  body {
+    background: #fff;
+  }
+  main {
+    padding: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .card {
+    margin: 0;
+    max-width: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .sheet .box {
+    background: #fff;
+    border-color: #ccc;
+    break-inside: avoid;
+  }
+  .clauses li {
+    break-inside: avoid;
+  }
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+}

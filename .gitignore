@@ -1,6 +1,16 @@
-# Temporary test / debug artifacts (E2E scripts, CDP browser profiles, JSON dumps)
+node_modules/
+.next/
+out/
+.env.local
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+
+# Temporary test / debug artifacts
 .tmp*
 *.tmp
-.tmp-cdp-profile*/
 *.log
-node_modules/
+
+# Freebuff local state
+.freebuff/

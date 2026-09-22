@@ -1,0 +1,8 @@
+{
+  "encrypted": true,
+  "version": 2,
+  "alg": "aes-256-gcm",
+  "iv": "Ppzq3qkUMiUKj/A4",
+  "tag": "AeTviNwP8h9fBL5PY43a6A==",
+  "data": "xVM="
+}

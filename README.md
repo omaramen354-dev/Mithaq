@@ -1,255 +1,139 @@
-<div dir="rtl" align="center">
+# ميثاق — النسخة الثانية (Next.js + Neon + Vercel)
 
-# 📜 ميثاق | MITHAQ
+منصة العقود العربية الذكية، معاد بناؤها بالكامل:
+Next.js App Router · Neon Serverless Postgres · Drizzle ORM · Auth.js v5 (Google)
 
-**منصة العقود والنماذج القانونية الذكية — عقودك بثقة وسهولة**
-
-![Version](https://img.shields.io/badge/version-1.0.0-D4A843?style=flat-square&labelColor=1D4A3E)
-![Node](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)
-![License](https://img.shields.io/badge/license-MIT-D4A843?style=flat-square&labelColor=1D4A3E)
-![Platform](https://img.shields.io/badge/platform-Web-1D4A3E?style=flat-square)
-![i18n](https://img.shields.io/badge/lang-العربية-D4A843?style=flat-square&labelColor=1D4A3E)
-![PRs](https://img.shields.io/badge/PRs-welcome-2a6355?style=flat-square)
-
-*توليد العقود • PDF احترافي • توقيع رقمي • دفع USDT • مراجعة قانونية*
-
-</div>
+> ✅ البناء مُختبَر: `next build` ناجح — 12 مسار + middleware حماية
 
 ---
 
-## 📋 نظرة عامة
+## 1) إنشاء قاعدة البيانات (Neon)
 
-**ميثاق** هي منصة Micro-SaaS عربية تمكّن أي شخص من إنشاء عقود ونماذج قانونية منظمة خلال دقائق — بدون خبرة قانونية مسبقة، وبدون محامٍ في الحالات البسيطة. تختار نوع العقد، تُدخل بيانات الطرفين، تُعدّل البنود، توقّع رقمياً بالرسم، ثم تطبع أو تشارك العقد كـ PDF منسّق — وتفعّل الباقات المدفوعة عبر USDT أو شام كاش.
-
-### ❗ المشكلة التي يحلها
-
-| المشكلة | حل ميثاق |
-|---|---|
-| الفريلانسرز يبدأون العمل **بدون عقد مكتوب** ويخسرون حقوقهم | قالب جاهز في دقيقتين + توقيع رقمي فوري |
-| المحاميون **مكلفون** للعقود البسيطة والمتكررة | قوالب مراجَعة ببنود قانونية أساسية مجانية |
-| أدوات العقود الغربية **لا تدعم العربية والسياق المحلي** | واجهة وعقود عربية بالكامل (RTL، تواريخ عربية) |
-| وسائل الدفع العالمية **غير متاحة محلياً** | USDT (TRC20) + شام كاش |
-| العقود المبعثرة في واتساب/ورق **قابلة للنسيان والنزاع** | أرشيف مركزي مشفّر + روابط مشاركة + حالة توقيع |
-
-### 🎯 الجمهور المستهدف
-
-- **الفريلانسرز والمستقلون** — حماية أتعابهم وحقوق ملكية أعمالهم
-- **أصحاب المشاريع الصغيرة** — عقود خدمات، توريد، وشراكات متكررة
-- **المطابع ومكاتب الخدمات** — إنتاج عقود بكميات وإيراد إضافي
-
----
-
-## ✨ الميزات الكاملة
-
-### 📄 توليد وإدارة العقود
-- **8 قوالب جاهزة** ببنود قانونية أساسية: إيجار، بيع وشراء، خدمات، عمل حر، تعهد وإقرار، توريد، شراكة، اتفاقية سرية (NDA)
-- **قائمة مدن شاملة** (~170 مدينة): كل الدول العربية وعواصمها وأهم مدنها + مدن تركيا وإيران وأوروبا وأمريكا وآسيا وأفريقيا، مع بحث فوري وقيمة مخصصة
-- **بنود قابلة للتعديل بالكامل** — كل بند في سطر مستقل، مع بنود افتراضية ذكية لكل نوع
-- **مسودة تلقائية (Autosave)** — الحفظ في المتصفح أثناء الكتابة + استرجاع/مسح المسودة
-- **بحث وفلترة** في العقود حسب الطرف أو النوع
-- **مفضلة** ⭐ وتصنيف العقود حسب الحالة (مسودة / توقيع جزئي / موقّع)
-- **تصدير واستيراد** نسخة احتياطية JSON
-
-### 🖨️ PDF منسّق
-- صفحة طباعة مخصصة (`/print/:id`) بتصميم A4 كامل: شعار، ختم إلكتروني، بنود مرقّمة، بطاقات أطراف، إخلاء مسؤولية
-- حفظ مباشر كـ PDF من متصفح أي جهاز (هاتف أو كمبيوتر)
-- تصدير إضافي بصيغ **TXT / HTML** ونسخ النص
-
-### ✍️ التوقيع الرقمي
-- **نمطان للتوقيع** يُختاران عند إنشاء العقد:
-  - **إرسال للطرف الثاني** (عادي) — بعد توقيع الطرف الأول تظهر نافذة مشاركة الرابط تلقائياً (نسخ / واتساب / PDF) ليوقّع الطرف الثاني من جهازه
-  - **سريع — جهاز واحد** (للمكاتب) — توقيع الطرفين بالتناوب على نفس الجهاز دون إرسال
-- فتح تفاصيل أي عقد **بالضغط على الصف كاملاً** في جدول «آخر العقود المنشأة» (وليس من الأزرار الجانبية فقط)
-- **لوحة توقيع بالرسم** تعمل بالفأرة واللمس (Touch) على الهاتف
-- توقيع كل طرف على حدة مع **الاسم والوقت وبيانات الجهاز و IP** (سجل إثبات)
-- حالة تلقائية: `partially_signed` ← `signed` عند اكتمال التوقيعين
-- التوقيعات تظهر داخل صفحة الـ PDF المطبوعة
-
-### 🔗 مشاركة ومراجعة
-- **رابط مشاركة عام** (`/share/:id`) للعرض بدون حساب
-- **طلب مراجعة قانونية مدفوعة** — يُخزّن في الخادم مع بيانات التواصل
-
-### 🔐 المصادقة
-- **Google OAuth** (Google Identity Services) — اختياري، يُحفظ محلياً
-- يُستخدم لتعبئة بيانات الدفع والمراجعة تلقائياً
-
-### 💳 الدفع والاشتراكات
-- **USDT على شبكة TRC20** — عرض عنوان المحفظة + إدخال TXID للتحقق
-- **شام كاش** — دفع محلي مع Webhook تأكيد تلقائي (`/api/payments/shamcash/webhook`)
-- **5 باقات**: Freemium، أساسي (5$)، موثّق (9$)، المستقل (15$)، المكاتب (49$) + مراجعة قانونية (25$+)
-- **تحديث تلقائي لحالة الاشتراك** — عند تأكيد الدفع يُفعّل شارة «Premium» على العقد فوراً
-
-### 🛡️ الأمان
-- **تشفير AES-256-GCM** لقاعدة العقود على القرص (Encrypted-at-Rest) مع ترحيل تلقائي من النص الصريح
-- التحقق من صحة المدخلات (Validation) على الخادم + تعقيم HTML (XSS)
-- حد حجم للطلبات (2MB) + CORS قابل للضبط + كتابة ملفات ذرّية (Atomic Writes)
-
-### 🖥️ تجربة المستخدم
-- **الوضع الليلي** 🌙 — يُحفظ تلقائياً في المتصفح
-- **وضع توفير البيانات** 🌿 — إيقاف الزخارف والرسوم المتحركة للشبكات البطيئة
-- **Responsive بالكامل** — هاتف، تابلت، سطح مكتب (Sidebar منزلق على الهاتف)
-- إشعارات Toast، عدّادات متحركة، اختصار `Escape` لإغلاق النوافذ
-- **حركات سلسة** ✨ — ظهور تدريجي عند التمرير (onscroll reveal + stagger)، انتقالات صفحات ونوافذ وتنبيهات عبر Framer Motion (يُعطَّل تلقائياً مع وضع توفير البيانات أو `prefers-reduced-motion`)
-- **جدول «آخر العقود المنشأة» قابل للفرز** — فرز بالاسم/النوع/الحالة/التاريخ (TanStack Table) بأعمدة متوافقة تماماً مع الصفوف على جميع المقاسات
-- **بدون Tailwind CDN في الإنتاج** — أزيل `cdn.tailwindcss.com` (غير مخصص للإنتاج) واستُبدل بطبقة CSS توافق مدمجة
-
----
-
-## 🛠️ التقنيات المستخدمة (Tech Stack)
-
-| الطبقة | التقنية |
-|---|---|
-| **Frontend** | HTML5 + CSS3 (متغيرات CSS، RTL) + JavaScript Vanilla (IIFE معزول، صفر تبعيات بناء) |
-| **الحركات والجداول** | Motion (محرك Framer Motion لـ vanilla JS) للانتقالات والحركات عند التمرير • TanStack Table لفرز جدول العقود — عبر CDN بدون خطوة بناء |
-| **الخطوط والأيقونات** | Cairo + Noto Naskh Arabic (Google Fonts) • Font Awesome 6.5 |
-| **المصادقة** | Google Identity Services (OAuth 2.0 / JWT Credential) |
-| **Backend** | Node.js (HTTP module خام — بدون Express) |
-| **قاعدة البيانات** | JSON Files + تشفير AES-256-GCM (ترقية مخططة إلى SQLite/Postgres) |
-| **الدفع** | USDT TRC20 (يدوي + Webhook) • شام كاش (Webhook) • Cryptomus (مخطط) |
-| **إشعارات** | Telegram Bot API (تقارير يومية + Webhook أوامر) |
-| **النشر** | أي استضافة Node (Railway, Render, VPS…) |
-
----
-
-## 📁 هيكل المشروع (Project Structure)
-
-```
-meethaq/
-├── frontend/
-│   ├── index.html              # الواجهة الرئيسية المدمجة (تصميم + منطق كامل)
-│   ├── marketing-carousel.html # صفحة الكاروسيل التسويقي
-│   ├── brand-identity.html     # دليل الهوية البصرية
-│   ├── agents-council.html     # لوحة مجلس الوكلاء
-│   ├── design-studio.html      # استوديو قوالب التصميم
-│   ├── ui-components.html      # دليل مكونات الواجهة (تطوير فقط — يستخدم Tailwind CDN)
-│   ├── mithaq-logo.svg         # الشعار
-│   └── assets/
-│       ├── mithaq-logo.svg     # الشعار (نسخة الأصول)
-│       ├── mithaq-symbol.svg   # الرمز
-│       ├── favicon.svg         # أيقونة المتصفح
-│       ├── crypto-badge.svg    # شارة USDT
-│       └── sham-cash-badge.svg # شارة شام كاش
-├── backend/
-│   ├── server.js               # الخادم الكامل (API + صفحات + طباعة)
-│   └── data/                   # قاعدة البيانات (تُنشأ تلقائياً)
-│       ├── contracts.json      # العقود — مشفّرة AES-256-GCM
-│       ├── payments.json       # عمليات الدفع
-│       └── review-requests.json# طلبات المراجعة القانونية
-├── index 2020.html             # المرجع التصميمي القديم (أرشيف)
-├── package.json
-└── README.md
-```
-
----
-
-## 🚀 التثبيت والتشغيل المحلي
-
-### المتطلبات
-- [Node.js](https://nodejs.org) إصدار 18 أو أحدث
-
-### الخطوات
+1. أنشئ حساباً على Neon → **Create project**
+2. انسخ **Connection string** (يشبه:
+   `postgresql://user:pass@ep-xxxx.region.aws.neon.tech/neondb?sslmode=require`)
+3. الصقه في `mithaq-next/.env.local` مكان قيمة `DATABASE_URL` المؤقتة
+4. أنشئ الجداول (schema كامل: users, contracts, signature_events, payment_requests):
 
 ```bash
-# 1) ادخل مجلد المشروع
-cd meethaq
-
-# 2) ثبّت الحزم (لا توجد تبعيات خارجية حالياً — جاهز لأي إضافات)
-npm install
-
-# 3) أنشئ ملف البيئة
-cp .env.example .env    # أو أنشئ .env يدوياً (انظر الجدول أدناه)
-
-# 4) شغّل الخادم
-npm run dev
-
-# 5) افتح المنصة
-# http://localhost:5000
+cd mithaq-next
+npx drizzle-kit push
 ```
 
-> ✅ **فحص سريع:** افتح `http://localhost:5000/api/health` — يجب أن ترى `{"ok":true,"status":"online"}`.
+---
+
+## 2) تسجيل الدخول عبر Google
+
+1. افتح [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. أنشئ **OAuth client ID** → نوع **Web application**
+3. أضف **Authorized redirect URIs**:
+
+   ```
+   http://localhost:3000/api/auth/callback/google
+   https://miithaq.com/api/auth/callback/google
+   ```
+
+4. انسخ Client ID و Client Secret إلى `.env.local`:
+
+   ```
+   AUTH_GOOGLE_ID=xxxx.apps.googleusercontent.com
+   AUTH_GOOGLE_SECRET=GOCSPX-xxxx
+   ADMIN_EMAILS=بريدك@gmail.com
+   ```
 
 ---
 
-## 🔑 المتغيرات البيئية (.env)
+## 3) التشغيل المحلي
 
-### ملف نموذجي
-
-```env
-# ===== الخادم =====
-PORT=5000
-HOST=0.0.0.0
-CORS_ORIGIN=http://localhost:5000
-
-# ===== الأمان (إلزامي في الإنتاج!) =====
-# مفتاح تشفير العقود — 24 حرفاً على الأقل
-ENCRYPTION_KEY=change-me-to-a-long-random-secret-key-32ch
-
-# ===== Google OAuth =====
-# من https://console.cloud.google.com → APIs & Services → Credentials
-GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
-
-# ===== الدفع =====
-# محفظة USDT (TRC20) لاستلام المدفوعات
-USDT_TRC20_ADDRESS=YOUR_TRC20_WALLET_ADDRESS
-# رابط دفع شام كاش (اختياري — إن وُجد)
-SHAM_CASH_CHECKOUT_URL=
-
-# ===== بوابة Cryptomus (عند التفعيل) =====
-CRYPTOMUS_MERCHANT_ID=your_merchant_uuid
-CRYPTOMUS_API_KEY=your_api_key
-
-# ===== Telegram (اختياري — تقارير مجلس ميثاق) =====
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
-
-# ===== تطوير فقط =====
-# يسمح بزر "تأكيد تجريبي" للدفع — لا تفعّله في الإنتاج!
-ALLOW_DEMO_CONFIRM=false
+```bash
+cd mithaq-next
+npm run dev        # http://localhost:3000
 ```
 
-### شرح أهم المتغيرات
-
-| المتغير | إلزامي؟ | الوظيفة |
-|---|---|---|
-| `ENCRYPTION_KEY` | ✅ في الإنتاج | مفتاح AES-256 لتشفير ملف العقود. بدونه يعمل الخادم بمفتاح تطوير **غير آمن** مع تحذير |
-| `GOOGLE_CLIENT_ID` | ⭕ اختياري | من [Google Cloud Console](https://console.cloud.google.com/apis/credentials): أنشئ **OAuth Client ID** من نوع *Web application*، وأضف `http://localhost:5000` في **Authorized JavaScript origins**. ثم ضع الـ ID في الواجهة (متغير `GOOGLE_CLIENT_ID` أعلى الـ `<script>` في `index.html` أو كمتغير عام `window.MITHAQ_GOOGLE_CLIENT_ID`) |
-| `USDT_TRC20_ADDRESS` | ✅ للدفع | عنوان محفظتك لاستلام USDT — يظهر للمشتري في صفحة الدفع |
-| `CRYPTOMUS_MERCHANT_ID` / `CRYPTOMUS_API_KEY` | ⭕ عند التفعيل | من لوحة [Cryptomus](https://cryptomus.com) بعد إنشاء Merchant. تُستخدم لتحويل الدفع اليدوي إلى بوابة تلقائية مع Webhook موقّع (انظر خطة التطوير) |
-| `CORS_ORIGIN` | ⭕ | الأصل المسموح لطلبات الـ API (افتراضي `*`) |
-| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | ⭕ | تقارير تلجرام التلقائية |
-
-> ⚠️ **ملاحظة أمان:** في الإنتاج، ضع `ENCRYPTION_KEY` قوياً وفريداً، وأوقف `ALLOW_DEMO_CONFIRM`، وحدّد `CORS_ORIGIN` بنطاقك الفعلي.
+> ⚠️ **مهم لجهازك:** شبكتك تعطّل IPv6 (`ENETUNREACH`) وهذا يعلّق npm.
+> الحل الدائم — نفّذه مرة واحدة:
+>
+> ```bash
+> setx NODE_OPTIONS "--dns-result-order=ipv4first"
+> ```
+> (ثم أعد فتح الطرفية — يصلح npm وnode نهائياً على جهازك)
 
 ---
 
-## 🗺️ خطة التطوير القادمة (Roadmap)
+## 4) النشر على Vercel + ربط miithaq.com
 
-- [x] توليد العقود + 8 قوالب ببنود قانونية
-- [x] PDF منسّق قابل للطباعة + مشاركة برابط عام
-- [x] توقيع رقمي بالرسم مع سجل إثبات (IP/وقت/جهاز)
-- [x] دفع USDT TRC20 + شام كاش + تفعيل الباقات تلقائياً
-- [x] تشفير AES-256-GCM للعقود + الوضع الليلي + توفير البيانات
-- [ ] **بوابة Cryptomus التلقائية** — فاتورة API + Webhook موقّع بـ HMAC + تفعيل فوري بدون TXID يدوي
-- [ ] **قاعدة بيانات حقيقية** (SQLite → Postgres) مع حسابات مستخدمين وحصص
-- [ ] **محرك بنود ذكي** — اقتراح بنود حسب نوع العقد والمبلغ والمجال
-- [ ] **لوحة إدارة** — عرض المدفوعات المعلقة وتأكيدها وطلبات المراجعة
-- [ ] **مكتبة قوالب موسّعة** — عقود مطابع، محلات، عمالة منزلية
-- [ ] **نسخة PWA** — تثبيت على الهاتف والعمل دون اتصال
-- [ ] **تعدد اللغات** — واجهة إنجليزية بجانب العربية
+1. ارفع مجلد `mithaq-next` إلى مستودع GitHub
+2. في [vercel.com](https://vercel.com) → **Add New Project** → اختر المستودع
+   (يكتشف Next.js تلقائياً — لا إعدادات بناء مطلوبة)
+3. أضف **Environment Variables** (نسخة Production):
+
+   | المتغير | القيمة |
+   |---|---|
+   | `DATABASE_URL` | نفس رابط Neon (استخدم **pooled connection** من Neon للإنتاج) |
+   | `AUTH_SECRET` | سلسلة عشوائية طويلة (`openssl rand -base64 32`) |
+   | `AUTH_GOOGLE_ID` | من خطوة Google |
+   | `AUTH_GOOGLE_SECRET` | من خطوة Google |
+   | `NEXT_PUBLIC_BASE_URL` | `https://miithaq.com` |
+   | `ADMIN_EMAILS` | بريدك |
+
+4. Deploy ثم: **Settings → Domains → Add** → `miithaq.com`
+5. عند مسجّل الدومين: سجل **CNAME** باسم `www` يشير إلى
+   `cname.vercel-dns.com`، وسجل **A** باسم `@` يشير إلى `76.76.21.21`
+   (أو القيم التي تعرضها Vercel لك — اتبعها حرفياً)
+6. HTTPS يُفعَّل تلقائياً بعد انتشار DNS
 
 ---
 
-## 👨‍💻 المطور والحقوق
+## هيكلية المشروع
 
-| | |
-|---|---|
-| **المطور** | عمر أمين الخضر |
-| **المنصة** | ميثاق — MITHAQ |
-| **الترخيص** | [MIT](LICENSE) — الاستخدام والتعديل والتوزيع مسموح مع الإبقاء على إشارة الحقوق |
-| **إخلاء مسؤولية** | العقود المولّدة مسودات تنظيمية قابلة للمراجعة، ولا تُعد بديلاً عن استشارة محامٍ مختص في الحالات المعقدة أو عالية القيمة |
+```
+mithaq-next/
+├── src/
+│   ├── db/
+│   │   ├── schema.ts            # 4 جداول (users, contracts, signature_events, payment_requests)
+│   │   └── index.ts             # اتصال Neon عبر Drizzle (neon-http)
+│   ├── lib/
+│   │   ├── auth.ts              # Auth.js v5 + مزامنة users + صلاحية المشرف
+│   │   ├── auth.config.ts       # إعداد Edge للـ middleware (بلا DB)
+│   │   ├── clauses.ts           # البنود الافتراضية لكل أنواع العقود
+│   │   ├── contract-text.ts     # بناء نص العقد + تعبئة الحقول الديناميكية
+│   │   ├── contract-types.ts    # أنواع العقود وأسماؤها
+│   │   ├── fingerprint.ts       # بصمة SHA-256 + مرجع MEQ + روابط المشاركة
+│   │   ├── whatsapp.ts          # رسالة المشاركة الرسمية
+│   │   ├── telegram.ts          # إشعارات تيليجرام (اختياري)
+│   │   └── format.ts            # التواريخ العربية
+│   ├── middleware.ts            # حماية الصفحات (عام: /share و /verify فقط)
+│   ├── app/
+│   │   ├── page.tsx             # لوحة العقود (محمية)
+│   │   ├── login/               # تسجيل الدخول بـ Google
+│   │   ├── share/[id]/          # صفحة الطرف الثاني العامة + لوحة توقيعه
+│   │   ├── verify/[id]/         # التحقق من سلامة العقد بالبصمة
+│   │   ├── print/[id]/          # نسخة A4 للطباعة/PDF (لحظية من DB)
+│   │   └── api/
+│   │       ├── auth/[...nextauth]/
+│   │       ├── contracts/               # GET قائمة + POST إنشاء
+│   │       ├── contracts/[id]/          # GET/PUT/DELETE
+│   │       ├── contracts/[id]/signatures/   # توقيع الأطراف (يحدّث الحالة)
+│   │       ├── contracts/[id]/share-info/   # بيانات نافذة الإرسال
+│   │       └── verify/[id]/             # تحقق برمجي بالبصمة
+│   └── components/
+│       ├── signing/ShareSignPad.tsx     # لوحة توقيع الطرف الثاني عن بُعد
+│       └── print/PrintButton.tsx        # زر الطباعة/PDF
+├── drizzle.config.ts            # إعداد drizzle-kit
+└── .env.local                   # أسرارك (غير مرفوع لgit)
+```
 
-<div align="center">
+---
 
-*© 2025 ميثاق – MITHAQ. جميع الحقوق محفوظة.* 🇸🇦
+## نقاط تصميمية مهمة
 
-</div>
+- **PDF لحظي بلا تخزين**: العقد (نص + توقيعات base64) في Neon، والـ PDF
+  يُولَّد عبر طباعة المتصفح من `/print/[id]` — يعمل على Vercel مجاناً ويحافظ
+  على العربية وRTL
+- **حالة الأزرار من قاعدة البيانات**: نهاية الهجرة تحل مشكلة الأزرار الصامتة
+  جذرياً — كل نافذة تقرأ حالة العقد من Neon مباشرة (source of truth واحد)
+- **توقيع الطرف الثاني عبر الرابط فقط**: صفحة `/share/[id]` العامة تحفظ
+  التوقيع في Neon مع IP + جهاز + وقت (جدول signature_events للإثبات)
+- **البصمة الموحّدة**: SHA-256 لحقل واحد مشترك بين الإنشاء والتوقيع والتحقق —
+  أي تغيير حرفي على العقد يُكتشف في `/verify/[id]`
+- **أول مستخدم يصبح مشرفاً** تلقائياً في قاعدة نظيفة (ما لم تحدد `ADMIN_EMAILS`)

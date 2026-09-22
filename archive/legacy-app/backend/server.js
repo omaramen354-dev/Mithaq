@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const url = require('url');
+const qrCodeSvg = require('../frontend/assets/qr.js');
 
 const PORT = Number(process.env.PORT || 5000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -17,10 +18,16 @@ const AGENTS_FILE = path.join(ROOT_DIR, 'frontend', 'agents-council.html');
 const DESIGN_STUDIO_FILE = path.join(ROOT_DIR, 'frontend', 'design-studio.html');
 const UI_COMPONENTS_FILE = path.join(ROOT_DIR, 'frontend', 'ui-components.html');
 const ASSETS_DIR = path.join(ROOT_DIR, 'frontend', 'assets');
-const DATA_DIR = path.join(__dirname, 'data');
+/* مجلد البيانات قابل للتخصيص عبر متغير البيئة DATA_DIR —
+   ضروري للاستضافة مع قرص ثابت (مثل Render Disks) لضمان بقاء العقود بعد كل نشر */
+const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(__dirname, 'data');
 const CONTRACTS_FILE = path.join(DATA_DIR, 'contracts.json');
 const REVIEWS_FILE = path.join(DATA_DIR, 'review-requests.json');
 const PAYMENTS_FILE = path.join(DATA_DIR, 'payments.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const AUDIT_FILE = path.join(DATA_DIR, 'audit.json');
+/* لوحة تحكم المشرف: عبر متغير بيئة (قائمة إيميلات مفصولة بفواصل) أو جلسة محلية */
+const ADMIN_EMAILS = String(process.env.ADMIN_EMAILS || '').split(',').map(e => normalize(e.toLowerCase())).filter(Boolean);
 
 const CONTRACT_TYPES = {
   lease: 'عقد إيجار',
@@ -239,9 +246,7 @@ function readEncryptedContracts() {
 }
 
 function writeEncryptedContracts(contracts) {
-  const safeContracts = Array.isArray(contracts) ? contracts : [];
-  const payload = encryptText(JSON.stringify(safeContracts));
-  atomicWriteFileSync(CONTRACTS_FILE, JSON.stringify(payload, null, JSON_INDENT));
+  writeEncryptedList(CONTRACTS_FILE, contracts);
 }
 
 function getRequestMetadata(req) {
@@ -259,6 +264,8 @@ function ensureStores() {
   ensureEncryptedContractsFile();
   ensureJsonArrayFile(REVIEWS_FILE);
   ensureJsonArrayFile(PAYMENTS_FILE);
+  if (!fs.existsSync(INTENTS_FILE)) atomicWriteFileSync(INTENTS_FILE, '[]');
+  ensureEncryptedListFile(USERS_FILE);
 }
 
 function readJson(file, fallback) {
@@ -278,10 +285,72 @@ function writeJson(file, value) {
 
 function readContracts() { return readEncryptedContracts(); }
 function writeContracts(contracts) { writeEncryptedContracts(contracts); }
+
+/* ===== QR Data URL (base64) بدون أي اعتماديات خارجية =====
+   MithaqQR يُخرج SVG نظيفاً معيارياً؛ تضمينه كـ data:image/svg+xml;base64
+   يعمل في <img> وفي الطباعة (Chrome/Edge/Firefox) وبحجم أصغر من PNG.
+   الترميز UTF-8 داخل Base64 يحفظ أي محارف عربية إن وُجدت */
+function svgToDataUrl(svg) {
+  return 'data:image/svg+xml;base64,' + Buffer.from(String(svg), 'utf8').toString('base64');
+}
 function readReviews() { return Array.isArray(readJson(REVIEWS_FILE, [])) ? readJson(REVIEWS_FILE, []) : []; }
 function writeReviews(reviews) { writeJson(REVIEWS_FILE, reviews); }
 function readPayments() { return Array.isArray(readJson(PAYMENTS_FILE, [])) ? readJson(PAYMENTS_FILE, []) : []; }
 function writePayments(payments) { writeJson(PAYMENTS_FILE, payments); }
+
+/* ===== المستخدمون (حسابات ميثاق) ===== */
+function readUsers() { return readEncryptedList(USERS_FILE); }
+function writeUsers(users) { writeEncryptedList(USERS_FILE, users); }
+/* سجل التدقيق — يسجل كل عملية حساسة (موافقات الدفع، حذف المستخدمين، تغيير الإعدادات) */
+function readAudit() { return readJson(AUDIT_FILE, []); }
+function writeAudit(list) { writeJson(AUDIT_FILE, list); }
+function logAudit(action, details, actor) {
+  try {
+    const list = readAudit();
+    list.unshift({ id: 'aud_' + newId(), action, details: details || {}, actor: actor || 'system', at: new Date().toISOString() });
+    writeAudit(list.slice(0, 1000));
+  } catch (error) { console.error('audit log failed:', error.message); }
+}
+/* حساب المستخدم الحالي: يجلب أو ينشئ سجل مستخدم مربوط بجلسة Google */
+function getUserForSession(session) {
+  if (!session || !session.userId) return null;
+  const users = readUsers();
+  let user = users.find(u => String(u.userId) === String(session.userId));
+  if (!user) {
+    user = {
+      userId: String(session.userId),
+      name: session.name || 'مستخدم ميثاق',
+      email: session.email || '',
+      picture: session.picture || '',
+      phone: '',
+      address: '',
+      plan: 'free',
+      planExpiresAt: null,
+      preferences: { darkMode: false, emailNotifications: true, contractReminders: true, language: 'ar' },
+      createdAt: new Date().toISOString(),
+      lastSeenAt: new Date().toISOString()
+    };
+    users.unshift(user);
+    writeUsers(users);
+  }
+  return user;
+}
+function updateUserRecord(userId, patch) {
+  const users = readUsers();
+  const idx = users.findIndex(u => String(u.userId) === String(userId));
+  if (idx < 0) return null;
+  users[idx] = Object.assign({}, users[idx], patch, { updatedAt: new Date().toISOString() });
+  writeUsers(users);
+  return users[idx];
+}
+function isAdminSession(session) {
+  if (!session) return false;
+  const email = normalize(String(session.email || '')).toLowerCase();
+  if (!email) return false;
+  if (ADMIN_EMAILS.length) return ADMIN_EMAILS.includes(email);
+  /* بيئة تطوير: أول مستخدم يدخل دون ADMIN_EMAILS يُعتبر مشرفاً لتجربة اللوحة */
+  return process.env.NODE_ENV !== 'production';
+}
 
 function commonHeaders(extra) {
   return Object.assign({
@@ -291,9 +360,9 @@ function commonHeaders(extra) {
   }, extra || {});
 }
 
-function sendJson(res, statusCode, payload) {
+function sendJson(res, statusCode, payload, extra) {
   const body = JSON.stringify(payload);
-  res.writeHead(statusCode, commonHeaders({ 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) }));
+  res.writeHead(statusCode, commonHeaders(Object.assign({ 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) }, extra || {})));
   res.end(body);
 }
 
@@ -346,6 +415,323 @@ function newId() { return crypto.randomUUID ? crypto.randomUUID() : crypto.rando
 function validDate(value) { const d = new Date(value); return value && !Number.isNaN(d.getTime()); }
 function arDate(value) { const d = new Date(value); return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString('ar-SY', { year: 'numeric', month: 'long', day: 'numeric' }); }
 function formatDateForDocument(value) { const d = new Date(value); return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('ar-SY', { year: 'numeric', month: '2-digit', day: '2-digit' }); }
+
+// ===== AUTH SESSIONS (جلسات الدخول عبر Google) =====
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
+const INTENTS_FILE = path.join(DATA_DIR, 'share-intents.json');
+const SESSION_COOKIE = 'mithaq_session';
+const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; /* 30 يوماً */
+const INTENT_TTL_MS = 15 * 60 * 1000; /* نافذة تهدئة إشعارات فتح الروابط */
+
+function sha256Hex(input) {
+  return crypto.createHash('sha256').update(String(input == null ? '' : input), 'utf8').digest('hex');
+}
+
+/* بصمة رقمية حتمية (SHA-256) لكل عقد — أي تغيير حرف واحد يغيّرها بالكامل */
+function contractFingerprint(contract) {
+  return sha256Hex([
+    contract.id || '', contract.type || '', contract.party1 || '', contract.party2 || '',
+    contract.amount || '', contract.date || '', contract.duration || '', contract.paymentMethod || '',
+    contract.city || '', contract.subject || '', contract.notes || '',
+    (contract.clauses || []).join('\n'), contract.content || ''
+  ].join('|'));
+}
+
+function contractVerifyPath(contract) { return '/verify/' + encodeURIComponent(contract.id); }
+
+function getBaseUrl() {
+  return (process.env.BASE_URL || process.env.PUBLIC_URL || ('http://localhost:' + PORT)).replace(/\/+$/, '');
+}
+
+/* ===== نظام التحقق بـ QR (QR Code Verification) ===== */
+/* حمولة QR: معرّف العقد + بصمة SHA-256 + وقت الإنشاء + حالة التوقيع */
+function buildQrPayload(contract) {
+  return {
+    v: 1, /* إصدار الصيغة لتوافق مستقبلي */
+    id: String(contract.id || ''),
+    hash: contractFingerprint(contract),
+    createdAt: contract.createdAt || '',
+    status: contract.status || 'draft'
+  };
+}
+/* التحقق من بصمة العقد: يُعاد ختم العقود القديمة (قبل نظام البصمة) تلقائياً */
+function verifyContractIntegrity(contract) {
+  if (!contract.contentHash) {
+    contract.contentHash = contractFingerprint(contract);
+    return { matched: true, resealed: true };
+  }
+  return { matched: contractFingerprint(contract) === normalize(contract.contentHash || ''), resealed: false };
+}
+/* QR مخزَّن داخل بيانات العقد كـ Data URL (base64 PNG) — يُعاد توليده عند تغيّر الحالة */
+function sealQrDataUrl(contract) {
+  try {
+    const verifyUrl = getBaseUrl() + contractVerifyPath(contract);
+    const svg = qrCodeSvg.svg(verifyUrl, { size: 160, ecc: 'M', ink: '#111827' });
+    contract.qrDataUrl = svgToDataUrl(svg);
+  } catch (error) {
+    /* فشل توليد QR لا يجب أن يُفشل حفظ العقد أبداً */
+    console.error('QR seal failed:', error.message);
+  }
+  return contract;
+}
+/* تُستخدم عند إنشاء/تعديل/توقيع العقد: يعاد ختم QR فقط إذا تغيّرت الحالة أو البصمة */
+function refreshContractQr(contract) {
+  const payload = buildQrPayload(contract);
+  const stamp = payload.hash + '|' + payload.status;
+  if (contract.qrSealedFor === stamp && contract.qrDataUrl) return contract;
+  contract.qrSealedFor = stamp;
+  return sealQrDataUrl(contract);
+}
+
+/* تخزين عام مشفّر بـ AES-256-GCM (يُستخدم لجلسات المستخدمين) */
+function writeEncryptedList(file, list) {
+  const payload = encryptText(JSON.stringify(Array.isArray(list) ? list : []));
+  atomicWriteFileSync(file, JSON.stringify(payload, null, JSON_INDENT));
+}
+/* يضمن وجود ملف قائمة مشفّر صالح عند إقلاع الخادم */
+function ensureEncryptedListFile(file) {
+  if (!fs.existsSync(file) || fs.statSync(file).size === 0) { writeEncryptedList(file, []); return; }
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (Array.isArray(parsed)) writeEncryptedList(file, parsed); /* ترقية نصية → مشفّرة */
+    else if (parsed && parsed.encrypted === true) JSON.parse(decryptText(parsed));
+    else writeEncryptedList(file, []);
+  } catch (_) { writeEncryptedList(file, []); }
+}
+function readEncryptedList(file) {
+  try {
+    if (!fs.existsSync(file) || fs.statSync(file).size === 0) return [];
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed && parsed.encrypted === true) {
+      const list = JSON.parse(decryptText(parsed) || '[]');
+      return Array.isArray(list) ? list : [];
+    }
+  } catch (error) {
+    console.error('Failed to read encrypted list:', file, error.message);
+  }
+  return [];
+}
+
+function sanitizeSession(session) {
+  return {
+    userId: session.userId,
+    name: session.name,
+    email: session.email,
+    picture: session.picture || '',
+    provider: session.provider || 'google',
+    issuedAt: session.issuedAt,
+    expiresAt: session.expiresAt
+  };
+}
+
+function createSession(userId, profile) {
+  const now = Date.now();
+  const session = {
+    sessionId: newId(),
+    userId,
+    name: profile.name || 'مستخدم ميثاق',
+    email: profile.email || '',
+    picture: profile.picture || '',
+    provider: 'google',
+    issuedAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + SESSION_TTL_MS).toISOString()
+  };
+  /* إسقاط الجلسات المنتهية وجلسات المستخدم القديمة قبل إضافة الجلسة الحالية */
+  const sessions = readEncryptedList(SESSIONS_FILE)
+    .filter(s => s.userId !== userId && new Date(s.expiresAt || 0).getTime() > now);
+  sessions.unshift(session);
+  writeEncryptedList(SESSIONS_FILE, sessions);
+  return session;
+}
+
+function readSession(sessionId) {
+  if (!sessionId) return null;
+  const sessions = readEncryptedList(SESSIONS_FILE);
+  const session = sessions.find(s => s.sessionId === sessionId);
+  if (!session) return null;
+  if (new Date(session.expiresAt || 0).getTime() <= Date.now()) {
+    writeEncryptedList(SESSIONS_FILE, sessions.filter(s => s.sessionId !== sessionId));
+    return null;
+  }
+  return session;
+}
+
+function deleteSession(sessionId) {
+  if (!sessionId) return;
+  const sessions = readEncryptedList(SESSIONS_FILE);
+  writeEncryptedList(SESSIONS_FILE, sessions.filter(s => s.sessionId !== sessionId));
+}
+
+function parseSessionFromRequest(req) {
+  const auth = req.headers['authorization'] || '';
+  let token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
+  if (!token) {
+    const cookieMatch = String(req.headers.cookie || '').match(new RegExp('(?:^|;\\s*)' + SESSION_COOKIE + '=([^;]+)'));
+    if (cookieMatch) token = decodeURIComponent(cookieMatch[1].trim());
+  }
+  return readSession(token);
+}
+
+function sessionCookie(token, maxAgeSeconds) {
+  return `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}`;
+}
+
+/* سجل نوايا المشاركة — يمنع تكرار إشعارات تيليجرام عند فتح نفس الرابط بشكل متكرر */
+function readIntents() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(INTENTS_FILE, 'utf8') || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) { return []; }
+}
+function writeIntents(list) { atomicWriteFileSync(INTENTS_FILE, JSON.stringify(list, null, JSON_INDENT)); }
+function hasRecentIntent(contractId, kind) {
+  const intents = readIntents().filter(i => Date.now() - new Date(i.at || 0).getTime() < INTENT_TTL_MS);
+  writeIntents(intents);
+  return intents.some(i => i.contractId === String(contractId) && i.kind === kind);
+}
+function recordIntent(contractId, kind) {
+  const intents = readIntents().filter(i => Date.now() - new Date(i.at || 0).getTime() < INTENT_TTL_MS);
+  intents.push({ contractId: String(contractId), kind, at: new Date().toISOString() });
+  writeIntents(intents.slice(-500));
+}
+
+/* رسالة المشاركة الرسمية عبر واتساب — تحتوي اسم العقد ورابط التوقيع/التحقق */
+function whatsappLink(text) { return 'https://wa.me/?text=' + encodeURIComponent(text); }
+
+function buildOfficialShareMessage(contract, link) {
+  const typeName = CONTRACT_TYPES[contract.type] || 'عقد';
+  const status = contract.status === 'signed' ? 'مُعتمد ومُوقّع رقمياً ✅' : 'بانتظار التوقيع ⏳';
+  const { ref } = contractVerification(contract);
+  return [
+    '📝 *عقد ' + typeName + '* — منصة ميثاق',
+    '',
+    'الطرف الأول: ' + (contract.party1 || '—'),
+    'الطرف الثاني: ' + (contract.party2 || '—'),
+    'الحالة: ' + status,
+    '',
+    '🔗 رابط العقد: ' + link,
+    '',
+    '🛡️ مرجع التوثيق: ' + ref
+  ].join('\n');
+}
+
+function notifyTelegram(text) {
+  return sendTelegramMessage(text).catch(error => ({ ok: false, message: (error && error.message) || 'telegram error' }));
+}
+
+/* ===== تدقيق Google ID Token =====
+   فكّ التشفير (JWT payload) محلياً + تدقيق كامل عبر نقطة tokeninfo الرسمية من Google
+   (تتحقق من التوقيع رقمياً وتعيد الادعاءات بعد التحقق). لا اعتماديات خارجية. */
+function decodeJwtPayload(token) {
+  try {
+    const payload = String(token).split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
+  } catch (_) { return null; }
+}
+
+function fetchGoogleTokenInfo(idToken) {
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'oauth2.googleapis.com',
+      path: '/tokeninfo?id_token=' + encodeURIComponent(idToken),
+      method: 'GET',
+      timeout: 8000
+    }, res => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
+        catch (_) { resolve({ status: res.statusCode || 0, body: null }); }
+      });
+    });
+    req.on('timeout', () => { req.destroy(); resolve({ status: 0, body: null }); });
+    req.on('error', () => resolve({ status: 0, body: null }));
+    req.end();
+  });
+}
+
+async function verifyGoogleCredential(credential) {
+  const localPayload = decodeJwtPayload(credential);
+  if (!localPayload || !localPayload.sub) return { ok: false, message: 'توكن Google غير صالح.' };
+  const info = await fetchGoogleTokenInfo(credential);
+  if (!info.body || info.status !== 200) {
+    return { ok: false, message: 'تعذر التحقق من توكن Google (توكن منتهٍ أو غير موقّع من Google).' };
+  }
+  const claims = info.body;
+  if (GOOGLE_CLIENT_ID && claims.aud !== GOOGLE_CLIENT_ID) {
+    return { ok: false, message: 'توكن Google صادر لعميل آخر (aud mismatch).' };
+  }
+  if (claims.iss !== 'accounts.google.com' && claims.iss !== 'https://accounts.google.com') {
+    return { ok: false, message: 'مُصدر التوكن غير موثوق.' };
+  }
+  if (Number(claims.exp) * 1000 < Date.now() - 60 * 1000) {
+    return { ok: false, message: 'انتهت صلاحية توكن Google.' };
+  }
+  if (claims.email && claims.email_verified === false) {
+    return { ok: false, message: 'بريد Google غير مُوثّق.' };
+  }
+  return {
+    ok: true,
+    profile: {
+      sub: String(claims.sub),
+      name: normalize(claims.name) || 'مستخدم ميثاق',
+      email: normalize(claims.email),
+      picture: String(claims.picture || '')
+    }
+  };
+}
+
+/* ===== تنبيهات تيليجرام لأحداث العقد =====
+   إشعار فوري لصاحب العقد: فتح العميل رابط العقد، أو إتمام التوقيع. */
+async function notifyContractEvent(contract, kind, extra) {
+  const info = extra || {};
+  const typeName = CONTRACT_TYPES[contract.type] || 'عقد';
+  const shareUrl = getBaseUrl() + '/share/' + encodeURIComponent(contract.id || '');
+  const { ref } = contractVerification(contract);
+  let text;
+  if (kind === 'opened') {
+    text = [
+      '🔔 *العميل فتح العقد الآن*',
+      '',
+      '📄 عقد: ' + typeName + ' — Ref: ' + ref,
+      '👤 الطرف الأول: ' + (contract.party1 || '—'),
+      '👥 الطرف الثاني: ' + (info.actorName || contract.party2 || '—'),
+      '🕒 ' + new Date().toLocaleString('ar-SY'),
+      '',
+      '🔗 ' + shareUrl
+    ].join('\n');
+  } else if (kind === 'signed') {
+    text = [
+      '✅ *تم اكتمال توقيع العقد بنجاح*',
+      '',
+      '📄 عقد: ' + typeName + ' — Ref: ' + ref,
+      '✍️ وقّع الآن: ' + (info.actorName || 'الطرفين') + ' (' + (info.actorParty || '—') + ')',
+      '🛡️ البصمة: ' + contractFingerprint(contract).slice(0, 16).toUpperCase(),
+      '🕒 ' + new Date().toLocaleString('ar-SY'),
+      '',
+      '🔗 ' + getBaseUrl() + contractVerifyPath(contract)
+    ].join('\n');
+  } else {
+    text = [
+      '✍️ *توقيع جزئي على العقد*',
+      '',
+      '📄 عقد: ' + typeName + ' — Ref: ' + ref,
+      '✍️ وقّع: ' + (info.actorName || '—') + ' (' + (info.actorParty || '—') + ')',
+      '⏳ بانتظار توقيع الطرف الآخر',
+      '🕒 ' + new Date().toLocaleString('ar-SY')
+    ].join('\n');
+  }
+  try {
+    const result = await sendTelegramMessage(text);
+    if (!result.ok) console.warn('Telegram notify failed:', result.message || result.description || 'not configured');
+    return result;
+  } catch (error) {
+    console.warn('Telegram notify error:', error.message);
+    return { ok: false };
+  }
+}
 
 // ===== CONTRACT REFERENCE & VERIFICATION HASH (المرجع ورمز التحقق) =====
 // مُشتقّان حتمياً (Deterministic) من معرّف العقد وبياناته حتى يبقى المرجع ثابتاً
@@ -526,6 +912,8 @@ function makeContract(data) {
     updatedAt: now
   };
   contract.content = buildContractContent(contract);
+  /* البصمة المرجعية: تُثبّت عند الإنشاء وتُقارن في /verify لكشف أي تلاعب لاحق */
+  contract.contentHash = contractFingerprint(contract);
   return contract;
 }
 /* لوحة التوقيع عبر الرابط (تظهر في صفحة /share فقط — لا تُطبع ولا تُضمَّن في /print) */
@@ -764,18 +1152,19 @@ function publicContractHtml(contract, printable) {
   const sig2 = contract.signatures?.party2?.dataUrl ? `<img src="${contract.signatures.party2.dataUrl}" alt="توقيع الطرف الثاني">` : '<span>لم يوقع بعد</span>';
   const logo = '/assets/mithaq-logo.svg';
   const printButton = printable ? '<button class="btn" onclick="window.print()">طباعة / حفظ PDF</button>' : '';
-  const shareButton = printable ? '<button class="btn btn-wa" onclick="shareForSigning()"><span aria-hidden="true">📲</span> مشاركة للتوقيع</button>' : '';
   const secBadge = securityBadgeHtml(contract);
   const { ref, verify } = contractVerification(contract);
-  const shareInfo = JSON.stringify({
-    id: contract.id,
-    typeName,
-    party1: contract.party1,
-    party2: contract.party2,
-    amount: contract.amount,
-    date: arDate(contract.date),
-    status: contract.status
-  });
+  /* بصمة SHA-256 حتمية لمحتوى العقد — تُطبع في التذييل وتُقارن في صفحة التحقق */
+  const fingerprint = contractFingerprint(contract);
+  const verifyPath = contractVerifyPath(contract);
+  const verifyUrl = getBaseUrl() + verifyPath;
+  const shareUrl = getBaseUrl() + '/share/' + encodeURIComponent(contract.id || '');
+  /* رمز QR حقيقي (QR Code Model 2) يشير إلى صفحة التحقق العامة — يُولَّد في الخادم */
+  const qrSvg = qrCodeSvg.svg(verifyUrl, { size: 96, ecc: 'M', ink: '#111827' });
+  /* QR مخزَّن كـ Data URL (يُختم عند الحفظ) مع توليد احتياطي للعقود القديمة */
+  const qrDataUrl = contract.qrDataUrl || svgToDataUrl(qrCodeSvg.svg(verifyUrl, { size: 160, ecc: 'M', ink: '#111827' }));
+  const waHref = whatsappLink(buildOfficialShareMessage(contract, shareUrl));
+  const shareButton = `<a class="btn btn-wa" href="${html(waHref)}" target="_blank" rel="noopener"><span aria-hidden="true">💬</span> مشاركة عبر واتساب</a>`;
   const signMarkup = printable ? '' : buildRemoteSignMarkup(contract);
   const signScript = printable ? '' : buildRemoteSignScript(contract);
   return `<!DOCTYPE html>
@@ -798,7 +1187,17 @@ function publicContractHtml(contract, printable) {
     .toast{position:fixed;left:22px;bottom:22px;z-index:999;display:none;gap:10px;max-width:min(420px,calc(100vw - 44px));padding:13px 16px;border-radius:14px;background:var(--ink);color:#fff;font-weight:800;font-size:13px;box-shadow:0 18px 40px rgba(0,0,0,.24)}
     .toast.show{display:flex}.toast.error{background:#7a1a1a}
     /* ===== STRICT A4 PORTRAIT CONTAINER ===== */
-    .page{max-width:210mm;min-height:297mm;margin:20px auto;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.08);padding:15mm 18mm;box-sizing:border-box;border:1px solid var(--line);border-radius:8px}
+    .page{max-width:210mm;min-height:297mm;margin:20px auto;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.08);padding:15mm 18mm 24mm;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;position:relative}
+    /* ===== تذييل PDF ثابت في أسفل كل صفحة: QR 80×80 + نص التحقق ===== */
+    .pdf-footer{position:absolute;left:18mm;right:18mm;bottom:8mm;display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:5px}
+    .pdf-footer .pdf-qr{width:80px;height:80px;flex:0 0 80px;display:block}
+    .pdf-footer .pdf-verify{font-size:9px;color:var(--muted);font-weight:600;line-height:1.7}
+    .pdf-footer .pdf-verify b{color:var(--kufic-ink);font-size:9.5px}
+    .pdf-footer .pdf-ref{margin-inline-start:auto;text-align:left;font-size:8px;color:var(--muted);unicode-bidi:embed;direction:ltr}
+    @media print{
+      .pdf-footer{left:15mm;right:15mm;bottom:6mm}
+      .pdf-footer,.pdf-footer *{page-break-inside:avoid}
+    }
     /* ===== SECURITY BADGE (شارة الأمان) ===== */
     .sec-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:8.5px;font-weight:800;background:#FDF6E7;border:1px solid #F1E2C0;color:#8A6414;white-space:nowrap;flex:0 0 auto}
     .sec-badge .chk{display:inline-grid;place-items:center;width:13px;height:13px;border-radius:50%;background:#D97706;color:#fff;font-size:8px;line-height:1}
@@ -824,11 +1223,12 @@ function publicContractHtml(contract, printable) {
     .sig{height:64px;border:1px dashed #C7CDD4;border-radius:6px;display:grid;place-items:center;color:var(--muted);font-size:10px;background:#FCFCFD}.sig img{max-width:90%;max-height:56px}
     .qr-card{flex:0 0 150px;border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;page-break-inside:avoid;break-inside:avoid}
     .qr-card b{display:block;font-size:10.5px;color:var(--kufic-ink);margin-bottom:5px}
-    .qr-card canvas{width:85px;height:85px;border:1px solid var(--line);border-radius:6px;display:block}
+    .qr-card img{width:85px;height:85px;border:1px solid var(--line);border-radius:6px;display:block;background:#fff}
     .qr-card small{display:block;margin-top:4px;font-size:8.5px;color:var(--muted)}
     .disclaimer{margin-top:10px;padding:8px 10px;border-radius:8px;background:#FDF6E7;border:1px solid #F1E2C0;color:#7A5B16;font-size:9.5px;font-weight:600}
     .foot{display:flex;justify-content:space-between;gap:10px;margin-top:10px;color:var(--muted);font-size:9px;border-top:1px solid var(--line);padding-top:6px;flex-wrap:wrap}
     .foot .ref{color:#8A6414;font-weight:700;unicode-bidi:embed;direction:ltr}
+    .foot .fp{color:#8A6414;font-weight:700;unicode-bidi:embed;direction:ltr;letter-spacing:.4px}
     /* ===== REMOTE SIGN FLOW (التوقيع عبر الرابط) ===== */
     .sign-flow{max-width:210mm;margin:18px auto 46px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:0 6px 22px rgba(0,0,0,.07)}
     .sf-top{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px}
@@ -871,7 +1271,7 @@ function publicContractHtml(contract, printable) {
          حتى لا يتغيّر مقاس الـ PDF حسب ورق الطابعة (Letter/A4) أو إعدادات المتصفح
          هوامش الورقة نفسها تُصفّر في الطباعة و min-height يُلغى — وإلا امتلأ
          ارتفاع 297mm بالضبط + هوامش 20px فانزلق آخر شريحة إلى صفحة بيضاء */
-      .page{border:0;box-shadow:none;border-radius:0;width:210mm;margin:0!important;min-height:0;padding:14mm 15mm 12mm;box-sizing:border-box}
+      .page{border:0;box-shadow:none;border-radius:0;width:210mm;margin:0!important;min-height:0;padding:14mm 15mm 26mm;box-sizing:border-box}
       @page{size:210mm 297mm;margin:0}
       .clauses li{page-break-inside:avoid;orphans:2;widows:2}
       .grid{page-break-inside:avoid}
@@ -910,76 +1310,205 @@ function publicContractHtml(contract, printable) {
       <div class="bottom-row">
         <div class="sig-card"><b>توقيع الطرف الأول</b><div class="sig">${sig1}</div></div>
         <div class="sig-card"><b>توقيع الطرف الثاني</b><div class="sig">${sig2}</div></div>
-        <div class="qr-card"><b>رمز التحقق</b><canvas class="qr-canvas" data-url="/share/${html(contract.id || '')}"></canvas><small>امسح للتحقق من العقد</small></div>
+        <div class="qr-card"><b>رمز التحقق</b>${qrSvg}<small>امسح للتحقق من بصمة العقد</small></div>
       </div>
       <div class="disclaimer">تنبيه: هذه الوثيقة مسودة تنظيمية قابلة للمراجعة القانونية، ولا تُعد بديلاً عن استشارة محامٍ مختص في الحالات المعقدة أو عالية القيمة.</div>
-      <footer class="foot"><span>معرّف العقد: ${html(contract.id || '')}</span><span class="ref">Ref: ${html(ref)} | AES-Verified: ${html(verify)}</span><span style="color:#1D4A3E;font-weight:700">🇸🇾 ميثاق — منصة العقود الذكية العربية</span></footer>
+      <footer class="foot"><span>معرّف العقد: ${html(contract.id || '')}</span><span class="ref">Ref: ${html(ref)} | AES: ${html(verify)}</span><span class="fp" title="بصمة SHA-256 لمحتوى العقد">FP: ${html(fingerprint.slice(0, 24).toUpperCase())}…</span><span style="color:#1D4A3E;font-weight:700">🇸🇾 ميثاق — منصة العقود الذكية العربية</span></footer>
+      <footer class="pdf-footer" style="border-top-color:var(--line)">
+        <img class="pdf-qr" src="${qrDataUrl}" alt="رمز التحقق من العقد" width="80" height="80">
+        <div class="pdf-verify"><b>تحقق من صحة العقد: <span style="direction:ltr;unicode-bidi:embed">mithaq.app/verify</span></b><br>امسح الرمز أو أدخل معرّف العقد في صفحة التحقق — بصمة SHA-256 تكشف أي تعديل</div>
+        <div class="pdf-ref">ID: ${html(String(contract.id || '').slice(0, 8))}…<br>FP: ${html(fingerprint.slice(0, 10).toUpperCase())}</div>
+      </footer>
     </article>
     ${signMarkup}
   </main>
   <script>
     var CONTRACT_ID = ${JSON.stringify(contract.id || '')};
-    var SHARE_INFO = ${shareInfo};
-    // مشاركة للتوقيع: نسخ رابط التوقيع + فتح واتساب بملخص العقد
-    function shareForSigning() {
-      var link = location.origin + '/share/' + encodeURIComponent(CONTRACT_ID);
-      var statusAr = SHARE_INFO.status === 'signed' ? 'مُعتمد ومُوقّع رقمياً ✓' : 'قيد التوقيع — بانتظار توقيع الطرفين';
-      var NL = String.fromCharCode(10);
-      var msg = '📝 *عقد ' + SHARE_INFO.typeName + '* من منصة ميثاق' + NL + NL;
-      msg += 'الطرف الأول: ' + (SHARE_INFO.party1 || '') + NL;
-      msg += 'الطرف الثاني: ' + (SHARE_INFO.party2 || '') + NL;
-      if (SHARE_INFO.amount) msg += 'المبلغ: ' + SHARE_INFO.amount + NL;
-      if (SHARE_INFO.date) msg += 'التاريخ: ' + SHARE_INFO.date + NL;
-      msg += 'الحالة: ' + statusAr + NL + NL;
-      msg += '🔗 رابط التوقيع/التحقق: ' + link + NL + NL;
-      msg += '🚨 تم إنشاء هذا العقد عبر منصة ميثاق للعقود الذكية — Ref: ${html(ref)} | AES-Verified: ${html(verify)}';
-      function showToast(text, type) {
-      var el = document.getElementById('toast');
-      if (!el) return;
-      el.textContent = text;
-      el.className = 'toast show' + (type ? ' ' + type : '');
-      clearTimeout(el._t);
-      el._t = setTimeout(function(){ el.className = 'toast'; }, 3000);
-    }
-    function copyLinkAndShare() {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function(){ showToast('تم نسخ رابط التوقيع.'); window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank'); }).catch(function(){ showToast('تعذر النسخ تلقائياً.'); window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank'); });
-      } else {
-        window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-      }
-    }
-    copyLinkAndShare();
-    }
+    var VERIFY_URL = ${JSON.stringify(verifyUrl)};
     ${printable ? "setTimeout(()=>window.print(),550)" : ""}
-    // Render the verification QR into each .qr-canvas (deterministic pattern,
-    // same generator as the dashboard's generateQRCode).
-    (function () {
-      document.querySelectorAll('canvas.qr-canvas').forEach(function (canvas) {
-        var text = location.origin + (canvas.getAttribute('data-url') || '');
-        var size = 170, modules = 25, cell = Math.floor(size / modules);
-        canvas.width = size; canvas.height = size;
-        var ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, size, size);
-        ctx.fillStyle = '#111827';
-        var hash = 0;
-        for (var i = 0; i < text.length; i++) hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
-        function finder(x, y) {
-          for (var r = 0; r < 7; r++) for (var c = 0; c < 7; c++) {
-            if (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
-              ctx.fillRect((x + c) * cell, (y + r) * cell, cell, cell);
-            }
-          }
-        }
-        finder(0, 0); finder(modules - 7, 0); finder(0, modules - 7);
-        var seed = Math.abs(hash);
-        for (var r = 8; r < modules - 8; r++) for (var c = 8; c < modules - 8; c++) {
-          seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-          if (seed % 3 === 0) ctx.fillRect(c * cell, r * cell, cell, cell);
-        }
-      });
-    })();
+    // QR يُولَّد في الخادم (frontend/assets/qr.js) ويُحقن كـ SVG — لا رسم في المتصفح.
     ${signScript}
   </script>
+</body>
+</html>`;
+}
+
+/* ===== صفحة التحقق العامة (/verify/:id) =====
+   صفحة خفيفة وسريعة: تقرأ بيانات العقد دون كشف أي تفاصيل مالية حساسة،
+   تعرض شارة التوثيق وجدول الطرفين وبصمة SHA-256، وتحذّر بالأحمر عند أي تلاعب. */
+function verifyContractHtml(contract, matched) {
+  const typeName = CONTRACT_TYPES[contract.type] || 'عقد';
+  const fingerprint = contractFingerprint(contract);
+  const fp16 = fingerprint.slice(0, 16).toUpperCase();
+  const verifyUrl = getBaseUrl() + contractVerifyPath(contract);
+  const qrSvg = qrCodeSvg.svg(verifyUrl, { size: 110, ecc: 'M', ink: matched ? '#157347' : '#B91C1C' });
+  const p1 = contract.signatures?.party1?.name || contract.party1 || '—';
+  const p2 = contract.signatures?.party2?.name || contract.party2 || '—';
+  const signedAt1 = contract.signatures?.party1?.signedAt || '';
+  const signedAt2 = contract.signatures?.party2?.signedAt || '';
+  const signDates = [signedAt1, signedAt2].filter(Boolean).map(arDate);
+  const lastSignDate = signDates.length ? signDates[signDates.length - 1] : arDate(contract.date || contract.createdAt);
+  const badge = matched
+    ? '<div class="v-badge ok"><span class="ic">✓</span><div><b>عقد موثق وسليم 100%</b><small>البصمة الرقمية مطابقة للأصل المخزّن</small></div></div>'
+    : '<div class="v-badge bad"><span class="ic">✕</span><div><b>هذا العقد غير مطابق للبصمة الأصلية</b><small>رُصد تلاعب أو تعديل غير معتمد على المحتوى</small></div></div>';
+  const badgeColor = matched ? '#157347' : '#B91C1C';
+  const rows = [
+    ['نوع العقد', typeName],
+    ['الطرف الأول', p1],
+    ['الطرف الثاني', p2],
+    ['تاريخ التحرير', arDate(contract.date || contract.createdAt)],
+    ['تاريخ التوقيع', lastSignDate],
+    ['حالة التوقيع', contract.status === 'signed' ? 'موقّع من الطرفين' : (contract.status === 'partially_signed' ? 'توقيع جزئي' : 'قيد التوقيع')]
+  ].map(r => `<tr><th>${html(r[0])}</th><td>${html(r[1])}</td></tr>`).join('');
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>التحقق من العقد — ميثاق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#18251F;--muted:#6B7280;--line:#E5E7EB}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:#F5F6F8;color:var(--ink);font-family:Cairo,Arial,sans-serif}
+.card{width:100%;max-width:560px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.08);overflow:hidden}
+.head{display:flex;align-items:center;gap:10px;padding:16px 22px;border-bottom:1px solid var(--line)}
+.head img{width:34px;height:34px}
+.head b{font-size:16px;font-weight:900;letter-spacing:.5px}
+.head small{display:block;font-size:9.5px;color:var(--muted);font-weight:600}
+.head .id{margin-inline-start:auto;font-size:10px;color:var(--muted);direction:ltr;unicode-bidi:embed}
+.body{padding:22px}
+.v-badge{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;border:1.5px solid;font-weight:800}
+.v-badge.ok{background:#E9F6EE;border-color:#BFE3CD;color:#157347}
+.v-badge.bad{background:#FDECEC;border-color:#F5C2C2;color:#B91C1C}
+.v-badge .ic{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:currentColor;color:#fff;font-size:18px;flex:0 0 auto}
+.v-badge b{display:block;font-size:15px}
+.v-badge small{display:block;font-size:11px;font-weight:600;opacity:.85}
+.qr-wrap{display:flex;gap:16px;align-items:center;margin:18px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:#FAFAFA}
+.qr-wrap img{width:110px;height:110px;border-radius:10px;background:#fff;flex:0 0 auto}
+.qr-wrap p{margin:0;font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.9}
+.qr-wrap b{color:var(--ink);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+tr{border-bottom:1px solid var(--line)}
+tr:last-child{border-bottom:0}
+th{text-align:right;padding:9px 4px;color:var(--muted);font-size:11px;font-weight:700;width:38%;white-space:nowrap}
+td{text-align:right;padding:9px 4px;font-weight:700}
+.fp-box{margin-top:16px;padding:12px 14px;border-radius:12px;border:1.5px dashed ${badgeColor};background:${matched ? '#F2FBF5' : '#FDF2F2'}}
+.fp-box small{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.fp-box code{display:block;direction:ltr;unicode-bidi:embed;font-size:12px;font-weight:800;letter-spacing:.6px;word-break:break-all;color:${badgeColor}}
+.actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:10px;background:#18251F;color:#fff;padding:10px 16px;font:800 12.5px Cairo;cursor:pointer;text-decoration:none}
+.btn-wa{background:#25D366}
+.foot{padding:12px 22px;border-top:1px solid var(--line);text-align:center;font-size:10px;color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <img src="/assets/mithaq-logo.svg" alt="ميثاق">
+    <div><b>مِــيــثَــاق</b><small>خدمة التحقق من العقود الرقمية</small></div>
+    <span class="id">ID: ${html(contract.id || '')}</span>
+  </div>
+  <div class="body">
+    ${badge}
+    <div class="qr-wrap">
+      ${qrSvg}
+      <p><b>رمز التحقق الرسمي</b><br>يشير إلى صفحة هذه البصمة:<br><span style="direction:ltr;unicode-bidi:embed">${html(verifyUrl)}</span></p>
+    </div>
+    <table>${rows}</table>
+    <div class="fp-box">
+      <small>بصمة المحتوى الرقمية (SHA-256) — أول 16 خانة من ${fingerprint.length}</small>
+      <code>${html(fp16)}…</code>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/share/${html(contract.id || '')}">عرض العقد كاملاً</a>
+      <a class="btn" style="background:#6B7280" href="/verify">التحقق من عقد آخر</a>
+      <a class="btn btn-wa" target="_blank" rel="noopener" href="${html(whatsappLink(buildOfficialShareMessage(contract, getBaseUrl() + '/share/' + encodeURIComponent(contract.id || ''))))}">💬 مشاركة عبر واتساب</a>
+    </div>
+  </div>
+  <div class="foot">🛡️ يتحقق هذا الرابط من مطابقة محتوى العقد للبصمة المخزّنة عند التوقيع — منصة ميثاق للعقود الذكية</div>
+</div>
+</body>
+</html>`;
+}
+
+/* ===== صفحة التحقق العامة (/verify) — إدخال يدوي لمعرّف العقد أو فتح مباشر من QR ===== */
+function verifyLandingHtml(prefillId) {
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>التحقق من صحة العقد — ميثاق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#18251F;--muted:#6B7280;--line:#E5E7EB;--green:#157347}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:#F5F6F8;color:var(--ink);font-family:Cairo,Arial,sans-serif}
+.card{width:100%;max-width:560px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.08);overflow:hidden}
+.head{display:flex;align-items:center;gap:10px;padding:16px 22px;border-bottom:1px solid var(--line)}
+.head img{width:34px;height:34px}
+.head b{font-size:16px;font-weight:900;letter-spacing:.5px}
+.head small{display:block;font-size:9.5px;color:var(--muted);font-weight:600}
+.body{padding:22px}
+.hint{font-size:12px;color:var(--muted);font-weight:600;line-height:1.9;margin:0 0 16px}
+label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--ink)}
+.row{display:flex;gap:8px}
+input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font:700 13px Cairo;direction:ltr;text-align:left;outline:none}
+input:focus{border-color:var(--green)}
+button{border:0;border-radius:10px;background:var(--green);color:#fff;padding:11px 18px;font:800 13px Cairo;cursor:pointer;white-space:nowrap}
+.err{display:none;margin-top:12px;padding:11px 14px;border-radius:11px;background:#FDECEC;border:1px solid #F5C2C2;color:#B91C1C;font-weight:700;font-size:12.5px;line-height:1.8}
+.err.show{display:block}
+.steps{margin:18px 0 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:#FAFAFA;font-size:11px;color:var(--muted);font-weight:600;line-height:2}
+.steps b{color:var(--ink)}
+.foot{padding:12px 22px;border-top:1px solid var(--line);text-align:center;font-size:10px;color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <img src="/assets/mithaq-logo.svg" alt="ميثاق">
+    <div><b>مِــيــثَــاق</b><small>خدمة التحقق من العقود الرقمية</small></div>
+  </div>
+  <div class="body">
+    <p class="hint">امسح رمز QR المطبع في تذييل العقد للتحقق الفوري، أو أدخل معرّف العقد يدوياً للتحقق من صحة البصمة الرقمية (SHA-256).</p>
+    <form id="vform">
+      <label for="cid">معرّف العقد (Contract ID)</label>
+      <div class="row">
+        <input id="cid" name="cid" autocomplete="off" spellcheck="false" placeholder="مثال: 5bdeeb18-a33d-4b49…" value="${html(prefillId || '')}">
+        <button type="submit">تحقق الآن</button>
+      </div>
+    </form>
+    <div class="err" id="verr"></div>
+    <div class="steps">
+      <b>ماذا يتحقق النظام؟</b><br>
+      ✅ مطابقة بصمة SHA-256 لمحتوى العقد الحالي مع البصمة المخزّنة عند الإنشاء/التوقيع<br>
+      ✅ حالة التوقيع وتاريخ الإنشاء وأسماء الطرفين (دون تفاصيل مالية حساسة)<br>
+      ❌ أي تعديل ولو بحرف واحد يجعل البصمة غير مطابقة وسيظهر تحذير أحمر
+    </div>
+  </div>
+  <div class="foot">🛡️ صفحة تحقق عامة لا تعرض بيانات حساسة — منصة ميثاق للعقود الذكية</div>
+</div>
+<script>
+  var f = document.getElementById('vform');
+  var errBox = document.getElementById('verr');
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var id = document.getElementById('cid').value.trim();
+    errBox.classList.remove('show');
+    if (!id) { errBox.textContent = 'أدخل معرّف العقد أولاً.'; errBox.classList.add('show'); return; }
+    fetch('/api/verify/' + encodeURIComponent(id)).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (res) {
+      if (res.ok && res.d && res.d.found) { window.location.href = '/verify/' + encodeURIComponent(id); }
+      else { errBox.textContent = (res.d && res.d.message) || 'تعذر التحقق من هذا المعرّف.'; errBox.classList.add('show'); }
+    }).catch(function () { errBox.textContent = 'تعذر الاتصال بالخادم.'; errBox.classList.add('show'); });
+  });
+</script>
 </body>
 </html>`;
 }
@@ -1340,6 +1869,16 @@ function createPaymentRecord({ contractId, method, planId, customerName, custome
   return payment;
 }
 
+/* عرض عام للدفعة: يخفي المعرفات الحساسة عن واجهات المستخدم العادية */
+function publicPaymentView(p) {
+  return {
+    id: p.id, contractId: p.contractId, method: p.method, planTitle: p.planTitle,
+    amountUsd: p.amountUsd, amountSyp: p.amountSyp, currency: p.currency,
+    status: p.status, txid: p.txid ? String(p.txid).slice(0, 10) + '…' : '',
+    createdAt: p.createdAt, confirmedAt: p.confirmedAt || null, updatedAt: p.updatedAt
+  };
+}
+
 function markContractPremium(contractId, paymentId) {
   const found = findContract(contractId);
   if (!found.contract) return null;
@@ -1430,7 +1969,8 @@ async function handleApi(req, res, pathname) {
     return sendJson(res, 201, { ok: true, payment });
   }
 
-  const paymentMatch = pathname.match(/^\/api\/payments\/([^/]+)$/);
+  /* استثناء history و plans من الالتقاط العام :id — لهما مسارات مخصصة */
+  const paymentMatch = pathname.match(/^\/api\/payments\/(?!history$|plans$)([^/]+)$/);
   if (req.method === 'GET' && paymentMatch) {
     const id = decodeURIComponent(paymentMatch[1]);
     const payment = readPayments().find(p => String(p.id) === String(id));
@@ -1484,11 +2024,348 @@ async function handleApi(req, res, pathname) {
     return sendJson(res, 200, { ok: true, payment: payments[index], contract });
   }
 
-  if (req.method === 'GET' && pathname === '/api/health') return sendJson(res, 200, { ok: true, status: 'online', service: 'Mithaq API', time: new Date().toISOString() });
+  /* ===== GOOGLE AUTH (GIS) ===== */
+  /* إعدادات GIS العامة — يقرأها الفرونت إند لعرض زر جوجل */
+  if (req.method === 'GET' && pathname === '/api/auth/config') {
+    return sendJson(res, 200, { ok: true, clientId: GOOGLE_CLIENT_ID, enabled: Boolean(GOOGLE_CLIENT_ID) });
+  }
 
+  /* استلام Credential (ID Token) من زر "Sign in with Google"، تدقيقه، وإنشاء جلسة */
+  if (req.method === 'POST' && pathname === '/api/auth/google') {
+    const body = parseBody(await readBody(req));
+    if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
+    const credential = String(body.credential || '').trim();
+    if (!credential) return sendJson(res, 422, { ok: false, message: 'credential مفقود.' });
+    const verifyResult = await verifyGoogleCredential(credential);
+    if (!verifyResult.ok) {
+      console.error('Google credential verification failed:', verifyResult.message);
+      return sendJson(res, 401, { ok: false, message: verifyResult.message });
+    }
+    const profile = verifyResult.profile;
+    const userId = 'g_' + sha256Hex(profile.sub).slice(0, 24);
+    const session = createSession(userId, profile);
+    return sendJson(res, 200, {
+      ok: true,
+      user: sanitizeSession(session),
+      session: { token: session.sessionId, expiresAt: session.expiresAt }
+    }, { 'Set-Cookie': sessionCookie(session.sessionId, SESSION_TTL_MS / 1000) });
+  }
+
+  /* جلسة المستخدم الحالية (من الكوكيز أو من Authorization: Bearer) */
+  if (req.method === 'GET' && pathname === '/api/auth/me') {
+    const session = parseSessionFromRequest(req);
+    if (!session) return sendJson(res, 401, { ok: false, message: 'لا توجد جلسة نشطة.' });
+    return sendJson(res, 200, { ok: true, user: sanitizeSession(session) });
+  }
+
+  if (req.method === 'POST' && pathname === '/api/auth/logout') {
+    const session = parseSessionFromRequest(req);
+    if (session) deleteSession(session.sessionId);
+    return sendJson(res, 200, { ok: true, message: 'تم تسجيل الخروج.' }, { 'Set-Cookie': sessionCookie('', 0) });
+  }
+
+  /* ================= لوحة المستخدم (Dashboard APIs) ================= */
+  const session = parseSessionFromRequest(req);
+  const user = session ? getUserForSession(session) : null;
+
+  /* الملف الشخصي: جلب / تحديث / حذف الحساب */
+  if (req.method === 'GET' && pathname === '/api/user/profile') {
+    if (!user) return sendJson(res, 401, { ok: false, message: 'سجّل الدخول أولاً.' });
+    return sendJson(res, 200, { ok: true, user });
+  }
+
+  if (req.method === 'PATCH' && pathname === '/api/user/profile') {
+    if (!user) return sendJson(res, 401, { ok: false, message: 'سجّل الدخول أولاً.' });
+    const body = parseBody(await readBody(req));
+    if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
+    const patch = {};
+    if (body.name != null) patch.name = normalize(body.name).slice(0, 80);
+    if (body.email != null) patch.email = normalize(body.email).toLowerCase().slice(0, 120);
+    if (body.phone != null) patch.phone = normalize(body.phone).slice(0, 30);
+    if (body.address != null) patch.address = normalize(body.address).slice(0, 300);
+    if (body.preferences && typeof body.preferences === 'object') {
+      patch.preferences = Object.assign({}, user.preferences, body.preferences);
+    }
+    const updated = updateUserRecord(user.userId, patch);
+    logAudit('user_profile_updated', { userId: user.userId }, user.email);
+    return sendJson(res, 200, { ok: true, user: updated, message: 'تم حفظ التغييرات ✓' });
+  }
+
+  if (req.method === 'DELETE' && pathname === '/api/user/account') {
+    if (!user) return sendJson(res, 401, { ok: false, message: 'سجّل الدخول أولاً.' });
+    /* إزالة الحساب وجلساته؛ العقود تبقى (مستندات قانونية) لكن تُفصل عن الحساب */
+    const users = readUsers().filter(u => String(u.userId) !== String(user.userId));
+    writeUsers(users);
+    const sessions = readEncryptedList(SESSIONS_FILE).filter(s => String(s.userId) !== String(user.userId));
+    writeEncryptedList(SESSIONS_FILE, sessions);
+    logAudit('user_account_deleted', { userId: user.userId, email: user.email }, user.email);
+    return sendJson(res, 200, { ok: true, message: 'تم حذف الحساب نهائياً.' }, { 'Set-Cookie': sessionCookie('', 0) });
+  }
+
+  /* إحصائيات لوحة المستخدم: إجمالي/موقعة/بانتظار/مسودات + آخر العقود */
+  if (req.method === 'GET' && pathname === '/api/stats/dashboard') {
+    if (!user) return sendJson(res, 401, { ok: false, message: 'سجّل الدخول أولاً.' });
+    const all = readContracts().filter(c => c.owner && String(c.owner.userId) === String(user.userId));
+    const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+    const stats = {
+      total: all.length,
+      signed: all.filter(c => c.status === 'signed').length,
+      pending: all.filter(c => c.status === 'partially_signed').length,
+      drafts: all.filter(c => !c.status || c.status === 'draft').length,
+      thisMonth: all.filter(c => new Date(c.createdAt || 0).getTime() >= monthStart.getTime()).length,
+      favorites: all.filter(c => c.favorite).length
+    };
+
+  if (req.method === 'GET' && pathname === '/api/health') return sendJson(res, 200, { ok: true, status: 'online', service: 'Mithaq API', time: new Date().toISOString() });
+      const recent = all.slice().sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 6).map(c => ({
+        id: c.id, type: c.typeName || CONTRACT_TYPES[c.type] || 'عقد', party2: c.party2 || '',
+        status: c.status || 'draft', createdAt: c.createdAt, signedAt: (c.signatures && c.signatures.party2 && c.signatures.party2.signedAt) || null
+      }));
+      return sendJson(res, 200, { ok: true, stats, recent });
+    }
+
+  /* ===== الاشتراك والفواتير ===== */
+  if (req.method === 'GET' && pathname === '/api/subscription') {
+    if (!user) return sendJson(res, 401, { ok: false, message: 'سجّل الدخول أولاً.' });
+    const payments = readPayments().filter(p => p.customerContact === user.email || p.payerEmail === user.email);
+    return sendJson(res, 200, {
+      ok: true,
+      subscription: { plan: user.plan, planExpiresAt: user.planExpiresAt, autoRenew: user.autoRenew !== false },
+      plans: ['basic', 'verified', 'freelancer', 'office', 'legal_review'].map(getPremiumPlan),
+      payments: payments.map(publicPaymentView)
+    });
+  }
+
+  if (req.method === 'POST' && pathname === '/api/subscription/cancel') {
+    if (!user) return sendJson(res, 401, { ok: false, message: 'سجّل الدخول أولاً.' });
+    const updated = updateUserRecord(user.userId, { plan: 'free', planExpiresAt: null, autoRenew: false });
+    logAudit('subscription_cancelled', { userId: user.userId, previousPlan: user.plan }, user.email);
+    return sendJson(res, 200, { ok: true, subscription: updated, message: 'تم إلغاء الاشتراك. ستبقى المزايا حتى نهاية الفترة المدفوعة إن وُجدت.' });
+  }
+
+  if (req.method === 'GET' && pathname === '/api/payments/history') {
+    if (!user) return sendJson(res, 401, { ok: false, message: 'سجّل الدخول أولاً.' });
+    const payments = readPayments().filter(p => p.customerContact === user.email || p.payerEmail === user.email);
+    return sendJson(res, 200, { ok: true, payments: payments.map(publicPaymentView) });
+  }
+
+  /* ================= لوحة المشرف (Admin APIs) — تتطلب جلسة مشرف ================= */
+  const adminMatch = pathname.match(/^\/api\/admin(\/.*)?$/);
+  if (adminMatch) {
+    const admin = parseSessionFromRequest(req);
+    if (!isAdminSession(admin)) return sendJson(res, 403, { ok: false, message: 'صلاحيات مشرف مطلوبة.' });
+    const sub = adminMatch[1] || '';
+    const adminActor = admin.email || admin.userId;
+
+    /* نظرة عامة: KPIs حقيقية من المخازن */
+    if (req.method === 'GET' && (sub === '' || sub === '/')) {
+      const contracts = readContracts();
+      const payments = readPayments();
+      const users = readUsers();
+      const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+      const paid = payments.filter(p => p.status === 'paid');
+      const revenue = paid.reduce((s, p) => s + (Number(p.amountUsd) || 0), 0);
+      return sendJson(res, 200, {
+        ok: true,
+        kpis: {
+          users: users.length,
+          contracts: contracts.length,
+          contractsToday: contracts.filter(c => new Date(c.createdAt || 0).getTime() >= dayStart.getTime()).length,
+          signedRate: contracts.length ? Math.round(contracts.filter(c => c.status === 'signed').length * 100 / contracts.length) : 0,
+          revenueUsd: Math.round(revenue * 100) / 100,
+          pendingPayments: payments.filter(p => ['pending', 'manual_review'].includes(p.status)).length,
+          activeSubscriptions: users.filter(u => u.plan && u.plan !== 'free').length
+        },
+        contractTypes: countBy(contracts, c => c.typeName || CONTRACT_TYPES[c.type] || 'عقد'),
+        paymentStatus: countBy(payments, p => p.status)
+      });
+    }
+
+    /* إدارة المستخدمين */
+    if (req.method === 'GET' && sub === '/users') {
+      const users = readUsers().map(u => ({
+        userId: u.userId, name: u.name, email: u.email, phone: u.phone, plan: u.plan,
+        planExpiresAt: u.planExpiresAt, createdAt: u.createdAt, lastSeenAt: u.lastSeenAt,
+        contracts: readContracts().filter(c => c.owner && String(c.owner.userId) === String(u.userId)).length
+      }));
+      return sendJson(res, 200, { ok: true, users });
+    }
+
+    const adminUserMatch = sub.match(/^\/users\/([^/]+)$/);
+    if (adminUserMatch && (req.method === 'PATCH' || req.method === 'DELETE')) {
+      const uid = decodeURIComponent(adminUserMatch[1]);
+      if (req.method === 'DELETE') {
+        const users = readUsers().filter(u => String(u.userId) !== String(uid));
+        if (users.length === readUsers().length) return sendJson(res, 404, { ok: false, message: 'المستخدم غير موجود.' });
+        writeUsers(users);
+        logAudit('admin_user_deleted', { userId: uid }, adminActor);
+        return sendJson(res, 200, { ok: true, message: 'تم حذف المستخدم.' });
+      }
+      const body = parseBody(await readBody(req));
+      if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
+      const patch = {};
+      if (body.plan != null) { patch.plan = normalize(body.plan); patch.planExpiresAt = body.plan === 'free' ? null : new Date(Date.now() + 30 * 864e5).toISOString(); }
+      if (body.name != null) patch.name = normalize(body.name);
+      const updated = updateUserRecord(uid, patch);
+      if (!updated) return sendJson(res, 404, { ok: false, message: 'المستخدم غير موجود.' });
+      logAudit('admin_user_updated', { userId: uid, patch: Object.keys(patch) }, adminActor);
+      return sendJson(res, 200, { ok: true, user: updated });
+    }
+
+    /* إدارة العقود: عرض الكل + حذف */
+    if (req.method === 'GET' && sub === '/contracts') {
+      const contracts = readContracts().map(c => ({
+        id: c.id, type: c.typeName || CONTRACT_TYPES[c.type] || 'عقد', party1: c.party1, party2: c.party2,
+        status: c.status || 'draft', createdAt: c.createdAt,
+        owner: (c.owner && (c.owner.email || c.owner.name)) || ''
+      }));
+      return sendJson(res, 200, { ok: true, contracts });
+    }
+
+    const adminContractMatch = sub.match(/^\/contracts\/([^/]+)$/);
+    if (adminContractMatch && req.method === 'DELETE') {
+      const cid = decodeURIComponent(adminContractMatch[1]);
+      const contracts = readContracts();
+      const next = contracts.filter(c => String(c.id) !== String(cid));
+      if (next.length === contracts.length) return sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
+      writeContracts(next);
+      logAudit('admin_contract_deleted', { contractId: cid }, adminActor);
+      return sendJson(res, 200, { ok: true, message: 'تم حذف العقد.' });
+    }
+
+    /* المدفوعات: القائمة + موافقة/رفض يدوي */
+    if (req.method === 'GET' && sub === '/payments') {
+      const payments = readPayments().map(p => Object.assign({}, p, {
+        payer: p.customerContact || p.payerEmail || p.customerName || ''
+      }));
+      return sendJson(res, 200, { ok: true, payments });
+    }
+
+    const adminPayMatch = sub.match(/^\/payments\/([^/]+)\/verify$/);
+    if (adminPayMatch && req.method === 'POST') {
+      const pid = decodeURIComponent(adminPayMatch[1]);
+      const body = parseBody(await readBody(req));
+      if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
+      const action = normalize(body.action);
+      const payments = readPayments();
+      const index = payments.findIndex(p => String(p.id) === String(pid));
+      if (index < 0) return sendJson(res, 404, { ok: false, message: 'عملية الدفع غير موجودة.' });
+      if (payments[index].status === 'paid' && action === 'approve') return sendJson(res, 409, { ok: false, message: 'هذه الدفعة مؤكدة مسبقاً.' });
+      if (action === 'approve') {
+        payments[index].status = 'paid';
+        payments[index].confirmedAt = new Date().toISOString();
+        payments[index].confirmedBy = adminActor;
+        /* ترقية مستخدم المنصة إن كان البريد مربوطاً بحساب، وتمييز العقد كمميز */
+        const email = normalize(payments[index].customerContact || '').toLowerCase();
+        if (email) {
+          const users = readUsers();
+          const uidx = users.findIndex(u => normalize(String(u.email || '')).toLowerCase() === email);
+          if (uidx >= 0) {
+            users[uidx].plan = payments[index].planId;
+            users[uidx].planExpiresAt = new Date(Date.now() + 30 * 864e5).toISOString();
+            writeUsers(users);
+          }
+        }
+        writePayments(payments);
+        const contract = markContractPremium(payments[index].contractId, payments[index].id);
+        logAudit('payment_approved', { paymentId: pid, amountUsd: payments[index].amountUsd, txid: payments[index].txid }, adminActor);
+        return sendJson(res, 200, { ok: true, payment: payments[index], contract, message: 'تم تأكيد الدفعة وتفعيل المزايا.' });
+      }
+      if (action === 'reject') {
+        payments[index].status = 'rejected';
+        payments[index].rejectionReason = normalize(body.reason || '');
+        payments[index].confirmedBy = adminActor;
+        writePayments(payments);
+        logAudit('payment_rejected', { paymentId: pid, reason: payments[index].rejectionReason }, adminActor);
+        return sendJson(res, 200, { ok: true, payment: payments[index], message: 'تم رفض الدفعة.' });
+      }
+      return sendJson(res, 422, { ok: false, message: 'الإجراء يجب أن يكون approve أو reject.' });
+    }
+
+    /* دفعة يدوية (USDT/شام كاش نقداً) من المشرف */
+    if (req.method === 'POST' && sub === '/payments/manual') {
+      const body = parseBody(await readBody(req));
+      if (!body) return sendJson(res, 400, { ok: false, message: 'صيغة JSON غير صحيحة.' });
+      const plan = getPremiumPlan(normalize(body.planId) || 'verified');
+      const payment = createPaymentRecord({
+        contractId: normalize(body.contractId) || '', method: ['sham_cash', 'crypto_usdt'].includes(body.method) ? body.method : 'crypto_usdt',
+        planId: plan.id, customerName: body.customerName, customerContact: body.customerContact
+      });
+      payment.txid = normalize(body.txid || '');
+      payment.status = 'paid';
+      payment.confirmedAt = new Date().toISOString();
+      payment.confirmedBy = adminActor;
+      payment.notes = normalize(body.notes || '');
+      const payments = readPayments();
+      payments.unshift(payment);
+      writePayments(payments);
+      if (payment.contractId) markContractPremium(payment.contractId, payment.id);
+      logAudit('payment_manual_entry', { paymentId: payment.id, amountUsd: payment.amountUsd }, adminActor);
+      return sendJson(res, 201, { ok: true, payment, message: 'تم تسجيل الدفعة اليدوية.' });
+    }
+
+    /* سجل التدقيق */
+    if (req.method === 'GET' && sub === '/logs') {
+      return sendJson(res, 200, { ok: true, logs: readAudit().slice(0, 200) });
+    }
+
+    return sendJson(res, 404, { ok: false, message: 'مسار إداري غير معروف.' });
+  }
+
+  /* ===== واجهة التحقق JSON (تستخدمها صفحة /verify للاستعلام قبل التحويل) ===== */
+  const apiVerifyMatch = pathname.match(/^\/api\/verify\/([^/]+)$/);
+  if (req.method === 'GET' && apiVerifyMatch) {
+    const id = decodeURIComponent(apiVerifyMatch[1]);
+    const { contract } = findContract(id);
+    if (!contract) return sendJson(res, 404, { ok: false, found: false, valid: false, message: 'لا يوجد عقد بهذا المعرّف.' });
+    const integrity = verifyContractIntegrity(contract);
+    if (integrity.resealed) {
+      const all = readContracts();
+      const idx = all.findIndex(c => String(c.id) === String(contract.id));
+      if (idx >= 0) { all[idx].contentHash = contract.contentHash; writeContracts(all); }
+    }
+    /* لا تُعرض أرقام مالية ولا توقيعات — أسماء الأطراف وحالة التوقيع فقط */
+    return sendJson(res, 200, {
+      ok: true,
+      found: true,
+      valid: integrity.matched,
+      contractId: contract.id,
+      status: contract.status || 'draft',
+      signatureStatus: contract.status === 'signed' ? 'signed' : (contract.status === 'partially_signed' ? 'partially_signed' : 'unsigned'),
+      createdAt: contract.createdAt || null,
+      signedAt: (contract.signatures && contract.signatures.party2 && contract.signatures.party2.signedAt) || null,
+      parties: { party1: contract.party1 || '', party2: contract.party2 || '' },
+      type: CONTRACT_TYPES[contract.type] || 'عقد',
+      fingerprint: contractFingerprint(contract),
+      expectedFingerprint: normalize(contract.contentHash || '') || null,
+      verifyUrl: getBaseUrl() + contractVerifyPath(contract),
+      qr: contract.qrDataUrl ? { present: true, sealedFor: contract.qrSealedFor || null } : { present: false }
+    });
+  }
+
+  /* عقود المستخدم: عند وجود جلسة صالحة تُعاد عقوده فقط (مرتبطة بحسابه)، وإلا كل العقود (وضع الضيف) */
   if (req.method === 'GET' && pathname === '/api/contracts') {
-    const contracts = readContracts().sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
-    return sendJson(res, 200, { ok: true, contracts });
+    const session = parseSessionFromRequest(req);
+    const all = readContracts().sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+    const contracts = session ? all.filter(c => c.owner && c.owner.userId === session.userId) : all;
+    return sendJson(res, 200, { ok: true, contracts, scoped: Boolean(session) });
+  }
+
+  /* بيانات زر المشاركة: رابط واتساب رسمي جاهز + حالة إعدادات تيليجرام */
+  const shareInfoMatch = pathname.match(/^\/api\/contracts\/([^/]+)\/share-info$/);
+  if (req.method === 'GET' && shareInfoMatch) {
+    const { contract } = findContract(decodeURIComponent(shareInfoMatch[1]));
+    if (!contract) return sendJson(res, 404, { ok: false, message: 'العقد غير موجود.' });
+    const link = getBaseUrl() + '/share/' + encodeURIComponent(contract.id || '');
+    const verifyLink = getBaseUrl() + contractVerifyPath(contract);
+    return sendJson(res, 200, {
+      ok: true,
+      link,
+      verifyLink,
+      whatsappUrl: whatsappLink(buildOfficialShareMessage(contract, link)),
+      fingerprint: contractFingerprint(contract),
+      telegramConfigured: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID)
+    });
   }
 
   const idMatch = pathname.match(/^\/api\/contracts\/([^/]+)$/);
@@ -1508,6 +2385,11 @@ async function handleApi(req, res, pathname) {
     const validation = validatePayload(body, false);
     if (!validation.ok) return sendJson(res, 422, { ok: false, message: validation.message });
     const contract = makeContract(validation.data);
+    /* ربط العقد بحساب صاحبه عند وجود جلسة نشطة */
+    const session = parseSessionFromRequest(req);
+    if (session) contract.owner = { userId: session.userId, name: session.name, email: session.email };
+    /* ختم QR التحقق داخل بيانات العقد (معرّف + بصمة + وقت + حالة) */
+    refreshContractQr(contract);
     const contracts = readContracts();
     contracts.unshift(contract);
     writeContracts(contracts);
@@ -1524,6 +2406,9 @@ async function handleApi(req, res, pathname) {
     if (!validation.ok) return sendJson(res, 422, { ok: false, message: validation.message });
     const updated = Object.assign({}, found.contract, validation.data, { typeName: CONTRACT_TYPES[validation.data.type], updatedAt: new Date().toISOString() });
     updated.content = buildContractContent(updated);
+    /* إعادة ختم البصمة بعد التعديل المصرّح به من صاحب العقد */
+    updated.contentHash = contractFingerprint(updated);
+    refreshContractQr(updated);
     found.contracts[found.index] = updated;
     writeContracts(found.contracts);
     return sendJson(res, 200, { ok: true, contract: updated });
@@ -1562,11 +2447,20 @@ async function handleApi(req, res, pathname) {
     found.contract.signatureMetadata = Array.isArray(found.contract.signatureMetadata) ? found.contract.signatureMetadata : [];
     found.contract.signatures[party] = { name, dataUrl, signedAt: metadata.timestamp, metadata };
     found.contract.signatureMetadata.push({ party, name, ...metadata });
-    found.contract.status = found.contract.signatures.party1 && found.contract.signatures.party2 ? 'signed' : 'partially_signed';
+    const becameSigned = found.contract.signatures.party1 && found.contract.signatures.party2;
+    found.contract.status = becameSigned ? 'signed' : 'partially_signed';
     found.contract.updatedAt = new Date().toISOString();
     found.contract.content = buildContractContent(found.contract);
+    /* إعادة ختم البصمة بعد التوقيع ليصبح التوقيع جزءاً من الوثيقة المحمية */
+    found.contract.contentHash = contractFingerprint(found.contract);
+    refreshContractQr(found.contract);
     found.contracts[found.index] = found.contract;
     writeContracts(found.contracts);
+    /* 🔔 تنبيه فوري عبر تيليجرام لصاحب العقد عند إتمام التوقيع */
+    notifyContractEvent(found.contract, becameSigned ? 'signed' : 'signing', {
+      actorName: name,
+      actorParty: party === 'party1' ? 'الطرف الأول' : 'الطرف الثاني'
+    });
     return sendJson(res, 200, { ok: true, contract: found.contract });
   }
 
@@ -1650,10 +2544,33 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && pathname === '/favicon.svg') return serveAsset(res, 'favicon.svg');
     const share = pathname.match(/^\/share\/([^/]+)$/);
     const print = pathname.match(/^\/print\/([^/]+)$/);
-    if ((req.method === 'GET') && (share || print)) {
-      const id = decodeURIComponent((share || print)[1]);
+    const verify = pathname.match(/^\/verify\/([^/]+)$/);
+    if (req.method === 'GET' && pathname === '/verify') return sendHtml(res, 200, verifyLandingHtml(''));
+    if ((req.method === 'GET') && (share || print || verify)) {
+      const id = decodeURIComponent((share || print || verify)[1]);
       const { contract } = findContract(id);
-      return contract ? sendHtml(res, 200, publicContractHtml(contract, Boolean(print))) : sendText(res, 404, 'العقد غير موجود.');
+      if (!contract) return sendText(res, 404, 'العقد غير موجود.');
+      if (share) {
+        /* 🔔 تنبيه تيليجرام عند فتح العميل لرابط العقد (مع تهدئة 15 دقيقة لكل عقد) */
+        if (!hasRecentIntent(contract.id, 'opened')) {
+          recordIntent(contract.id, 'opened');
+          notifyContractEvent(contract, 'opened', { actorName: contract.party2 });
+        }
+        return sendHtml(res, 200, publicContractHtml(contract, false));
+      }
+      if (verify) {
+        /* صفحة التحقق العامة: تقارن بصمة المحتوى الحالية بالبصمة المرجعية المخزّنة.
+           العقود القديمة (قبل نظام البصمة) تُختم تلقائياً في أول زيارة تحقق. */
+        const integrity = verifyContractIntegrity(contract);
+        if (integrity.resealed) {
+          const all = readContracts();
+          const idx = all.findIndex(c => String(c.id) === String(contract.id));
+          if (idx >= 0) { all[idx].contentHash = contract.contentHash; writeContracts(all); }
+        }
+        const matched = integrity.matched;
+        return sendHtml(res, 200, verifyContractHtml(contract, matched));
+      }
+      return sendHtml(res, 200, publicContractHtml(contract, true));
     }
     if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html' || pathname === '/frontend/index.html')) return serveFrontend(res);
     if (req.method === 'GET' && pathname === '/marketing') return serveHtmlFile(res, MARKETING_FILE, 'ملف التسويق غير موجود.');

@@ -1,0 +1,34 @@
+# ===== Render.com Blueprint لمشروع ميثاق =====
+# النشر: اربط مستودع Git في Render → New + → Blueprint
+# سيُنشأ Web Service مع قرص ثابت محمّل على /var/data/mithaq
+# ليبقى العقود والمستخدمون محفوظين بعد كل نشر أو إعادة تشغيل
+services:
+  - type: web
+    name: mithaq
+    runtime: node
+    plan: starter
+    region: frankfurt  # أقرب منطقة للشرق الأوسط من مناطق Render
+    buildCommand: npm install
+    startCommand: node backend/server.js
+    healthCheckPath: /api/health
+    disk:
+      name: mithaq-data
+      mountPath: /var/data/mithaq
+      sizeGB: 1
+    envVars:
+      - key: DATA_DIR
+        value: /var/data/mithaq
+      - key: BASE_URL
+        sync: false        # تُعبّأ يدوياً: https://miithaq.com
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false        # إيميل المشرف مفصول بفواصل
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://miithaq.com

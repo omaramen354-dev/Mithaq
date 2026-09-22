@@ -1,19 +1,31 @@
 {
   "name": "mithaq-platform",
-  "version": "1.0.0",
-  "description": "Mithaq Arabic smart contracts platform backend and frontend",
-  "main": "backend/server.js",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Mithaq — Arabic smart contracts platform (Next.js App Router + Neon Postgres)",
   "scripts": {
-    "dev": "node backend/server.js",
-    "start": "npm run dev",
-    "serve": "node backend/server.js",
-    "check": "node -c backend/server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
-  "keywords": [
-    "mithaq",
-    "contracts",
-    "arabic"
-  ],
-  "author": "",
-  "license": "MIT"
+  "dependencies": {
+    "next": "^15.1.6",
+    "next-auth": "^5.0.0-beta.25",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@neondatabase/serverless": "^0.10.4",
+    "drizzle-orm": "^0.38.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "drizzle-kit": "^0.30.1",
+    "typescript": "^5.7.0"
+  }
 }

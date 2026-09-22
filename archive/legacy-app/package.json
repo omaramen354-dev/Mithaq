@@ -1,0 +1,19 @@
+{
+  "name": "mithaq-platform",
+  "version": "1.0.0",
+  "description": "Mithaq Arabic smart contracts platform backend and frontend",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "node backend/server.js",
+    "start": "npm run dev",
+    "serve": "node backend/server.js",
+    "check": "node --check backend/server.js"
+  },
+  "keywords": [
+    "mithaq",
+    "contracts",
+    "arabic"
+  ],
+  "author": "",
+  "license": "MIT"
+}
