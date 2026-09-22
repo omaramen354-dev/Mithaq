@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   return (
@@ -13,8 +14,9 @@ export default function LoginPage() {
       }}
     >
       <div className="card" style={{ maxWidth: 420, padding: 28, textAlign: "center" }}>
-        <h1 style={{ margin: "0 0 6px", fontSize: 22, fontWeight: 900 }}>
-          مِــيــثَــاق
+        <Logo height={40} />
+        <h1 style={{ margin: "8px 0 6px", fontSize: 18, fontWeight: 900 }}>
+          منصة العقود الذكية العربية
         </h1>
         <p style={{ color: "var(--muted)", fontSize: 13, margin: "0 0 22px" }}>
           منصة العقود والتوثيق الإلكتروني — سجّل الدخول للمتابعة

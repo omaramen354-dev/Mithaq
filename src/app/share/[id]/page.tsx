@@ -7,6 +7,7 @@ import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
 import { contractVerification } from "@/lib/fingerprint";
 import ShareSignPad from "@/components/signing/ShareSignPad";
+import Logo from "@/components/Logo";
 import { buildOfficialShareMessage, whatsappLink } from "@/lib/whatsapp";
 import { shareUrlFor } from "@/lib/fingerprint";
 
@@ -73,7 +74,7 @@ export default async function SharePage({ params }: Props) {
           }}
         >
           <div style={{ flex: 1, minWidth: 200 }}>
-            <b style={{ fontSize: 16, fontWeight: 900 }}>مِــيــثَــاق</b>
+            <Logo height={22} />
             <small style={{ display: "block", color: "var(--muted)", fontSize: 11 }}>
               منظومة العقود والتوثيق الإلكتروني
             </small>

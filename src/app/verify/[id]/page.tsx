@@ -5,6 +5,7 @@ import { contracts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
+import Logo from "@/components/Logo";
 
 export const dynamic = "force-dynamic";
 
@@ -77,7 +78,7 @@ export default async function VerifyPage({ params }: Props) {
             borderBottom: "1px solid var(--line)",
           }}
         >
-          <b style={{ fontSize: 16, fontWeight: 900 }}>مِــيــثَــاق</b>
+          <Logo height={20} />
           <small style={{ color: "var(--muted)", fontSize: 11 }}>
             خدمة التحقق من العقود الرقمية
           </small>

@@ -10,6 +10,14 @@ const cairo = Cairo({
 export const metadata: Metadata = {
   title: "ميثاق — منصة العقود الذكية العربية",
   description: "أنشئ العقود ووقّعها رقمياً وتحقق منها — منصة ميثاق",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://miithaq.com"),
+  openGraph: {
+    title: "ميثاق — منصة العقود الذكية العربية",
+    description: "أنشئ العقود ووقّعها رقمياً وتحقق منها",
+    siteName: "ميثاق",
+    locale: "ar_AR",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
