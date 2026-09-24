@@ -94,12 +94,22 @@ const statements = [
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
   )`,
+  /* guest_prompt_seen — سجل بصمة IP للضيوف (تذكير التسجيل مرة واحدة) */
+  `CREATE TABLE IF NOT EXISTS guest_prompt_seen (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    ip_hash text NOT NULL UNIQUE,
+    user_agent text DEFAULT '',
+    drafts_saved integer NOT NULL DEFAULT 1,
+    seen_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+  )`,
   /* الفهارس */
   `CREATE INDEX IF NOT EXISTS users_email_idx ON users (email)`,
   `CREATE INDEX IF NOT EXISTS contracts_owner_idx ON contracts (owner_id)`,
   `CREATE INDEX IF NOT EXISTS contracts_status_idx ON contracts (status)`,
   `CREATE INDEX IF NOT EXISTS contracts_created_idx ON contracts (created_at)`,
   `CREATE INDEX IF NOT EXISTS sig_events_contract_idx ON signature_events (contract_id)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS guest_prompt_ip_hash_idx ON guest_prompt_seen (ip_hash)`,
 ];
 
 console.log("⏳ إنشاء الجداول في Neon عبر HTTPS...");

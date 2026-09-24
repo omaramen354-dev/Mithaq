@@ -3,6 +3,7 @@ import {
   text,
   timestamp,
   boolean,
+  integer,
   jsonb,
   uuid,
   index,
@@ -133,6 +134,22 @@ export const signatureEvents = pgTable(
   (t) => [index("sig_events_contract_idx").on(t.contractId)]
 );
 
+/* ===== سجل تذكير الضيوف بالتسجيل — يمنع تكرار نافذة
+   "سجّل الدخول" لنفس الزائر (بصمة IP) بعد إنشاء أول عقد ضيف.
+   ملاحظة:ipv4/ipv6 مخزنة مجزأة (آخر جزء مخفي) لأغراض الخصوصية ===== */
+export const guestPromptSeen = pgTable(
+  "guest_prompt_seen",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ipHash: text("ip_hash").notNull(), // SHA-256(ip + salt) — لا نخزن الـ IP الخام
+    userAgent: text("user_agent").default(""),
+    draftsSaved: integer("drafts_saved").notNull().default(1),
+    seenAt: timestamp("seen_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("guest_prompt_ip_hash_idx").on(t.ipHash)]
+);
+
 /* ===== طلبات الدفع (شام كاش / USDT / Cryptomus) ===== */
 export const paymentRequests = pgTable("payment_requests", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -160,3 +177,4 @@ export type Contract = typeof contracts.$inferSelect;
 export type NewContract = typeof contracts.$inferInsert;
 export type SignatureEvent = typeof signatureEvents.$inferSelect;
 export type PaymentRequest = typeof paymentRequests.$inferSelect;
+export type GuestPromptSeen = typeof guestPromptSeen.$inferSelect;

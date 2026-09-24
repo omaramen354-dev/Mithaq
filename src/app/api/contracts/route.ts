@@ -12,6 +12,11 @@ export const runtime = "nodejs";
 
 /* ============================================================
    /api/contracts — GET (قائمة عقود المستخدم) | POST (إنشاء عقد)
+
+   Guest-First: الضيف يجرب بناء العقد في الواجهة كاملاً دون تسجيل.
+   كل عمليات الكتابة هنا للمسجلين فقط (401 JSON لغير المسجلين).
+   مسودة الضيف تُحفظ في قاعدة البيانات بعد الدخول عبر
+   POST /api/contracts/restore (بجلسة صالحة) — انظر NewContractForm.
    ============================================================ */
 
 type CreateBody = {
@@ -53,6 +58,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  /* الحماية: الكتابة للمسجلين فقط — الضيف يمر عبر بوابة الواجهة */
   const session = await auth();
   if (!session?.user?.dbId) {
     return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
