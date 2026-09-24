@@ -5,10 +5,10 @@ import { signIn } from "next-auth/react";
 import Logo from "@/components/Logo";
 
 /* ============================================================
-   LoginGateModal — النافذة المنبثقة الأنيقة عند بوابة الضيف
-   تظهر عندما يحاول زائر حفظ العقد أو طباعة PDF قبل تسجيل الدخول.
-   المسودة محفوظة مسبقاً في LocalStorage عبر GuestDraft —
-   عند العودة من Google يستعيد النموذج بياناته ويحفظها تلقائياً.
+   LoginGateModal — نافذة تأكيد الحفظ
+   تظهر للزائر عند حفظ العقد أو طباعته: خطوة واحدة سريعة
+   عبر Google، وبيانات العقد محفوظة على جهازه وستُستعاد
+   تلقائياً بعد الدخول.
    ============================================================ */
 
 export default function LoginGateModal({
@@ -24,7 +24,6 @@ export default function LoginGateModal({
 
   useEffect(() => {
     if (!open) return;
-    /* إغلاق بمفتاح Escape */
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -60,7 +59,6 @@ export default function LoginGateModal({
           padding: "28px 26px",
           textAlign: "center",
           position: "relative",
-          animation: "fadeInUp 0.25s ease",
         }}
       >
         <button
@@ -88,14 +86,14 @@ export default function LoginGateModal({
         </div>
 
         <h2 style={{ margin: "4px 0 6px", fontSize: 17, fontWeight: 900 }}>
-          {action === "print" ? "طباعة PDF" : "حفظ العقد"} — خطوة واحدة تفصلك
+          {action === "print" ? "طباعة العقد" : "حفظ العقد"} — خطوة واحدة
         </h2>
         <p style={{ color: "var(--muted)", fontSize: 13, margin: "0 0 8px" }}>
-          عقدك جاهز ومحفوظ مؤقتاً على جهازك ✅
+          بيانات عقدك محفوظة على جهازك ✅
         </p>
         <p style={{ color: "var(--muted)", fontSize: 12.5, margin: "0 0 20px" }}>
-          سجّل الدخول عبر Google في ثوانٍ ليُحفظ العقد في قاعدة البيانات
-          مع بصمة SHA-256 ورابط توقيع وتحقق —{" "}
+          سجّل الدخول عبر Google ليُحفظ العقد في حسابك مع بصمة SHA-256 ورابط
+          توقيع وتحقق —{" "}
           <b style={{ color: "var(--ink)" }}>
             وستجده في لوحتك تلقائياً بعد الدخول دون إعادة كتابة أي شيء.
           </b>
@@ -107,7 +105,6 @@ export default function LoginGateModal({
           disabled={busy}
           onClick={() => {
             setBusy(true);
-            /* callbackUrl إلى الرئيسية — component يستعيد المسودة ويحفظها تلقائياً */
             signIn("google", { callbackUrl: "/" });
           }}
         >
@@ -117,7 +114,7 @@ export default function LoginGateModal({
               d="M21.35 11.1H12v2.9h5.35c-.25 1.4-1.7 4.1-5.35 4.1A6.1 6.1 0 1 1 16.2 7l2.2-2.1A9 9 0 1 0 21 12c0-.3 0-.6-.05-.9z"
             />
           </svg>
-          {busy ? "جاري التحويل…" : "الدخول عبر Google"}
+          {busy ? "جاري التحويل…" : "المتابعة عبر Google"}
         </button>
 
         <button
@@ -125,7 +122,7 @@ export default function LoginGateModal({
           style={{ width: "100%", justifyContent: "center", marginTop: 8 }}
           onClick={onClose}
         >
-          متابعة كضيف الآن
+          رجوع
         </button>
 
         <p style={{ color: "var(--muted)", fontSize: 10.5, margin: "12px 0 0" }}>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CONTRACT_TYPES, contractTypeName } from "@/lib/contract-types";
-import { resolveClauses, buildContractContent } from "@/lib/contract-text";
+import { buildContractContent } from "@/lib/contract-text";
 import { arDate } from "@/lib/format";
 import {
   saveGuestDraft,
@@ -16,14 +16,11 @@ import ClausePickerModal from "./ClausePickerModal";
 import LoginGateModal from "./LoginGateModal";
 
 /* ============================================================
-   NewContractForm — نموذج إنشاء العقد (Guest-First)
-   - متاح بالكامل للضيف: تعبئة + اختيار بنود + معاينة ديناميكية حية
-   - «حفظ في قاعدة البيانات» أو «طباعة PDF» للضيف:
-       1) تُحفظ المسودة في LocalStorage
-       2) تظهر نافذة أنيقة تطلب الدخول عبر Google
-       3) بعد العودة: استعادة تلقائية + حفظ فوري في Neon عبر
-          POST /api/contracts/restore (يرجع العقد إلى الجدول)
-   - للمسجل: نفس الأزرار تعمل فوراً وبشكل طبيعي
+   NewContractForm — نموذج إنشاء العقد
+   واجهة واحدة طبيعية للجميع: نفس العنوان والأزرار، بلا أي
+   كلمات "تجربة/ضيف/بدون تسجيل". المسجل يحفظ مباشرة، والزائر
+   عند الحفظ/الطباعة يُحفظ مسودته محلياً وتظهر نافذة الدخول
+   الأنيقة، وبعد عودته تُستعاد بياناته وتُحفظ تلقائياً.
    ============================================================ */
 
 type FieldStyle = React.CSSProperties;
@@ -95,7 +92,7 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
   const router = useRouter();
 
   /* ===== الحالة ===== */
-  const [open, setOpen] = useState(() => mode === "guest");
+  const [open, setOpen] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -107,7 +104,7 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
   const [gateOpen, setGateOpen] = useState(false);
   const [gateAction, setGateAction] = useState<"save" | "print">("save");
 
-  /* ===== استعادة مسودة الضيف (مرة واحدة عند التركيب) ===== */
+  /* ===== استعادة المسودة المحفوظة (مرة واحدة عند التركيب) ===== */
   const restoredRef = useRef(false);
   useEffect(() => {
     if (restoredRef.current) return;
@@ -117,7 +114,7 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
     if (!draft) return;
 
     if (mode === "user") {
-      /* عاد من Google مسجلاً — استعادة + حفظ فوري في Neon */
+      /* عاد من الدخول — استعادة + حفظ فوري في Neon */
       (async () => {
         try {
           const res = await fetch("/api/contracts/restore", {
@@ -127,34 +124,29 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
           });
           const data = await res.json();
           if (!res.ok || !data.ok)
-            throw new Error(data.message || "تعذر حفظ مسودتك");
+            throw new Error(data.message || "تعذر حفظ العقد");
           clearGuestDraft();
-          setNotice("✅ تم استعادة مسودتك وحفظها في عقودك بنجاح");
+          setNotice("✅ تم حفظ عقدك في عقودك بنجاح");
           setOpen(false);
           router.refresh();
         } catch (e) {
-          /* فشل الاستعادة — نعيد فتح النموذج معبأ كي لا يفقد المستخدم شيئاً */
           setForm(formFromDraft(draft));
           setClauses(draft.clauses || []);
           setOpen(true);
-          setNotice("");
           setError(
-            "⚠️ " +
-              ((e as Error).message ||
-                "تعذر الحفظ التلقائي — بياناتك محفوظة على جهازك، اضغط «حفظ» لإعادة المحاولة")
+            "⚠️ تعذر الحفظ التلقائي — بياناتك محفوظة، اضغط «حفظ العقد» لإعادة المحاولة"
           );
         }
       })();
     } else {
-      /* ضيف عاد دون تسجيل — نعيد تعبئة النموذج كي لا يفقد شيئاً */
+      /* زائر عاد دون دخول — نعيد تعبئة النموذج كي لا يفقد شيئاً */
       setForm(formFromDraft(draft));
       setClauses(draft.clauses || []);
       setOpen(true);
-      setNotice("♻️ استعدنا مسودتك المحفوظة على جهازك — أكمل حيث توقفت");
     }
   }, [mode, router]);
 
-  /* ===== المعاينة الديناميكية الحية ===== */
+  /* ===== المعاينة الحية ===== */
   const preview = useMemo(() => {
     const cleanClauses = clauses.map((c) => c.trim()).filter(Boolean);
     return buildContractContent({
@@ -170,22 +162,6 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
       clauses: cleanClauses.length ? cleanClauses : undefined,
       date: new Date(),
     });
-  }, [form, clauses]);
-
-  const liveClauseCount = useMemo(() => {
-    const clean = clauses.map((c) => c.trim()).filter(Boolean);
-    if (clean.length) return clean.length;
-    return resolveClauses({
-      type: form.type,
-      party1Name: form.party1,
-      party2Name: form.party2,
-      amount: form.amount,
-      city: form.city,
-      subject: form.subject,
-      duration: form.duration,
-      paymentMethod: form.paymentMethod,
-      date: new Date(),
-    }).length;
   }, [form, clauses]);
 
   /* ===== مناولة الحقول ===== */
@@ -210,32 +186,34 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
     };
   }
 
-  /* تحقق خفيف قبل فتح بوابة الدخول أو الإرسال */
   function basicValidation(): string {
     if (!form.party1.trim()) return "أدخل اسم الطرف الأول أولاً.";
     if (!form.party2.trim()) return "أدخل اسم الطرف الثاني أولاً.";
     return "";
   }
 
-  /* ===== بوابة الضيف: حفظ محلي + نافذة تسجيل الدخول ===== */
-  function guestGate(action: "save" | "print") {
-    saveGuestDraft({ ...form, clauses: clauses.map((c) => c.trim()).filter(Boolean) });
+  /* ===== بوابة الحفظ: حفظ محلي + نافذة الدخول (للزائر) ===== */
+  function gate(action: "save" | "print") {
+    saveGuestDraft({
+      ...form,
+      clauses: clauses.map((c) => c.trim()).filter(Boolean),
+    });
     markPendingClaim();
     setGateAction(action);
     setGateOpen(true);
   }
 
-  /* ===== حفظ في قاعدة البيانات ===== */
+  /* ===== حفظ العقد ===== */
   async function submit() {
     setError("");
+    setNotice("");
     const v = basicValidation();
     if (v) {
       setError(v);
       return;
     }
     if (mode === "guest") {
-      guestGate("save");
-      setNotice("💾 حفظنا مسودتك على جهازك — سجّل الدخول لإتمام الحفظ في عقودك");
+      gate("save");
       return;
     }
     setBusy(true);
@@ -262,19 +240,18 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
   /* ===== طباعة / PDF ===== */
   async function printContract() {
     setError("");
+    setNotice("");
     const v = basicValidation();
     if (v) {
       setError(v);
       return;
     }
     if (mode === "guest") {
-      guestGate("print");
-      setNotice("💾 حفظنا مسودتك على جهازك — بعد الدخول ستجد زر الطباعة في جدول عقودك");
+      gate("print");
       return;
     }
     setBusy(true);
     try {
-      /* للمسجل: حفظ ثم فتح نسخة A4 القابلة للطباعة/PDF مباشرة */
       const res = await fetch("/api/contracts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -304,23 +281,14 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
         }}
       >
         <div>
-          <b style={{ fontSize: 15 }}>
-            {mode === "guest"
-              ? "جرّب المنصة — أنشئ عقدك الآن بدون تسجيل"
-              : "عقودي — عقد جديد"}
-          </b>
+          <b style={{ fontSize: 15 }}>عقد جديد</b>
           <p style={{ color: "var(--muted)", fontSize: 12, margin: "2px 0 0" }}>
-            {mode === "guest"
-              ? "عبّئ النموذج واختر البنود وشاهد مسودة عقدك تتولد أمامك — الحفظ الدائم والطباعة يتطلبان دخولاً سريعاً بـ Google"
-              : "أنشئ عقداً جديداً ووقّعه رقمياً مع بصمة تحقق SHA-256."}
+            املأ البيانات واختر البنود — سيتولد نص العقد أمامك فوراً، ووقّعه
+            رقمياً مع بصمة تحقق SHA-256.
           </p>
         </div>
         <button className="btn" type="button" onClick={() => setOpen((o) => !o)}>
-          {open
-            ? "✕ إغلاق النموذج"
-            : mode === "guest"
-              ? "✍️ ابدأ عقدك الآن — مجاناً"
-              : "＋ عقد جديد"}
+          {open ? "✕ إغلاق النموذج" : "＋ عقد جديد"}
         </button>
       </div>
 
@@ -465,20 +433,14 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                 alignItems: "center",
               }}
             >
-              <b style={{ fontSize: 13 }}>
-                بنود العقد ({clauses.length})
-                <span style={{ color: "var(--muted)", fontWeight: 600, fontSize: 11 }}>
-                  {" "}
-                  — ستُظهر المسودة {liveClauseCount} بنداً
-                </span>
-              </b>
+              <b style={{ fontSize: 13 }}>بنود العقد ({clauses.length})</b>
               <button
                 className="btn btn-soft"
                 type="button"
                 style={{ padding: "6px 12px", fontSize: 12 }}
                 onClick={() => setPickerOpen(true)}
               >
-                ＋ بنود جاهزة (محررة قانونياً)
+                ＋ بنود جاهزة
               </button>
               <button
                 className="btn btn-soft"
@@ -506,8 +468,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
 
             {clauses.length === 0 && (
               <p style={{ color: "var(--muted)", fontSize: 12, margin: 0 }}>
-                لا بنود مخصصة — سنستخدم البنود الافتراضية لنوع العقد
-                «{contractTypeName(form.type)}» تلقائياً في المعاينة والحفظ.
+                ستُستخدم البنود الافتراضية لنوع العقد «
+                {contractTypeName(form.type)}» تلقائياً.
               </p>
             )}
 
@@ -554,13 +516,13 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
             ))}
           </div>
 
-          {/* ===== المعاينة الديناميكية ===== */}
+          {/* ===== المعاينة الحية ===== */}
           <details
             open
             style={{ borderTop: "1px dashed var(--line)", paddingTop: 12 }}
           >
             <summary style={{ cursor: "pointer", fontWeight: 900, fontSize: 13 }}>
-              👁️ معاينة مسودة العقد — تتحدث فورياً أثناء الكتابة
+              👁️ معاينة العقد — تتحدث فورياً أثناء الكتابة
             </summary>
             <div
               className="box"
@@ -618,11 +580,7 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn" type="submit" disabled={busy}>
-              {busy
-                ? "جاري…"
-                : mode === "guest"
-                  ? "💾 حفظ العقد في قاعدة البيانات"
-                  : "💾 حفظ العقد"}
+              {busy ? "جاري…" : "💾 حفظ العقد"}
             </button>
             <button
               className="btn btn-soft"
@@ -630,20 +588,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               disabled={busy}
               onClick={printContract}
             >
-              🖨️ طباعة العقد وتحميله كـ PDF
+              🖨️ طباعة / PDF
             </button>
-            {mode === "guest" && (
-              <small
-                style={{
-                  color: "var(--muted)",
-                  fontSize: 11,
-                  alignSelf: "center",
-                }}
-              >
-                الحفظ الدائم يحتاج دخولاً سريعاً — بياناتك تبقى محفوظة على جهازك
-                ولن تضيع
-              </small>
-            )}
           </div>
         </form>
       )}

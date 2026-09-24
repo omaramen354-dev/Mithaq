@@ -10,24 +10,19 @@ import DashboardClient from "@/components/dashboard/DashboardClient";
 export const dynamic = "force-dynamic";
 
 /* ============================================================
-   الصفحة الرئيسية — لوحة إدارة العقود (Guest-First)
-   - للضيف: اللوحة تفتح مباشرة دون تسجيل — تجربة كاملة لنموذج
-     الإنشاء والبنود والمعاينة الديناميكية، والحفظ/الطباعة
-     يفتحان نافذة تسجيل دخول مع حفظ المسودة محلياً (LocalStorage)
-     واستعادتها تلقائياً بعد الدخول.
-   - للمسجل: جلب العقود مباشرة من Neon عبر Drizzle db.select
-     (بنفس منطق GET /api/contracts تماماً).
-   - المسار عام في middleware — الحماية الحقيقية على عمليات
-     الكتابة داخل الـ APIs (401 لغير المسجلين).
+   منصة ميثاق — الصفحة الرئيسية
+   واجهة واحدة طبيعية للجميع: أي زائر يفتح المنصة مباشرة
+   وينشئ عقداً كاملاً (نموذج + بنود + معاينة حية). عند الحفظ
+   أو الطباعة يطلب دخولاً سريعاً عبر Google مع حفظ بياناته
+   واستعادتها تلقائياً. المسجل يرى عقوده من Neon عبر Drizzle.
    ============================================================ */
 
 export default async function Home() {
-  /* 1) من هو الزائر؟ (بدون أي redirect — الرئيسية عامة) */
   const session = await auth();
   const dbId = session?.user?.dbId;
   const isUser = Boolean(dbId);
 
-  /* 2) عقود المسجل من Neon — الضيف يرى لوحة فارغة للتجربة */
+  /* عقود المسجل من Neon — الزائر يرى نموذج الإنشاء مباشرة */
   const rows: Contract[] = isUser
     ? await db
         .select()
@@ -38,7 +33,6 @@ export default async function Home() {
 
   return (
     <main style={{ padding: 20 }}>
-      {/* ترويسة اللوحة + شريط الضيف الترحيبي */}
       <DashboardClient
         mode={isUser ? "user" : "guest"}
         userName={session?.user?.name}
@@ -48,7 +42,6 @@ export default async function Home() {
         }}
       />
 
-      {/* نموذج الإنشاء + جدول العقود (Client Components مربوطة بالـ APIs) */}
       <div style={{ maxWidth: 1020, margin: "0 auto" }}>
         <NewContractForm mode={isUser ? "user" : "guest"} />
         {isUser && <ContractsTable contracts={rows} />}
