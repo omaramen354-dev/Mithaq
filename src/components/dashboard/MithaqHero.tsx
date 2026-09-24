@@ -1,5 +1,7 @@
 "use client";
 
+import MithaqHeroButtons from "./MithaqHeroButtons";
+
 /* ============================================================
    MithaqHero — الهيرو الأسطوري (v1)
    نقشة السداسيات الزخرفية + شعار المنصة الذهبي + الشارة،
@@ -7,13 +9,7 @@
    بإمالة 3D تتحرك مع الفأرة — منقولة بوفاء من التصميم الأصلي.
    ============================================================ */
 
-export default function MithaqHero({
-  onCreateClick,
-  onTypesClick,
-}: {
-  onCreateClick: () => void;
-  onTypesClick: () => void;
-}) {
+export default function MithaqHero() {
   return (
     <section className="hero">
       {/* نقشة السداسيات الزخرفية — نفس SVG الأصلي */}
@@ -115,16 +111,7 @@ export default function MithaqHero({
           PDF ببصمة تحقق SHA-256 — كل ذلك من مكان واحد.
         </p>
 
-        <div className="hero-actions">
-          <button className="btn btn-primary" onClick={onCreateClick}>
-            <i className="fas fa-file-circle-plus" />
-            إنشاء عقد جديد
-          </button>
-          <button className="btn btn-outline" onClick={onTypesClick}>
-            <i className="fas fa-layer-group" />
-            استعراض القوالب
-          </button>
-        </div>
+        <MithaqHeroButtons />
       </div>
 
       {/* بطاقة الوثيقة الزجاجية بإمالة 3D */}

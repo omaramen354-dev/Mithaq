@@ -53,18 +53,7 @@ export default async function Home() {
       <div className="main-wrapper">
         <DashboardTopbar />
 
-        <MithaqHero
-          onCreateClick={() => {
-            document
-              .getElementById("create")
-              ?.scrollIntoView({ behavior: "smooth" });
-          }}
-          onTypesClick={() => {
-            document
-              .getElementById("types")
-              ?.scrollIntoView({ behavior: "smooth" });
-          }}
-        />
+        <MithaqHero />
 
         <StatsBar contracts={rows.length} />
 
