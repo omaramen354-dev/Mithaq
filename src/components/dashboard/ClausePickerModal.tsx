@@ -4,10 +4,8 @@ import { useMemo, useState } from "react";
 import { DEFAULT_CLAUSES } from "@/lib/clauses";
 
 /* ============================================================
-   ClausePickerModal — نافذة اختيار البنود الجاهزة لنوع العقد
-   تفتح من زر "إضافة بنود جاهزة" في نموذج الإنشاء، وتتيح
-   تحديد بنود متعددة (مع فرز حسب الأكثر اختياراً) ثم إضافتها
-   دفعة واحدة إلى قائمة بنود العقد الجاري تحريره.
+   ClausePickerModal — نافذة اختيار البنود (الهوية الأسطورية)
+   بطاقة عاجية، تحديد بحد ذهبي وخلفية ذهبية فاتحة.
    ============================================================ */
 
 export default function ClausePickerModal({
@@ -26,7 +24,6 @@ export default function ClausePickerModal({
   const candidates = DEFAULT_CLAUSES[contractType] || [];
   const [selected, setSelected] = useState<number[]>([]);
 
-  /* البنود المضافة سابقاً — لتعطيل إضافتها مرتين */
   const existingSet = useMemo(
     () => new Set(existingClauses.map((c) => c.trim())),
     [existingClauses]
@@ -56,8 +53,8 @@ export default function ClausePickerModal({
         position: "fixed",
         inset: 0,
         zIndex: 1000,
-        background: "rgba(15, 28, 22, 0.55)",
-        backdropFilter: "blur(4px)",
+        background: "rgba(7, 31, 26, 0.58)",
+        backdropFilter: "blur(10px)",
         display: "grid",
         placeItems: "center",
         padding: 20,
@@ -68,17 +65,18 @@ export default function ClausePickerModal({
         onClick={(e) => e.stopPropagation()}
         className="card"
         style={{
-          maxWidth: 640,
+          maxWidth: 660,
           width: "100%",
           margin: 0,
           maxHeight: "85vh",
           display: "flex",
           flexDirection: "column",
+          borderRadius: 30,
         }}
       >
         <header
           style={{
-            padding: "16px 20px",
+            padding: "18px 22px",
             borderBottom: "1px solid var(--line)",
             display: "flex",
             alignItems: "center",
@@ -87,8 +85,12 @@ export default function ClausePickerModal({
           }}
         >
           <div>
-            <b style={{ fontSize: 15 }}>بنود جاهزة — محررها قانونياً</b>
-            <p style={{ color: "var(--muted)", fontSize: 11.5, margin: "2px 0 0" }}>
+            <b style={{ fontSize: 15.5, color: "var(--green)" }}>
+              بنود جاهزة — محررة قانونياً
+            </b>
+            <p
+              style={{ color: "var(--muted)", fontSize: 11.5, margin: "3px 0 0" }}
+            >
               اختر ما يناسب عقدك — تُعبأ الحقول بين [الأقواس] تلقائياً من بيانات
               النموذج
             </p>
@@ -110,13 +112,13 @@ export default function ClausePickerModal({
           </button>
         </header>
 
-        <div style={{ padding: "14px 20px", overflowY: "auto", flex: 1 }}>
+        <div style={{ padding: "16px 22px", overflowY: "auto", flex: 1 }}>
           {candidates.length === 0 && (
             <p style={{ color: "var(--muted)", fontSize: 13 }}>
               لا توجد بنود جاهزة لهذا النوع — أضف بنودك يدوياً من النموذج.
             </p>
           )}
-          <div style={{ display: "grid", gap: 8 }}>
+          <div style={{ display: "grid", gap: 9 }}>
             {candidates.map((text, i) => {
               const exists = isExisting(i);
               const checked = selected.includes(i);
@@ -127,12 +129,15 @@ export default function ClausePickerModal({
                     display: "flex",
                     gap: 10,
                     alignItems: "flex-start",
-                    padding: "10px 12px",
-                    border: `1.5px solid ${checked ? "var(--green)" : "var(--line)"}`,
-                    borderRadius: 10,
-                    background: checked ? "#f2f8f4" : "#fff",
+                    padding: "11px 13px",
+                    border: `1.5px solid ${checked ? "var(--gold)" : "var(--line)"}`,
+                    borderRadius: 16,
+                    background: checked
+                      ? "linear-gradient(135deg, #fff7d8, #fffdf6)"
+                      : "#fffefa",
                     cursor: exists ? "not-allowed" : "pointer",
-                    opacity: exists ? 0.55 : 1,
+                    opacity: exists ? 0.5 : 1,
+                    transition: "0.2s var(--ease)",
                   }}
                 >
                   <input
@@ -140,7 +145,7 @@ export default function ClausePickerModal({
                     checked={checked}
                     disabled={exists}
                     onChange={() => toggle(i)}
-                    style={{ marginTop: 4, accentColor: "var(--green)" }}
+                    style={{ marginTop: 4, accentColor: "var(--gold)" }}
                   />
                   <span style={{ fontSize: 12.5, lineHeight: 1.8 }}>{text}</span>
                 </label>
@@ -151,11 +156,10 @@ export default function ClausePickerModal({
 
         <footer
           style={{
-            padding: "14px 20px",
+            padding: "16px 22px",
             borderTop: "1px solid var(--line)",
             display: "flex",
-            gap: 8,
-            justifyContent: "flex-start",
+            gap: 9,
             flexWrap: "wrap",
             alignItems: "center",
           }}
@@ -164,7 +168,7 @@ export default function ClausePickerModal({
             className="btn"
             type="button"
             disabled={!selected.length}
-            style={{ opacity: selected.length ? 1 : 0.5 }}
+            style={{ opacity: selected.length ? 1 : 0.55 }}
             onClick={add}
           >
             إضافة البنود المحددة ({selected.length})

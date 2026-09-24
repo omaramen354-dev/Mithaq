@@ -6,15 +6,16 @@ import Logo from "@/components/Logo";
 import { loadGuestDraft } from "@/lib/guest-draft";
 
 /* ============================================================
-   صفحة /login — دخول Google
-   Guest-First: إذا وصل الزائر هنا من بوابة الحفظ/الطباعة فمسودته
-   محفوظة في LocalStorage — نطمئنه بأنها ستجد طريقها لعقوده
-   تلقائياً بعد الدخول، ولا نمسحها إلا بعد نجاح الاستعادة
-   في NewContractForm (وضع user).
+   صفحة /login — بالهوية الأسطورية (عاجي + زمردي + ذهبي)
+   إذا وصل الزائر من بوابة الحفظ/الطباعة فمسودته محفوظة
+   محلياً وستستعاد تلقائياً بعد الدخول.
    ============================================================ */
 
 export default function LoginPage() {
-  const [draftInfo, setDraftInfo] = useState<{ party1: string; party2: string } | null>(null);
+  const [draftInfo, setDraftInfo] = useState<{
+    party1: string;
+    party2: string;
+  } | null>(null);
 
   useEffect(() => {
     const d = loadGuestDraft();
@@ -34,14 +35,48 @@ export default function LoginPage() {
     >
       <div
         className="card"
-        style={{ maxWidth: 420, padding: 28, textAlign: "center" }}
+        style={{
+          maxWidth: 430,
+          padding: 30,
+          textAlign: "center",
+          borderRadius: 30,
+          border: "1px solid rgba(212, 168, 67, 0.45)",
+          boxShadow: "0 34px 80px rgba(0,0,0,0.22)",
+        }}
       >
-        <Logo height={40} />
-        <h1 style={{ margin: "8px 0 6px", fontSize: 18, fontWeight: 900 }}>
+        <div
+          style={{
+            display: "grid",
+            placeItems: "center",
+            marginBottom: 12,
+          }}
+        >
+          <div
+            style={{
+              padding: 14,
+              borderRadius: 24,
+              background: "linear-gradient(135deg, #071f1a, #1d4a3e)",
+              boxShadow: "var(--shadow)",
+            }}
+          >
+            <Logo height={44} />
+          </div>
+        </div>
+
+        <h1
+          style={{
+            margin: "8px 0 6px",
+            fontSize: 19,
+            fontWeight: 900,
+            color: "var(--green)",
+          }}
+        >
           منصة العقود الذكية العربية
         </h1>
-        <p style={{ color: "var(--muted)", fontSize: 13, margin: "0 0 22px" }}>
-          منصة العقود والتوثيق الإلكتروني — سجّل الدخول للمتابعة
+        <p
+          style={{ color: "var(--muted)", fontSize: 13, margin: "0 0 22px" }}
+        >
+          منظومة العقود والتوثيق الإلكتروني — سجّل الدخول للمتابعة
         </p>
 
         {draftInfo && (
@@ -49,10 +84,10 @@ export default function LoginPage() {
             style={{
               textAlign: "right",
               fontSize: 12,
-              background: "#f2f8f4",
-              border: "1px solid #d8ead9",
-              borderRadius: 10,
-              padding: "10px 14px",
+              background: "linear-gradient(135deg, #fff7d8, #fffdf6)",
+              border: "1px solid rgba(212, 168, 67, 0.4)",
+              borderRadius: 14,
+              padding: "11px 14px",
               margin: "0 0 16px",
               lineHeight: 1.8,
             }}
@@ -76,21 +111,24 @@ export default function LoginPage() {
 
         <button
           className="btn"
-          style={{ width: "100%", justifyContent: "center" }}
+          style={{ width: "100%", justifyContent: "center", padding: "13px 18px" }}
           onClick={() => signIn("google", { callbackUrl: "/" })}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
             <path
-              fill="#fff"
+              fill="currentColor"
               d="M21.35 11.1H12v2.9h5.35c-.25 1.4-1.7 4.1-5.35 4.1A6.1 6.1 0 1 1 16.2 7l2.2-2.1A9 9 0 1 0 21 12c0-.3 0-.6-.05-.9z"
             />
           </svg>
           الدخول عبر Google
         </button>
 
-        <p style={{ color: "var(--muted)", fontSize: 11, margin: "14px 0 0" }}>
-          <a href="/" style={{ color: "var(--green-2)", fontWeight: 800 }}>
-            ← متابعة كضيف بدون تسجيل
+        <p style={{ color: "var(--muted)", fontSize: 11.5, margin: "15px 0 0" }}>
+          <a
+            href="/"
+            style={{ color: "var(--green)", fontWeight: 900 }}
+          >
+            ← متابعة إلى المنصة
           </a>
         </p>
       </div>

@@ -10,11 +10,10 @@ import DashboardClient from "@/components/dashboard/DashboardClient";
 export const dynamic = "force-dynamic";
 
 /* ============================================================
-   منصة ميثاق — الصفحة الرئيسية
-   واجهة واحدة طبيعية للجميع: أي زائر يفتح المنصة مباشرة
-   وينشئ عقداً كاملاً (نموذج + بنود + معاينة حية). عند الحفظ
-   أو الطباعة يطلب دخولاً سريعاً عبر Google مع حفظ بياناته
-   واستعادتها تلقائياً. المسجل يرى عقوده من Neon عبر Drizzle.
+   منصة ميثاق — الصفحة الرئيسية (الهوية الأسطورية)
+   أي زائر يفتح المنصة مباشرة وينشئ عقداً كاملاً بنفس واجهة
+   النسخة الأصلية الزمردية الذهبية. عند الحفظ/الطباعة فقط
+   يطلب دخولاً سريعاً عبر Google مع استعادة بياناته تلقائياً.
    ============================================================ */
 
 export default async function Home() {
@@ -22,7 +21,6 @@ export default async function Home() {
   const dbId = session?.user?.dbId;
   const isUser = Boolean(dbId);
 
-  /* عقود المسجل من Neon — الزائر يرى نموذج الإنشاء مباشرة */
   const rows: Contract[] = isUser
     ? await db
         .select()
@@ -47,18 +45,20 @@ export default async function Home() {
         {isUser && <ContractsTable contracts={rows} />}
       </div>
 
-      <p
-        style={{
-          maxWidth: 1020,
-          margin: "10px auto 24px",
-          textAlign: "center",
-          color: "var(--muted)",
-          fontSize: 11,
-        }}
-      >
-        🛡️ كل عقد يحمل بصمة رقمية SHA-256 وتاريخ توقيع موثق — لا يمكن التعديل
-        بعد توقيع الطرفين.
-      </p>
+      <div style={{ maxWidth: 1020, margin: "0 auto" }}>
+        <hr className="gold-rule" />
+        <p
+          style={{
+            textAlign: "center",
+            color: "var(--muted)",
+            fontSize: 11.5,
+            fontWeight: 700,
+          }}
+        >
+          🛡️ كل عقد يحمل بصمة رقمية SHA-256 وتاريخ توقيع موثق — لا يمكن التعديل
+          بعد توقيع الطرفين.
+        </p>
+      </div>
     </main>
   );
 }

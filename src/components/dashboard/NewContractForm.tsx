@@ -16,29 +16,30 @@ import ClausePickerModal from "./ClausePickerModal";
 import LoginGateModal from "./LoginGateModal";
 
 /* ============================================================
-   NewContractForm — نموذج إنشاء العقد
-   واجهة واحدة طبيعية للجميع: نفس العنوان والأزرار، بلا أي
-   كلمات "تجربة/ضيف/بدون تسجيل". المسجل يحفظ مباشرة، والزائر
-   عند الحفظ/الطباعة يُحفظ مسودته محلياً وتظهر نافذة الدخول
-   الأنيقة، وبعد عودته تُستعاد بياناته وتُحفظ تلقائياً.
+   NewContractForm — نموذج إنشاء العقد (الهوية الأسطورية)
+   حقول عاجية بتركيز ذهبي + أزرار ذهبية — نفس منطق الحفظ
+   والاستعادة السابق دون أي تغيير.
    ============================================================ */
 
 type FieldStyle = React.CSSProperties;
 
 const input: FieldStyle = {
   width: "100%",
+  minHeight: 44,
   padding: "10px 12px",
-  border: "1.5px solid var(--line)",
-  borderRadius: 9,
+  border: "1px solid var(--line)",
+  borderRadius: 14,
   font: "inherit",
-  background: "#fff",
+  background: "#fffefa",
+  outline: "none",
+  transition: "0.2s var(--ease)",
 };
 
 const label: FieldStyle = {
   display: "block",
   fontSize: 12,
-  fontWeight: 800,
-  color: "var(--muted)",
+  fontWeight: 900,
+  color: "var(--green)",
   margin: "0 0 4px",
 };
 
@@ -91,7 +92,6 @@ function formFromDraft(d: GuestDraft): FormState {
 export default function NewContractForm({ mode }: { mode: DashboardMode }) {
   const router = useRouter();
 
-  /* ===== الحالة ===== */
   const [open, setOpen] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -99,12 +99,11 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [clauses, setClauses] = useState<string[]>([]);
 
-  /* المودالات */
   const [pickerOpen, setPickerOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateAction, setGateAction] = useState<"save" | "print">("save");
 
-  /* ===== استعادة المسودة المحفوظة (مرة واحدة عند التركيب) ===== */
+  /* ===== استعادة المسودة المحفوظة (مرة واحدة) ===== */
   const restoredRef = useRef(false);
   useEffect(() => {
     if (restoredRef.current) return;
@@ -114,7 +113,6 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
     if (!draft) return;
 
     if (mode === "user") {
-      /* عاد من الدخول — استعادة + حفظ فوري في Neon */
       (async () => {
         try {
           const res = await fetch("/api/contracts/restore", {
@@ -139,7 +137,6 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
         }
       })();
     } else {
-      /* زائر عاد دون دخول — نعيد تعبئة النموذج كي لا يفقد شيئاً */
       setForm(formFromDraft(draft));
       setClauses(draft.clauses || []);
       setOpen(true);
@@ -164,7 +161,6 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
     });
   }, [form, clauses]);
 
-  /* ===== مناولة الحقول ===== */
   function set(k: keyof FormState, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
   }
@@ -192,7 +188,6 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
     return "";
   }
 
-  /* ===== بوابة الحفظ: حفظ محلي + نافذة الدخول (للزائر) ===== */
   function gate(action: "save" | "print") {
     saveGuestDraft({
       ...form,
@@ -203,7 +198,6 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
     setGateOpen(true);
   }
 
-  /* ===== حفظ العقد ===== */
   async function submit() {
     setError("");
     setNotice("");
@@ -237,7 +231,6 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
     }
   }
 
-  /* ===== طباعة / PDF ===== */
   async function printContract() {
     setError("");
     setNotice("");
@@ -270,7 +263,10 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
   }
 
   return (
-    <section className="card" style={{ padding: "16px 20px" }}>
+    <section
+      className="card"
+      style={{ padding: "24px 26px", borderRadius: 30 }}
+    >
       <div
         style={{
           display: "flex",
@@ -281,10 +277,12 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
         }}
       >
         <div>
-          <b style={{ fontSize: 15 }}>عقد جديد</b>
-          <p style={{ color: "var(--muted)", fontSize: 12, margin: "2px 0 0" }}>
-            املأ البيانات واختر البنود — سيتولد نص العقد أمامك فوراً، ووقّعه
-            رقمياً مع بصمة تحقق SHA-256.
+          <b style={{ fontSize: 17, color: "var(--green)", fontWeight: 900 }}>
+            عقد جديد
+          </b>
+          <p style={{ color: "var(--muted)", fontSize: 12.5, margin: "3px 0 0" }}>
+            املأ البيانات واختر البنود — سيتولد نص العقد أمامك فوراً ببصمة تحقق
+            SHA-256.
           </p>
         </div>
         <button className="btn" type="button" onClick={() => setOpen((o) => !o)}>
@@ -292,9 +290,11 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
         </button>
       </div>
 
+      <hr className="gold-rule" />
+
       {open && (
         <form
-          style={{ marginTop: 16, display: "grid", gap: 12 }}
+          style={{ display: "grid", gap: 13 }}
           onSubmit={(e) => {
             e.preventDefault();
             submit();
@@ -306,7 +306,9 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               <select
                 value={form.type}
                 onChange={(e) => set("type", e.target.value)}
-                style={input}
+                style={{ ...input, padding: 0 }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               >
                 {Object.entries(CONTRACT_TYPES).map(([key, name]) => (
                   <option key={key} value={key}>
@@ -320,7 +322,9 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               <select
                 value={form.signingMode}
                 onChange={(e) => set("signingMode", e.target.value)}
-                style={input}
+                style={{ ...input, padding: 0 }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               >
                 <option value="send">إرسال للطرف الثاني عبر الرابط</option>
                 <option value="quick">توقيع سريع على نفس الجهاز</option>
@@ -334,6 +338,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                 maxLength={120}
                 placeholder="اسم المؤجر / البائع / مقدم الخدمة"
                 style={input}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               />
             </div>
             <div>
@@ -344,6 +350,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                 maxLength={120}
                 placeholder="اسم المستأجر / المشتري / المستفيد"
                 style={input}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               />
             </div>
           </div>
@@ -357,6 +365,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                 maxLength={120}
                 placeholder="مثال: 500,000 ل.س"
                 style={input}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               />
             </div>
             <div>
@@ -367,6 +377,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                 maxLength={80}
                 placeholder="دمشق"
                 style={input}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               />
             </div>
             <div>
@@ -376,6 +388,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                 onChange={(e) => set("country", e.target.value)}
                 maxLength={80}
                 style={input}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               />
             </div>
             <div>
@@ -386,6 +400,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                 maxLength={120}
                 placeholder="سنة واحدة"
                 style={input}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               />
             </div>
           </div>
@@ -398,6 +414,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               maxLength={200}
               placeholder="وصف موجز لموضوع العقد"
               style={input}
+              onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+              onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
             />
           </div>
 
@@ -409,6 +427,8 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               maxLength={120}
               placeholder="شهري / دفعة واحدة"
               style={input}
+              onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+              onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
             />
           </div>
 
@@ -419,7 +439,9 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               onChange={(e) => set("notes", e.target.value)}
               maxLength={2000}
               rows={3}
-              style={{ ...input, resize: "vertical" }}
+              style={{ ...input, padding: 12, resize: "vertical" }}
+              onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+              onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
             />
           </div>
 
@@ -433,11 +455,13 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                 alignItems: "center",
               }}
             >
-              <b style={{ fontSize: 13 }}>بنود العقد ({clauses.length})</b>
+              <b style={{ fontSize: 13.5, color: "var(--green)" }}>
+                بنود العقد ({clauses.length})
+              </b>
               <button
                 className="btn btn-soft"
                 type="button"
-                style={{ padding: "6px 12px", fontSize: 12 }}
+                style={{ padding: "7px 14px", fontSize: 12 }}
                 onClick={() => setPickerOpen(true)}
               >
                 ＋ بنود جاهزة
@@ -445,7 +469,7 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               <button
                 className="btn btn-soft"
                 type="button"
-                style={{ padding: "6px 12px", fontSize: 12 }}
+                style={{ padding: "7px 14px", fontSize: 12 }}
                 onClick={() => setClauses((cs) => [...cs, ""])}
               >
                 ＋ بند مخصص
@@ -455,9 +479,9 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                   className="btn btn-soft"
                   type="button"
                   style={{
-                    padding: "6px 12px",
+                    padding: "7px 14px",
                     fontSize: 12,
-                    color: "#b91c1c",
+                    color: "var(--red)",
                   }}
                   onClick={() => setClauses([])}
                 >
@@ -480,10 +504,11 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               >
                 <span
                   style={{
-                    color: "var(--muted)",
-                    fontSize: 12,
+                    color: "var(--gold)",
+                    fontSize: 13,
+                    fontWeight: 900,
                     paddingTop: 10,
-                    minWidth: 20,
+                    minWidth: 22,
                   }}
                 >
                   {i + 1}.
@@ -499,11 +524,11 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
                   rows={2}
                   maxLength={1000}
                   placeholder="نص البند — أي حقول بين [أقواس] تُعبأ تلقائياً من بيانات النموذج"
-                  style={{ ...input, resize: "vertical", fontSize: 12.5 }}
+                  style={{ ...input, padding: 12, resize: "vertical", fontSize: 12.5 }}
                 />
                 <button
                   className="btn btn-soft"
-                  style={{ padding: "6px 10px", fontSize: 11, color: "#b91c1c" }}
+                  style={{ padding: "7px 10px", fontSize: 11, color: "var(--red)" }}
                   type="button"
                   onClick={() =>
                     setClauses((cs) => cs.filter((_, idx) => idx !== i))
@@ -519,14 +544,29 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
           {/* ===== المعاينة الحية ===== */}
           <details
             open
-            style={{ borderTop: "1px dashed var(--line)", paddingTop: 12 }}
+            style={{ borderTop: "1px solid var(--line)", paddingTop: 14 }}
           >
-            <summary style={{ cursor: "pointer", fontWeight: 900, fontSize: 13 }}>
+            <summary
+              style={{
+                cursor: "pointer",
+                fontWeight: 900,
+                fontSize: 13.5,
+                color: "var(--green)",
+              }}
+            >
               👁️ معاينة العقد — تتحدث فورياً أثناء الكتابة
             </summary>
             <div
               className="box"
-              style={{ marginTop: 10, maxHeight: 360, overflowY: "auto" }}
+              style={{
+                marginTop: 10,
+                maxHeight: 380,
+                overflowY: "auto",
+                borderRadius: 18,
+                border: "1px solid rgba(212,168,67,0.35)",
+                background:
+                  "linear-gradient(180deg, #fffdf6, #fcfaf2)",
+              }}
             >
               <b>{contractTypeName(form.type)}</b>
               <div
@@ -558,7 +598,7 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               style={{
                 color: "var(--green-2)",
                 fontSize: 12.5,
-                fontWeight: 700,
+                fontWeight: 800,
                 margin: 0,
               }}
             >
@@ -568,9 +608,9 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
           {error && (
             <p
               style={{
-                color: "#b91c1c",
+                color: "var(--red)",
                 fontSize: 12.5,
-                fontWeight: 700,
+                fontWeight: 800,
                 margin: 0,
               }}
             >
@@ -578,8 +618,13 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
             </p>
           )}
 
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button className="btn" type="submit" disabled={busy}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              className="btn"
+              type="submit"
+              disabled={busy}
+              style={{ padding: "12px 24px", fontSize: 13.5 }}
+            >
               {busy ? "جاري…" : "💾 حفظ العقد"}
             </button>
             <button
@@ -587,6 +632,7 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
               type="button"
               disabled={busy}
               onClick={printContract}
+              style={{ padding: "12px 24px", fontSize: 13.5 }}
             >
               🖨️ طباعة / PDF
             </button>
