@@ -89,15 +89,38 @@ function formFromDraft(d: GuestDraft): FormState {
   };
 }
 
-export default function NewContractForm({ mode }: { mode: DashboardMode }) {
+export default function NewContractForm({
+  mode,
+  presetType,
+}: {
+  mode: DashboardMode;
+  presetType?: string;
+}) {
   const router = useRouter();
 
   const [open, setOpen] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<FormState>(
+    presetType && CONTRACT_TYPES[presetType]
+      ? { ...EMPTY_FORM, type: presetType }
+      : EMPTY_FORM
+  );
   const [clauses, setClauses] = useState<string[]>([]);
+
+  /* استقبال نوع مختار من بطاقات القوالب (نافذة الأسفل تستمع لحدث مخصص) */
+  useEffect(() => {
+    const onPick = (e: Event) => {
+      const t = (e as CustomEvent<string>).detail;
+      if (t && CONTRACT_TYPES[t]) {
+        setForm((f) => ({ ...f, type: t }));
+        setOpen(true);
+      }
+    };
+    window.addEventListener("mithaq:pick-type", onPick);
+    return () => window.removeEventListener("mithaq:pick-type", onPick);
+  }, []);
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -265,7 +288,12 @@ export default function NewContractForm({ mode }: { mode: DashboardMode }) {
   return (
     <section
       className="card"
-      style={{ padding: "24px 26px", borderRadius: 30 }}
+      style={{
+        padding: "24px 26px",
+        borderRadius: 20,
+        border: "1.5px solid rgba(212,168,67,0.3)",
+        boxShadow: "var(--shadow)",
+      }}
     >
       <div
         style={{

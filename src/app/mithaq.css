@@ -1,0 +1,1032 @@
+/* ============================================================
+   ميثاق — نظام التصميم الأسطوري الأصلي (v1)
+   منقول من frontend/index.html القديم
+   الأخضر الزمردي + الذهبي + العاجي + السايدبار والهيرو
+   ============================================================ */
+
+:root {
+  --green: #1d4a3e;
+  --green-light: #2a6355;
+  --gold: #d4a843;
+  --gold-light: #f0c85a;
+  --gold-dark: #b8922e;
+  --ivory: #f4f1e1;
+  --white: #ffffff;
+  --text: #333333;
+  --text-2: #777777;
+  --line: rgba(29, 74, 62, 0.12);
+  --card-bg: #ffffff;
+  --page-bg: #ffffff;
+  --shadow: 0 2px 18px rgba(29, 74, 62, 0.06);
+  --sidebar-w: 265px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-naskh), "Noto Naskh Arabic", serif;
+  background: var(--page-bg);
+  color: var(--text);
+  direction: rtl;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, .btn {
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--ivory); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+/* ===== فئة Cairo المساعدة ===== */
+.cairo { font-family: var(--font-cairo), "Cairo", sans-serif; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: linear-gradient(180deg, #152f27 0%, var(--green) 40%, #1a3e33 100%);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  box-shadow: -4px 0 30px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 6px 16px;
+  height: 54px;
+  border-bottom: 1px solid rgba(212, 168, 67, 0.15);
+}
+
+.logo-svg-wrap { width: 38px; height: 38px; flex-shrink: 0; }
+.logo-text-block { display: flex; flex-direction: column; line-height: 1.15; }
+.logo-text-block .arabic {
+  font-size: 21px;
+  font-weight: 900;
+  color: var(--gold);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  letter-spacing: 1px;
+}
+.logo-text-block .english {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: rgba(212, 168, 67, 0.55);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+.sidebar-tagline {
+  padding: 10px 18px 16px;
+  font-size: 11.5px;
+  color: rgba(244, 241, 225, 0.45);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  border-bottom: 1px solid rgba(201, 160, 61, 0.1);
+  letter-spacing: 0.5px;
+}
+
+.sidebar-nav { padding: 12px 0; flex: 1; }
+
+.nav-section-title {
+  padding: 10px 18px 4px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: rgba(212, 168, 67, 0.4);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  color: rgba(244, 241, 225, 0.72);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  position: relative;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: right;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+.nav-link .ico {
+  width: 20px;
+  text-align: center;
+  color: rgba(212, 168, 67, 0.65);
+  font-size: 14px;
+  transition: color 0.25s;
+  flex-shrink: 0;
+}
+.nav-link:hover {
+  background: rgba(212, 168, 67, 0.1);
+  color: var(--white);
+  padding-right: 24px;
+}
+.nav-link:hover .ico { color: var(--gold); }
+.nav-link.active {
+  background: linear-gradient(90deg, rgba(212, 168, 67, 0.15), transparent);
+  color: var(--gold);
+  border-right: 3px solid var(--gold);
+}
+.nav-link.active .ico { color: var(--gold); }
+
+.nav-badge {
+  margin-right: auto;
+  background: var(--gold);
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+.sidebar-footer {
+  padding: 16px 18px;
+  border-top: 1px solid rgba(212, 168, 67, 0.15);
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(212, 168, 67, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(212, 168, 67, 0.18);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  font-weight: 900;
+  font-size: 14px;
+  flex-shrink: 0;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  overflow: hidden;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.user-info .name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ivory);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.user-info .role {
+  font-size: 10px;
+  color: rgba(212, 168, 67, 0.65);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+.sidebar-auth { padding: 14px 18px 6px; }
+.sidebar-auth .auth-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  margin-bottom: 8px;
+}
+.sidebar-auth .auth-text {
+  font-size: 11px;
+  color: rgba(244, 241, 225, 0.5);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+.sidebar-auth .btn-auth {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(212, 168, 67, 0.14);
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  color: var(--gold);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.sidebar-auth .btn-auth:hover {
+  background: var(--gold);
+  color: var(--green);
+}
+
+/* ===== MAIN LAYOUT ===== */
+.main-wrapper {
+  margin-right: var(--sidebar-w);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--page-bg);
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+  background: var(--card-bg);
+  padding: 13px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+}
+
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.topbar-actions { display: flex; align-items: center; gap: 9px; }
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--green);
+  font-size: 14px;
+  transition: all 0.2s;
+  position: relative;
+}
+.icon-btn:hover {
+  background: var(--green);
+  color: var(--gold);
+  border-color: var(--green);
+}
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  background: linear-gradient(145deg, #122e26 0%, var(--green) 45%, #1f5244 100%);
+  padding: 64px 44px 72px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold) 30%, var(--gold-light) 50%, var(--gold) 70%, transparent 100%);
+}
+
+.hero-ornament {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-content { position: relative; z-index: 2; flex: 1; }
+
+.platform-name-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.platform-logo-inline { display: flex; align-items: center; gap: 9px; }
+.platform-logo-inline .logo-mini {
+  width: 38px;
+  height: 38px;
+  filter: drop-shadow(0 2px 8px rgba(212, 168, 67, 0.6));
+}
+.platform-name-text {
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.platform-name-sep {
+  width: 1px;
+  height: 28px;
+  background: rgba(212, 168, 67, 0.3);
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(212, 168, 67, 0.14);
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  color: var(--gold);
+  padding: 5px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-weight: 600;
+}
+
+.hero h1 {
+  font-size: clamp(30px, 4vw, 50px);
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1.28;
+  margin: 16px 0 14px;
+}
+.hero h1 span { color: var(--gold); }
+
+.hero-tagline {
+  font-size: clamp(17px, 2vw, 22px);
+  font-weight: 700;
+  color: rgba(212, 168, 67, 0.8);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.hero p.lead {
+  font-size: clamp(13px, 1.5vw, 16px);
+  color: rgba(244, 241, 225, 0.75);
+  max-width: 470px;
+  line-height: 2;
+  margin-bottom: 34px;
+}
+
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* ===== BUTTONS (نظام v1) ===== */
+.btn {
+  padding: 13px 28px;
+  border-radius: 12px;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.28s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: var(--green);
+  box-shadow: 0 4px 20px rgba(212, 168, 67, 0.4);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(212, 168, 67, 0.55);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+}
+
+.btn-green {
+  background: linear-gradient(135deg, var(--green) 0%, #1f5244 100%);
+  color: var(--gold);
+}
+.btn-green:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(29, 74, 62, 0.35);
+}
+
+.btn-soft {
+  background: rgba(29, 74, 62, 0.07);
+  color: var(--green);
+  border: 1px solid var(--line);
+}
+.btn-soft:hover { background: rgba(29, 74, 62, 0.13); }
+
+.btn-sm { padding: 8px 14px; font-size: 12.5px; border-radius: 9px; }
+
+/* ===== HERO 3D CARD ===== */
+.hero-visual { position: relative; z-index: 2; flex-shrink: 0; }
+
+.hero-card-mockup {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(212, 168, 67, 0.28);
+  border-radius: 22px;
+  padding: 28px;
+  width: 275px;
+  backdrop-filter: blur(12px);
+  transform: rotateY(-8deg) rotateX(4deg);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+}
+.hero-visual:hover .hero-card-mockup {
+  transform: rotateY(-4deg) rotateX(2deg) translateY(-6px);
+}
+
+.mockup-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 20px;
+}
+.mockup-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  font-size: 20px;
+}
+.mockup-title {
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-weight: 700;
+  color: var(--white);
+  font-size: 14px;
+}
+.mockup-subtitle { font-size: 10.5px; color: rgba(244, 241, 225, 0.55); margin-top: 2px; }
+
+.mockup-lines { display: flex; flex-direction: column; gap: 8px; }
+.mockup-line { height: 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.1); }
+.mockup-line.gold { background: rgba(212, 168, 67, 0.45); width: 68%; }
+.mockup-line.w-full { width: 100%; }
+.mockup-line.w-80 { width: 80%; }
+.mockup-line.w-60 { width: 60%; }
+.mockup-line.w-45 { width: 45%; }
+
+.mockup-badge {
+  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 168, 67, 0.18);
+  border: 1px solid rgba(212, 168, 67, 0.38);
+  color: var(--gold);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-weight: 600;
+}
+
+/* ===== STATS BAR ===== */
+.stats-bar {
+  background: var(--ivory);
+  padding: 22px 44px;
+  display: flex;
+  border-bottom: 1px solid var(--line);
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 0 26px;
+  border-left: 1px solid rgba(29, 74, 62, 0.1);
+}
+.stat-item:last-child { border-left: none; }
+.stat-item:first-child { padding-right: 0; }
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.stat-num {
+  font-size: 23px;
+  font-weight: 900;
+  color: var(--green);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-top: 3px;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+/* ===== SECTIONS ===== */
+.section { padding: 52px 44px; }
+.section-header {
+  margin-bottom: 34px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold-dark);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  margin-bottom: 8px;
+}
+.section-label::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 2px;
+}
+
+.section-title {
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 800;
+  color: var(--green);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.section-sub {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 6px;
+}
+
+/* ===== CONTRACT TYPE CARDS ===== */
+.contracts-section { background: var(--card-bg); }
+
+.contracts-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+}
+
+.contract-card {
+  background: var(--ivory);
+  border: 1.5px solid rgba(212, 168, 67, 0.3);
+  border-radius: 20px;
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 14px rgba(29, 74, 62, 0.05);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+.contract-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.contract-card:hover::before { transform: scaleX(1); }
+.contract-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 14px 36px rgba(29, 74, 62, 0.13);
+  border-color: var(--gold);
+  background: var(--card-bg);
+}
+
+.contract-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-size: 25px;
+  box-shadow: 0 4px 16px rgba(29, 74, 62, 0.22);
+  transition: transform 0.3s;
+}
+
+.contract-card:hover .contract-icon {
+  transform: scale(1.1) rotate(-6deg);
+}
+
+.contract-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.contract-desc {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+.contract-count {
+  font-size: 11px;
+  color: var(--gold-dark);
+  font-weight: 700;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  background: rgba(212, 168, 67, 0.12);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+  padding: 3px 12px;
+  border-radius: 20px;
+}
+
+/* ===== FEATURES ===== */
+.features-section {
+  background: linear-gradient(135deg, var(--ivory), var(--card-bg));
+  position: relative;
+  overflow: hidden;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.feature-card {
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: 32px 22px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover::after { transform: scaleX(1); }
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(29, 74, 62, 0.11);
+}
+
+.feature-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 18px;
+}
+.feature-icon.green { background: rgba(29, 74, 62, 0.09); color: var(--green); }
+.feature-icon.gold { background: rgba(212, 168, 67, 0.12); color: var(--gold-dark); }
+
+.feature-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 9px;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.feature-desc {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.85;
+}
+
+/* ===== عقودي (قائمة المستخدم) ===== */
+.recent-section { background: var(--card-bg); }
+.recent-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.view-all {
+  color: var(--gold-dark);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.view-all:hover { color: var(--green); }
+
+.contracts-table {
+  background: var(--card-bg);
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1fr 1fr 1.4fr;
+  padding: 14px 22px;
+  background: rgba(29, 74, 62, 0.04);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1fr 1fr 1.4fr;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(29, 74, 62, 0.05);
+  align-items: center;
+  transition: background 0.2s;
+}
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background: rgba(244, 241, 225, 0.5); }
+
+.table-row .contract-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.table-row .contract-parties {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-top: 2px;
+}
+.date-text {
+  font-size: 12px;
+  color: var(--text-2);
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.row-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.type-badge {
+  display: inline-flex;
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.type-rent { background: rgba(29, 74, 62, 0.09); color: var(--green); }
+.type-sale { background: rgba(212, 168, 67, 0.13); color: #8a6618; }
+.type-service { background: rgba(80, 120, 200, 0.1); color: #3a5fc8; }
+.type-freelance { background: rgba(150, 60, 120, 0.1); color: #963c78; }
+.type-pledge { background: rgba(90, 140, 90, 0.12); color: #4a7a4a; }
+.type-supply { background: rgba(180, 90, 50, 0.1); color: #b45a32; }
+.type-partnership { background: rgba(60, 130, 160, 0.1); color: #3c82a0; }
+.type-nda { background: rgba(120, 90, 160, 0.1); color: #785aa0; }
+.type-other { background: rgba(29, 74, 62, 0.09); color: var(--green); }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.status-active { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
+.status-active::before { background: #16a34a; }
+.status-partial { background: rgba(251, 146, 60, 0.1); color: #ea7c20; }
+.status-partial::before { background: #ea7c20; }
+.status-draft { background: rgba(148, 163, 184, 0.14); color: #64748b; }
+.status-draft::before { background: #94a3b8; }
+
+.action-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: 12px;
+  transition: all 0.2s;
+  background: transparent;
+  text-decoration: none;
+}
+.action-icon:hover {
+  background: var(--green);
+  color: var(--gold);
+  border-color: var(--green);
+}
+.action-icon.danger:hover {
+  background: #c94a4a;
+  border-color: #c94a4a;
+  color: #fff;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: linear-gradient(135deg, #122e26 0%, var(--green) 60%);
+  color: rgba(244, 241, 225, 0.7);
+  padding: 34px 44px;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 2;
+}
+.footer .gold { color: var(--gold); font-weight: 800; }
+
+/* ===== نموذج العقد داخل التصميم ===== */
+.form-section {
+  background: var(--card-bg);
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 13px;
+  font-family: inherit;
+  font-size: 13.5px;
+  background: var(--card-bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(212, 168, 67, 0.13);
+}
+.form-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 6px;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+/* شارات البنود */
+.clause-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(212, 168, 67, 0.3);
+  background: var(--ivory);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.clause-chip:hover { border-color: var(--gold); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .contracts-grid { grid-template-columns: repeat(3, 1fr); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-wrapper { margin-right: 0; }
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 44px 22px;
+  }
+  .hero p.lead { margin-inline: auto; }
+  .hero-actions { justify-content: center; }
+  .hero-visual { display: none; }
+  .stats-bar { flex-wrap: wrap; padding: 16px 22px; gap: 12px; }
+  .stat-item { flex: 1 1 40%; padding: 8px 12px; border-left: none; }
+  .section { padding: 36px 22px; }
+  .contracts-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: 1fr; }
+  .table-header { display: none; }
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* ===== طباعة A4 ===== */
+.sheet { max-width: 800px; }
+@media print {
+  body { background: #fff; }
+  .sidebar, .topbar, .no-print { display: none !important; }
+  .main-wrapper { margin: 0 !important; }
+  .card, .contracts-table {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+}

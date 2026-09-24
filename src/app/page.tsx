@@ -3,17 +3,25 @@ import { db } from "@/db";
 import { contracts, type Contract } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { signOut } from "@/lib/auth";
+import MithaqSidebar from "@/components/dashboard/MithaqSidebar";
+import MithaqHero from "@/components/dashboard/MithaqHero";
+import {
+  StatsBar,
+  ContractTypes,
+  Features,
+  MithaqFooter,
+} from "@/components/dashboard/MithaqSections";
 import ContractsTable from "@/components/dashboard/ContractsTable";
 import NewContractForm from "@/components/dashboard/NewContractForm";
-import DashboardClient from "@/components/dashboard/DashboardClient";
+import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 
 export const dynamic = "force-dynamic";
 
 /* ============================================================
-   منصة ميثاق — الصفحة الرئيسية (الهوية الأسطورية)
-   أي زائر يفتح المنصة مباشرة وينشئ عقداً كاملاً بنفس واجهة
-   النسخة الأصلية الزمردية الذهبية. عند الحفظ/الطباعة فقط
-   يطلب دخولاً سريعاً عبر Google مع استعادة بياناته تلقائياً.
+   منصة ميثاق — الواجهة الأسطورية الأصلية (v1)
+   سايدبار زمردي + هيرو بنقشة السداسيات + بطاقة 3D + إحصائيات
+   + قوالب العقود الذهبية + المميزات — أي زائر يفتح المنصة
+   مباشرة وينشئ عقداً كاملاً. الدخول اختياري ويطلب عند الحفظ.
    ============================================================ */
 
 export default async function Home() {
@@ -30,35 +38,70 @@ export default async function Home() {
     : [];
 
   return (
-    <main style={{ padding: 20 }}>
-      <DashboardClient
+    <>
+      <MithaqSidebar
         mode={isUser ? "user" : "guest"}
         userName={session?.user?.name}
+        userPicture={session?.user?.picture}
+        contractsCount={rows.length}
         signOutAction={async () => {
           "use server";
           await signOut({ redirectTo: "/login" });
         }}
       />
 
-      <div style={{ maxWidth: 1020, margin: "0 auto" }}>
-        <NewContractForm mode={isUser ? "user" : "guest"} />
-        {isUser && <ContractsTable contracts={rows} />}
-      </div>
+      <div className="main-wrapper">
+        <DashboardTopbar />
 
-      <div style={{ maxWidth: 1020, margin: "0 auto" }}>
-        <hr className="gold-rule" />
-        <p
-          style={{
-            textAlign: "center",
-            color: "var(--muted)",
-            fontSize: 11.5,
-            fontWeight: 700,
+        <MithaqHero
+          onCreateClick={() => {
+            document
+              .getElementById("create")
+              ?.scrollIntoView({ behavior: "smooth" });
           }}
-        >
-          🛡️ كل عقد يحمل بصمة رقمية SHA-256 وتاريخ توقيع موثق — لا يمكن التعديل
-          بعد توقيع الطرفين.
-        </p>
+          onTypesClick={() => {
+            document
+              .getElementById("types")
+              ?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
+
+        <StatsBar contracts={rows.length} />
+
+        {/* قسم إنشاء العقد — نموذج ميثاق الحي داخل التصميم الأسطوري */}
+        <section className="section form-section" id="create">
+          <div className="section-header">
+            <div>
+              <div className="section-label">إنشاء عقد</div>
+              <h2 className="section-title">وثيقتك الجديدة</h2>
+              <p className="section-sub">
+                املأ البيانات واختر البنود — سيتولد نص العقد أمامك فوراً ببصمة
+                SHA-256.
+              </p>
+            </div>
+          </div>
+          <NewContractForm mode={isUser ? "user" : "guest"} />
+        </section>
+
+        <ContractTypes />
+
+        <Features />
+
+        {/* عقود المستخدم المسجل — جدول العقود بالتصميم الأصلي */}
+        {isUser && (
+          <section className="section recent-section" id="contracts">
+            <div className="recent-header">
+              <div>
+                <div className="section-label">عقودي</div>
+                <h2 className="section-title">آخر العقود المنشأة</h2>
+              </div>
+            </div>
+            <ContractsTable contracts={rows} />
+          </section>
+        )}
+
+        <MithaqFooter />
       </div>
-    </main>
+    </>
   );
 }
