@@ -7,13 +7,13 @@ import MithaqSidebar from "@/components/dashboard/MithaqSidebar";
 import MithaqHero from "@/components/dashboard/MithaqHero";
 import {
   StatsBar,
-  ContractTypes,
   Features,
   MithaqFooter,
 } from "@/components/dashboard/MithaqSections";
 import ContractsTable from "@/components/dashboard/ContractsTable";
 import NewContractForm from "@/components/dashboard/NewContractForm";
 import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
+import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +39,7 @@ export default async function Home() {
 
   return (
     <>
+      <RevealOnScroll />
       <MithaqSidebar
         mode={isUser ? "user" : "guest"}
         userName={session?.user?.name}
@@ -58,7 +59,7 @@ export default async function Home() {
         <StatsBar contracts={rows.length} />
 
         {/* قسم إنشاء العقد — نموذج ميثاق الحي داخل التصميم الأسطوري */}
-        <section className="section form-section" id="create">
+        <section className="section form-section reveal" id="create">
           <div className="section-header">
             <div>
               <div className="section-label">إنشاء عقد</div>
@@ -72,13 +73,11 @@ export default async function Home() {
           <NewContractForm mode={isUser ? "user" : "guest"} />
         </section>
 
-        <ContractTypes />
-
         <Features />
 
         {/* عقود المستخدم المسجل — جدول العقود بالتصميم الأصلي */}
         {isUser && (
-          <section className="section recent-section" id="contracts">
+          <section className="section recent-section reveal" id="contracts">
             <div className="recent-header">
               <div>
                 <div className="section-label">عقودي</div>

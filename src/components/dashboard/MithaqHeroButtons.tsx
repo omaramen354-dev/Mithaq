@@ -1,19 +1,16 @@
 "use client";
 
+import ContractTypePicker from "./ContractTypePicker";
+
 /* ============================================================
-   MithaqHeroButtons — الأزرار التفاعلية للهيرو الأسطوري (v1)
-   مخصص كـ Client Component منفصل لاستقبال الـ Event handlers
-   من سياق التطبيق (Server Page) دون كسر حدود الاتصال بين
-   السيرفر والويب.
+   MithaqHeroButtons — الأزرار التفاعلية للهيرو الأسطوري (v2)
+   زر الإنشاء + قائمة أنواع العقود المنبثقة المدمجة بأسلوب
+   الإنديكس القديم بدل قسم القوالب المنفصل.
    ============================================================ */
 
 export default function MithaqHeroButtons() {
   function scrollToCreate() {
     document.getElementById("create")?.scrollIntoView({ behavior: "smooth" });
-  }
-
-  function scrollToTypes() {
-    document.getElementById("types")?.scrollIntoView({ behavior: "smooth" });
   }
 
   return (
@@ -22,10 +19,7 @@ export default function MithaqHeroButtons() {
         <i className="fas fa-file-circle-plus" />
         إنشاء عقد جديد
       </button>
-      <button className="btn btn-outline" onClick={scrollToTypes}>
-        <i className="fas fa-layer-group" />
-        استعراض القوالب
-      </button>
+      <ContractTypePicker variant="hero" />
     </div>
   );
 }

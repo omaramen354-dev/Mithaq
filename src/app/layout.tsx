@@ -1,17 +1,29 @@
 import type { Metadata } from "next";
-import { Cairo, Noto_Naskh_Arabic } from "next/font/google";
+import localFont from "next/font/local";
 import "./mithaq.css";
 
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "600", "700", "800", "900"],
-  variable: "--font-cairo",
+/* خط ثمانية — Sans للنصوص + Serif Display للعناوين الكبيرة */
+const thmanyahSans = localFont({
+  src: [
+    { path: "./fonts/thmanyah-sans-300.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/thmanyah-sans-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/thmanyah-sans-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/thmanyah-sans-700.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/thmanyah-sans-900.woff2", weight: "900", style: "normal" },
+  ],
+  variable: "--font-thmanyah",
+  display: "swap",
 });
 
-const naskh = Noto_Naskh_Arabic({
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-naskh",
+const thmanyahDisplay = localFont({
+  src: [
+    { path: "./fonts/thmanyah-display-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/thmanyah-display-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/thmanyah-display-700.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/thmanyah-display-900.woff2", weight: "900", style: "normal" },
+  ],
+  variable: "--font-thmanyah-display",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -42,7 +54,7 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         />
       </head>
-      <body className={`${cairo.variable} ${naskh.variable}`}>
+      <body className={`${thmanyahSans.variable} ${thmanyahDisplay.variable}`}>
         {children}
       </body>
     </html>

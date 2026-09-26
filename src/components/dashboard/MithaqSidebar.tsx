@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
+import ContractTypePicker from "./ContractTypePicker";
 
 /* ============================================================
    MithaqSidebar — السايدبار الزمردي الأسطوري (v1)
@@ -65,13 +66,15 @@ export default function MithaqSidebar({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sidebar-logo">
-          <Image
-            className="logo-svg-wrap"
-            src="/mithaq-logo.svg"
-            alt="شعار ميثاق — كوفي مربع"
-            width={38}
-            height={38}
-          />
+          <span className="mithaq-logo-box">
+            <Image
+              src="/mithaq-logo.svg"
+              alt="شعار ميثاق"
+              width={52}
+              height={31}
+              priority
+            />
+          </span>
           <div className="logo-text-block">
             <span className="arabic">مِــيــثَــاق</span>
             <span className="english">MITHAQ</span>
@@ -90,6 +93,9 @@ export default function MithaqSidebar({
             <i className="ico fas fa-file-circle-plus" />
             <span>إنشاء عقد جديد</span>
           </button>
+          <div className="sidebar-picker-slot">
+            <ContractTypePicker variant="sidebar" />
+          </div>
 
           <div className="nav-section-title" style={{ marginTop: 10 }}>
             إدارة

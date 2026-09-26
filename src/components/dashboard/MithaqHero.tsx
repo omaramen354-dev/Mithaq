@@ -1,12 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import MithaqHeroButtons from "./MithaqHeroButtons";
 
 /* ============================================================
-   MithaqHero — الهيرو الأسطوري (v1)
-   نقشة السداسيات الزخرفية + شعار المنصة الذهبي + الشارة،
-   والعنوان الأبيض بلمسة ذهبية، وبطاقة «وثيقة ميثاق» الزجاجية
-   بإمالة 3D تتحرك مع الفأرة — منقولة بوفاء من التصميم الأصلي.
+   MithaqHero — الهيرو الأسطوري (v2)
+   نقشة السداسيات + اللوغو الجديد داخل صندوقه الأخضر الداكن
+   + بطاقة الوثيقة الزجاجية بإمالة 3D، مع قائمة أنواع العقود
+   المنبثقة المدمجة ضمن الأزرار بدل القسم المنفصل.
    ============================================================ */
 
 export default function MithaqHero() {
@@ -41,56 +42,16 @@ export default function MithaqHero() {
       <div className="hero-content">
         <div className="platform-name-banner">
           <div className="platform-logo-inline">
-            {/* شعار المنصة الدائري الذهبي — نفس SVG الأصلي */}
-            <svg
-              className="logo-mini"
-              viewBox="0 0 100 100"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <circle
-                cx="50"
-                cy="50"
-                r="47"
-                fill="#1D4A3E"
-                stroke="#D4A843"
-                strokeWidth="2.5"
+            {/* اللوغو الجديد — من ملف add داخل صندوقه الأخضر الداكن */}
+            <span className="mithaq-logo-box">
+              <Image
+                src="/mithaq-logo.svg"
+                alt="شعار ميثاق"
+                width={56}
+                height={33}
+                priority
               />
-              <circle
-                cx="50"
-                cy="50"
-                r="36"
-                fill="none"
-                stroke="rgba(212,168,67,0.35)"
-                strokeWidth="1"
-              />
-              <polygon
-                points="50,16 81,34 81,66 50,84 19,66 19,34"
-                fill="none"
-                stroke="rgba(212,168,67,0.25)"
-                strokeWidth="1"
-              />
-              <g transform="translate(50,50) rotate(-15)">
-                <rect
-                  x="-4"
-                  y="-22"
-                  width="8"
-                  height="30"
-                  rx="4"
-                  fill="#D4A843"
-                />
-                <polygon points="0,12 -5,24 5,24" fill="#F0C85A"></polygon>
-                <polygon points="0,20 -2,28 2,28" fill="#1D4A3E"></polygon>
-                <rect
-                  x="-4"
-                  y="-28"
-                  width="8"
-                  height="8"
-                  rx="3"
-                  fill="#B8922E"
-                />
-              </g>
-            </svg>
+            </span>
             <span className="platform-name-text">منصة ميثاق</span>
           </div>
           <div className="platform-name-sep"></div>

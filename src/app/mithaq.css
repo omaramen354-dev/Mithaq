@@ -28,7 +28,7 @@
 }
 
 body {
-  font-family: var(--font-naskh), "Noto Naskh Arabic", serif;
+  font-family: var(--font-thmanyah), sans-serif;
   background: var(--page-bg);
   color: var(--text);
   direction: rtl;
@@ -36,15 +36,15 @@ body {
 }
 
 h1, h2, h3, h4, h5, .btn {
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--ivory); }
 ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
-/* ===== فئة Cairo المساعدة ===== */
-.cairo { font-family: var(--font-cairo), "Cairo", sans-serif; }
+/* ===== فئات الخطوط المساعدة ===== */
+.cairo { font-family: var(--font-thmanyah), sans-serif; }
 
 /* ===== SIDEBAR ===== */
 .sidebar {
@@ -87,7 +87,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 21px;
   font-weight: 900;
   color: var(--gold);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   letter-spacing: 1px;
 }
 .logo-text-block .english {
@@ -96,14 +96,14 @@ h1, h2, h3, h4, h5, .btn {
   color: rgba(212, 168, 67, 0.55);
   letter-spacing: 3px;
   text-transform: uppercase;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 .sidebar-tagline {
   padding: 10px 18px 16px;
   font-size: 11.5px;
   color: rgba(244, 241, 225, 0.45);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   border-bottom: 1px solid rgba(201, 160, 61, 0.1);
   letter-spacing: 0.5px;
 }
@@ -117,7 +117,7 @@ h1, h2, h3, h4, h5, .btn {
   color: rgba(212, 168, 67, 0.4);
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 .nav-link {
@@ -136,7 +136,7 @@ h1, h2, h3, h4, h5, .btn {
   background: none;
   width: 100%;
   text-align: right;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 .nav-link .ico {
@@ -168,7 +168,7 @@ h1, h2, h3, h4, h5, .btn {
   font-weight: 800;
   padding: 2px 8px;
   border-radius: 20px;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 .sidebar-footer {
@@ -198,7 +198,7 @@ h1, h2, h3, h4, h5, .btn {
   font-weight: 900;
   font-size: 14px;
   flex-shrink: 0;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   overflow: hidden;
 }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -207,12 +207,12 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 13px;
   font-weight: 700;
   color: var(--ivory);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .user-info .role {
   font-size: 10px;
   color: rgba(212, 168, 67, 0.65);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 .sidebar-auth { padding: 14px 18px 6px; }
@@ -220,7 +220,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 12.5px;
   font-weight: 700;
   color: var(--gold);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   margin-bottom: 8px;
 }
 .sidebar-auth .auth-text {
@@ -236,7 +236,7 @@ h1, h2, h3, h4, h5, .btn {
   background: rgba(212, 168, 67, 0.14);
   border: 1px solid rgba(212, 168, 67, 0.35);
   color: var(--gold);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   font-weight: 700;
   font-size: 12.5px;
   cursor: pointer;
@@ -279,7 +279,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 15px;
   font-weight: 700;
   color: var(--green);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .topbar-actions { display: flex; align-items: center; gap: 9px; }
 
@@ -350,7 +350,7 @@ h1, h2, h3, h4, h5, .btn {
   filter: drop-shadow(0 2px 8px rgba(212, 168, 67, 0.6));
 }
 .platform-name-text {
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   font-size: 20px;
   font-weight: 900;
   color: var(--gold);
@@ -372,11 +372,12 @@ h1, h2, h3, h4, h5, .btn {
   padding: 5px 14px;
   border-radius: 30px;
   font-size: 12px;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   font-weight: 600;
 }
 
 .hero h1 {
+  font-family: var(--font-thmanyah-display), var(--font-thmanyah), sans-serif;
   font-size: clamp(30px, 4vw, 50px);
   font-weight: 900;
   color: var(--white);
@@ -389,7 +390,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: clamp(17px, 2vw, 22px);
   font-weight: 700;
   color: rgba(212, 168, 67, 0.8);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   margin-bottom: 12px;
   letter-spacing: 0.5px;
 }
@@ -408,7 +409,7 @@ h1, h2, h3, h4, h5, .btn {
 .btn {
   padding: 13px 28px;
   border-radius: 12px;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
@@ -496,7 +497,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 20px;
 }
 .mockup-title {
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   font-weight: 700;
   color: var(--white);
   font-size: 14px;
@@ -522,7 +523,7 @@ h1, h2, h3, h4, h5, .btn {
   padding: 5px 12px;
   border-radius: 20px;
   font-size: 11px;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   font-weight: 600;
 }
 
@@ -562,7 +563,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 23px;
   font-weight: 900;
   color: var(--green);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   line-height: 1;
   letter-spacing: -0.5px;
 }
@@ -570,7 +571,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 12px;
   color: var(--text-2);
   margin-top: 3px;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 /* ===== SECTIONS ===== */
@@ -593,7 +594,7 @@ h1, h2, h3, h4, h5, .btn {
   font-weight: 700;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   margin-bottom: 8px;
 }
 .section-label::before {
@@ -605,10 +606,11 @@ h1, h2, h3, h4, h5, .btn {
 }
 
 .section-title {
+  font-family: var(--font-thmanyah-display), var(--font-thmanyah), sans-serif;
   font-size: clamp(20px, 2.5vw, 28px);
   font-weight: 800;
   color: var(--green);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .section-sub {
   font-size: 13px;
@@ -640,7 +642,7 @@ h1, h2, h3, h4, h5, .btn {
   position: relative;
   overflow: hidden;
   text-align: center;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 .contract-card::before {
@@ -685,7 +687,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 15px;
   font-weight: 700;
   color: var(--green);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .contract-desc {
   font-size: 12px;
@@ -697,7 +699,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 11px;
   color: var(--gold-dark);
   font-weight: 700;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   background: rgba(212, 168, 67, 0.12);
   border: 1px solid rgba(212, 168, 67, 0.25);
   padding: 3px 12px;
@@ -764,7 +766,7 @@ h1, h2, h3, h4, h5, .btn {
   font-weight: 700;
   color: var(--green);
   margin-bottom: 9px;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .feature-desc {
   font-size: 13px;
@@ -788,7 +790,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -814,7 +816,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 12px;
   font-weight: 700;
   color: var(--green);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 
 .table-row {
@@ -832,7 +834,7 @@ h1, h2, h3, h4, h5, .btn {
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .table-row .contract-parties {
   font-size: 12px;
@@ -842,7 +844,7 @@ h1, h2, h3, h4, h5, .btn {
 .date-text {
   font-size: 12px;
   color: var(--text-2);
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .row-actions { display: flex; gap: 7px; flex-wrap: wrap; }
 
@@ -852,7 +854,7 @@ h1, h2, h3, h4, h5, .btn {
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .type-rent { background: rgba(29, 74, 62, 0.09); color: var(--green); }
 .type-sale { background: rgba(212, 168, 67, 0.13); color: #8a6618; }
@@ -872,7 +874,7 @@ h1, h2, h3, h4, h5, .btn {
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .status-badge::before {
   content: "";
@@ -955,7 +957,7 @@ h1, h2, h3, h4, h5, .btn {
   font-weight: 800;
   color: var(--green);
   margin-bottom: 6px;
-  font-family: var(--font-cairo), "Cairo", sans-serif;
+  font-family: var(--font-thmanyah), sans-serif;
 }
 .form-grid {
   display: grid;
@@ -1030,3 +1032,157 @@ h1, h2, h3, h4, h5, .btn {
     margin: 16mm 14mm;
   }
 }
+
+/* ============================================================
+   إضافات v2 — اللوغو الجديد + الأنيميشن المحسّن + القائمة المنبثقة
+   ============================================================ */
+
+/* ===== صندوق اللوغو الجديد (متوافق مع خلفية السايدبار والهيرو) ===== */
+.mithaq-logo-box {
+  background: #162E1C;
+  border-radius: 12px;
+  border: 1px solid rgba(242, 218, 160, 0.35);
+  padding: 5px 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.35);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+.mithaq-logo-box:hover {
+  transform: translateY(-2px) rotate(-1.5deg);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+.mithaq-logo-box img { display: block; }
+.sidebar-logo .mithaq-logo-box img { width: 52px; height: auto; }
+.sidebar-logo { height: auto; padding: 14px 16px; }
+
+/* ===== أنيميشن دخول الهيرو ===== */
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes heroScaleIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes floatCard {
+  0%, 100% { transform: perspective(900px) rotateY(-6deg) rotateX(2deg) translateY(0); }
+  50% { transform: perspective(900px) rotateY(-6deg) rotateX(2deg) translateY(-12px); }
+}
+.hero-content > * { animation: heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-content > *:nth-child(1) { animation-delay: 0.05s; }
+.hero-content > *:nth-child(2) { animation-delay: 0.15s; }
+.hero-content > *:nth-child(3) { animation-delay: 0.25s; }
+.hero-content > *:nth-child(4) { animation-delay: 0.35s; }
+.hero-content > *:nth-child(5) { animation-delay: 0.45s; }
+.hero-visual { animation: heroScaleIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both; }
+.hero-visual .hero-card-mockup { animation: floatCard 6s ease-in-out 1.2s infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-content > *, .hero-visual, .hero-visual .hero-card-mockup { animation: none !important; }
+}
+
+/* ===== كشف تدريجي عند التمرير ===== */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+.reveal.visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ===== قائمة أنواع العقود المنبثقة (من الإنديكس القديم) ===== */
+.mq-pop-wrap { position: relative; }
+.mq-pop {
+  position: absolute; top: calc(100% + 10px); inset-inline-start: 0; width: 100%;
+  min-width: 280px;
+  background: var(--card-bg);
+  border: 1.5px solid rgba(212, 168, 67, 0.28);
+  border-radius: 14px;
+  box-shadow: 0 24px 55px -14px rgba(0, 0, 0, 0.35);
+  z-index: 60; overflow: hidden;
+  animation: mqPopIn 0.18s ease-out both;
+}
+@keyframes mqPopIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-pop { animation: none !important; }
+}
+.mq-pop-up { top: auto; bottom: calc(100% + 10px); animation-name: mqPopInUp; }
+@keyframes mqPopInUp {
+  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+.mq-search {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--text-2);
+}
+.mq-search input {
+  flex: 1; min-width: 0; border: 0; outline: none; background: transparent;
+  color: var(--text); font-family: var(--font-thmanyah), sans-serif;
+  font-size: 13.5px; font-weight: 700;
+}
+.mq-search input::placeholder { color: var(--text-2); opacity: 0.7; }
+.mq-list { list-style: none; margin: 0; padding: 6px; max-height: 252px; overflow: auto; }
+.mq-opt {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  padding: 8px 10px; border: 0; border-radius: 10px;
+  background: transparent; cursor: pointer; text-align: start;
+  color: var(--text); font-family: var(--font-thmanyah), sans-serif;
+  transition: background 0.14s ease;
+}
+.mq-opt:hover { background: rgba(212, 168, 67, 0.13); }
+.mq-opt.active { background: rgba(212, 168, 67, 0.2); }
+.mq-opt-ico {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9px;
+  display: grid; place-items: center;
+  color: var(--gold-dark); background: rgba(212, 168, 67, 0.14);
+  border: 1px solid rgba(212, 168, 67, 0.25); font-size: 12px;
+}
+.mq-opt-txt { flex: 1; min-width: 0; }
+.mq-opt-txt b {
+  display: block; font-size: 13.5px; font-weight: 800; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mq-opt-txt span {
+  display: block; font-size: 11px; color: var(--text-2); font-weight: 600; margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mq-opt-check { flex: 0 0 auto; width: 15px; height: 15px; color: var(--gold); opacity: 0; }
+.mq-opt.active .mq-opt-check { opacity: 1; }
+.mq-empty { padding: 22px 12px; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--text-2); }
+
+/* زر المشغل داخل الهيرو */
+.hero-picker-trigger {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 12px 18px; border-radius: 12px; cursor: pointer;
+  border: 1.5px solid rgba(212, 168, 67, 0.5);
+  background: rgba(212, 168, 67, 0.12); color: var(--white);
+  font-family: var(--font-thmanyah), sans-serif; font-weight: 700; font-size: 15px;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.hero-picker-trigger:hover {
+  border-color: var(--gold); background: rgba(212, 168, 67, 0.2); transform: translateY(-1px);
+}
+.hero-picker-trigger .chev { transition: transform 0.2s ease; font-size: 12px; color: var(--gold-light); }
+.hero-picker-trigger[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.hero-picker-wrap { position: relative; display: inline-block; width: min(360px, 100%); }
+.hero-picker-wrap .mq-pop { width: 100%; }
+
+/* فتحة القائمة المنبثقة داخل السايدبار */
+.sidebar-picker-slot { padding: 6px 14px 12px; border-bottom: 1px solid rgba(212, 168, 67, 0.12); }
+.sidebar-picker-slot .mq-opt {
+  padding: 10px 12px;
+  background: rgba(212, 168, 67, 0.08);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+  color: var(--ivory);
+  font-weight: 700;
+  border-radius: 10px;
+}
+.sidebar-picker-slot .mq-opt:hover { background: rgba(212, 168, 67, 0.16); }
+.sidebar-picker-slot .mq-opt .chev { color: var(--gold-light); font-size: 11px; }
+.sidebar-picker-slot .mq-pop { border-color: rgba(212, 168, 67, 0.35); }
+
+/* القائمة المفتوحة بوضع fixed (نسخة السايدبار) */
+.mq-pop-fixed { position: fixed; }

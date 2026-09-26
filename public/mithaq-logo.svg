@@ -1,56 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="شعار ميثاق — كوفي مربع">
-  <!--
-    Square (Kufic) seal for ميثاق.
-    Palette: Black #111827, Gold #D97706, White #FFFFFF.
-    The word مِيثَاق is drawn as square-grid letter blocks:
-      م (right column)  ي (mid-right)  ث (center, with dots)  ا (left bar)  ق (far left, with dots)
-    Read right-to-left inside a solid black square with a gold keyline.
-  -->
-  <!-- seal plate -->
-  <rect x="2" y="2" width="96" height="96" rx="10" fill="#111827"/>
-  <rect x="2" y="2" width="96" height="96" rx="10" fill="none" stroke="#D97706" stroke-width="3"/>
-  <!-- inner gold keyline frame -->
-  <rect x="9" y="9" width="82" height="82" rx="5" fill="none" stroke="#D97706" stroke-width="1.5" opacity="0.55"/>
-
-  <!-- letter blocks (grid unit = 4) -->
-  <g fill="#FFFFFF">
-    <!-- م : vertical stem + square bowl (rightmost) -->
-    <rect x="76" y="26" width="6" height="30"/>
-    <rect x="70" y="50" width="12" height="6"/>
-    <rect x="70" y="44" width="6" height="6"/>
-
-    <!-- ي : base stroke with two ascending teeth -->
-    <rect x="58" y="56" width="6" height="18"/>
-    <rect x="52" y="56" width="12" height="6"/>
-    <rect x="58" y="38" width="6" height="12"/>
-    <rect x="58" y="30" width="6" height="4"/>
-
-    <!-- ث : center column with three-dot crown bowl -->
-    <rect x="40" y="30" width="6" height="44"/>
-    <rect x="34" y="30" width="12" height="6"/>
-    <rect x="34" y="42" width="12" height="6"/>
-    <rect x="34" y="54" width="12" height="6"/>
-
-    <!-- ا : plain vertical bar -->
-    <rect x="24" y="30" width="6" height="44"/>
-
-    <!-- ق : left column with bowl + double-dot base -->
-    <rect x="12" y="30" width="6" height="30"/>
-    <rect x="12" y="54" width="12" height="6"/>
-    <rect x="12" y="66" width="12" height="6"/>
-  </g>
-
-  <!-- letter dots (gold) -->
-  <g fill="#D97706">
-    <!-- ث : three dots above the crown -->
-    <rect x="40" y="22" width="4" height="4"/>
-    <rect x="46" y="22" width="4" height="4"/>
-    <rect x="52" y="22" width="4" height="4"/>
-    <!-- ق : two dots above the bowl -->
-    <rect x="14" y="22" width="4" height="4"/>
-    <rect x="20" y="22" width="4" height="4"/>
-  </g>
-
-  <!-- gold baseline anchor (bottom center) -->
-  <rect x="42" y="82" width="16" height="3" fill="#D97706"/>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 147.4 87.24" style="enable-background:new 0 0 147.4 87.24;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#162E1C;}
+	.st1{fill:#F8F1E7;}
+	.st2{fill:#F2DAA0;}
+</style>
+<rect x="-0.23" y="0.18" class="st0" width="147.21" height="87.13"/>
+<path class="st1" d="M51.67,25.57h-1.64h-3.65h-3.11h-5.29v20.52h6.38h2.02h3.65v3.65H34.32V25.6h-8.4v24.13v0.12v8.28h24.11h0.05
+	h8.35V25.57H51.67z M46.37,37.68v-3.52h3.65v3.52H46.37z"/>
+<rect x="74.11" y="13.55" transform="matrix(1.348034e-07 1 -1 1.348034e-07 96.0624 -60.5618)" class="st2" width="8.4" height="8.4"/>
+<rect x="74.16" y="25.6" transform="matrix(6.310798e-08 1 -1 6.310798e-08 108.1703 -48.5592)" class="st2" width="8.4" height="8.4"/>
+<path class="st1" d="M130.78,17.06c0-1.94-1.57-3.51-3.51-3.51h-4.89v0H86.19v8.4h36.19v39.84h-12.05v8.4h16.95
+	c1.94,0,3.51-1.57,3.51-3.51v-4.26l0,0V17.06z"/>
+<path class="st1" d="M22.29,61.76V21.98h12.04v-8.4H22.29v-0.02H17.4c-1.94,0-3.51,1.57-3.51,3.51v44.7v0.13v4.76
+	c0,1.94,1.57,3.52,3.52,3.52h65.16v-8.4H22.29z"/>
+<rect x="86.22" y="25.6" transform="matrix(6.310841e-08 1 -1 6.310841e-08 120.2246 -60.6136)" class="st2" width="8.4" height="8.4"/>
+<rect x="86.19" y="61.79" transform="matrix(6.310841e-08 1 -1 6.310841e-08 156.3815 -24.3979)" class="st2" width="8.4" height="8.4"/>
+<rect x="98.27" y="61.79" transform="matrix(6.310798e-08 1 -1 6.310798e-08 168.4653 -36.4817)" class="st2" width="8.4" height="8.4"/>
+<rect x="50.05" y="13.57" transform="matrix(6.310798e-08 1 -1 6.310798e-08 72.0302 -36.4817)" class="st2" width="8.4" height="8.4"/>
+<rect x="38" y="13.55" transform="matrix(6.310852e-08 1 -1 6.310852e-08 59.9519 -24.4512)" class="st2" width="8.4" height="8.4"/>
+<g>
+	<polygon class="st1" points="94.59,37.68 86.19,37.68 86.19,49.74 82.45,49.74 82.45,37.77 74.05,37.77 74.05,49.74 70.48,49.74 
+		70.48,13.57 62.08,13.57 62.08,49.74 62.08,49.96 62.08,58.14 118.7,58.14 118.7,49.74 94.59,49.74 	"/>
+	<path class="st1" d="M110.3,25.57h-3.65h-1.81h-6.59v20.49h6.29v0.02h5.76v3.63h8.4V33.97v-8.4H110.3z M110.3,37.68h-3.65v-3.71
+		h3.65V37.68z"/>
+</g>
 </svg>

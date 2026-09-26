@@ -140,7 +140,7 @@ export function ContractTypes({ onPick }: { onPick?: (type: string) => void }) {
 
 export function Features() {
   return (
-    <section className="section features-section" id="features">
+    <section className="section features-section reveal" id="features">
       <div className="section-header">
         <div>
           <div className="section-label">مميزاتنا</div>
