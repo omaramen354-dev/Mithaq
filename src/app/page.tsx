@@ -7,6 +7,7 @@ import MithaqSidebar from "@/components/dashboard/MithaqSidebar";
 import MithaqHero from "@/components/dashboard/MithaqHero";
 import {
   StatsBar,
+  ContractTypes,
   Features,
   MithaqFooter,
 } from "@/components/dashboard/MithaqSections";
@@ -72,6 +73,8 @@ export default async function Home() {
           </div>
           <NewContractForm mode={isUser ? "user" : "guest"} />
         </section>
+
+        <ContractTypes />
 
         <Features />
 
