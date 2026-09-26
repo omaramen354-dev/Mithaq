@@ -53,7 +53,7 @@ export default async function Home() {
       />
 
       <div className="main-wrapper">
-        <DashboardTopbar />
+        <DashboardTopbar isAdmin={Boolean(session?.user?.isAdmin)} />
 
         <MithaqHero />
 
