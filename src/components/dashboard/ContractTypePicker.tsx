@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { CONTRACT_TYPES } from "@/lib/contract-types";
 
 /* ============================================================
    ContractTypePicker — قائمة أنواع العقود المنبثقة
    منقولة بروح «لوحة القوائم المنبثقة» من الإنديكس القديم:
    حقل بحث فوري + خيارات بأيقونات ذهبية + علامة اختيار للنوع النشط.
-   تُدمَج ضمن الهيرو والسايدبار ويعمل نفس حدث mithaq:pick-type
-   الذي يلتقطه نموذج الإنشاء ليحدد النوع ويمرّر المستخدم للأسفل.
 
-   ملاحظة تقنية: داخل السايدبار (overflow-y: auto) تُفتح القائمة
-   بـ position: fixed محسوبة من مستطيل الزر حتى لا تُقتَطع بالحواف.
+   تُرسم عبر React Portal في جسم الصفحة بتموضع fixed محسوب من
+   مستطيل الزر — فلا تتأثر بأي overflow أو تراص طبقات لأقسام
+   الصفحة (هذا هو الإصلاح الجذري لظهورها خلف الطبقات)، وتتبع
+   الزر عند التمرير وتنقلب للأعلى عند قرب أسفل الشاشة.
+   يعمل نفس حدث mithaq:pick-type الذي يلتقطه نموذج الإنشاء.
    ============================================================ */
 
 const TYPE_ICONS: Record<string, string> = {
@@ -42,81 +44,88 @@ const TYPE_DESCS: Record<string, string> = {
   rent_furnished: "إيجار مفروش بجرد تفصيلي",
 };
 
-export default function ContractTypePicker({
-  variant = "hero",
-}: {
-  variant?: "hero" | "sidebar";
-}) {
+const POP_MAX_H = 320;
+
+export default function ContractTypePicker() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(null);
-  const [fixedStyle, setFixedStyle] = useState<CSSProperties | undefined>();
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const [popStyle, setPopStyle] = useState<CSSProperties>({});
   const btnRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const isSidebar = variant === "sidebar";
+  useEffect(() => setMounted(true), []);
 
-  /* إغلاق عند النقر خارج القائمة أو الضغط على Escape أو تمرير الصفحة */
+  /* حساب موضع القائمة من مستطيل الزر — تُفتح لأسفل أو للأعلى حسب المساحة */
+  const reposition = () => {
+    const btn = btnRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const width = Math.max(r.width, 300);
+    const openUp = r.bottom + POP_MAX_H + 20 > window.innerHeight && r.top > POP_MAX_H + 40;
+    setPopStyle(
+      openUp
+        ? {
+            position: "fixed",
+            bottom: window.innerHeight - r.top + 8,
+            insetInlineStart: "auto",
+            right: Math.max(8, window.innerWidth - r.right),
+            width,
+          }
+        : {
+            position: "fixed",
+            top: r.bottom + 8,
+            insetInlineStart: "auto",
+            right: Math.max(8, window.innerWidth - r.right),
+            width,
+          }
+    );
+  };
+
+  /* إغلاق خارجي + Escape + تتبع الزر عند التمرير/التحجيم + إغلاق إذا خرج الزر من الشاشة */
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      const root = isSidebar ? btnRef.current : wrapRef.current;
-      const target = e.target as Node;
-      if (root && !root.contains(target) && !target.parentElement?.closest?.(".mq-pop")) {
-        setOpen(false);
-      }
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t) || popRef.current?.contains(t)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    const onScroll = () => {
-      if (isSidebar) setOpen(false);
+    const onMove = () => {
+      const btn = btnRef.current;
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      /* إذا انطفأ الزر عن الشاشة (مثلاً أُغلق السايدبار) نغلق القائمة */
+      if (r.right < 0 || r.left > window.innerWidth || r.bottom < 0 || r.top > window.innerHeight) {
+        setOpen(false);
+        return;
+      }
+      reposition();
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
-    window.addEventListener("scroll", onScroll, true);
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("scroll", onMove, true);
+    window.addEventListener("resize", onMove);
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
-      window.removeEventListener("scroll", onScroll, true);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", onMove, true);
+      window.removeEventListener("resize", onMove);
     };
-  }, [open, isSidebar]);
+  }, [open]);
 
-  /* فتح الحقل للبحث مباشرة + حساب موضع القائمة الثابت في السايدبار */
   useEffect(() => {
     if (open) {
+      reposition();
       inputRef.current?.focus();
-      if (isSidebar && btnRef.current) {
-        const rect = btnRef.current.getBoundingClientRect();
-        const width = Math.max(rect.width, 300);
-        const openUp = rect.bottom + 300 > window.innerHeight;
-        setFixedStyle(
-          openUp
-            ? {
-                position: "fixed",
-                bottom: window.innerHeight - rect.top + 8,
-                right: window.innerWidth - rect.right,
-                width,
-                zIndex: 120,
-              }
-            : {
-                position: "fixed",
-                top: rect.bottom + 8,
-                right: window.innerWidth - rect.right,
-                width,
-                zIndex: 120,
-              }
-        );
-      } else {
-        setFixedStyle(undefined);
-      }
     } else {
       setQuery("");
     }
-  }, [open, isSidebar]);
+  }, [open]);
 
   const entries = useMemo(() => Object.entries(CONTRACT_TYPES), []);
   const filtered = useMemo(() => {
@@ -141,12 +150,12 @@ export default function ContractTypePicker({
   const activeName = active ? CONTRACT_TYPES[active] : null;
 
   return (
-    <div className="mq-pop-wrap" ref={wrapRef}>
+    <>
       <button
         ref={btnRef}
         type="button"
-        className={isSidebar ? "mq-opt" : "hero-picker-trigger"}
-        style={isSidebar ? { width: "100%", borderRadius: 10 } : undefined}
+        className="mq-opt"
+        style={{ width: "100%", borderRadius: 10 }}
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen((v) => !v)}
@@ -158,51 +167,55 @@ export default function ContractTypePicker({
         <i className={`fas fa-chevron-down chev${open ? " rotated" : ""}`} />
       </button>
 
-      {open && (
-        <div
-          className={`mq-pop${fixedStyle ? " mq-pop-fixed" : ""}`}
-          role="listbox"
-          aria-label="أنواع العقود"
-          style={fixedStyle}
-        >
-          <div className="mq-search">
-            <i className="fas fa-magnifying-glass" />
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="ابحث عن نوع العقد…"
-              aria-label="ابحث عن نوع العقد"
-            />
-          </div>
-          {filtered.length ? (
-            <ul className="mq-list">
-              {filtered.map(([key, name]) => (
-                <li key={key}>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={active === key}
-                    className={`mq-opt${active === key ? " active" : ""}`}
-                    onClick={() => pick(key)}
-                  >
-                    <span className="mq-opt-ico">
-                      <i className={`fas ${TYPE_ICONS[key] || "fa-file-contract"}`} />
-                    </span>
-                    <span className="mq-opt-txt">
-                      <b>{name}</b>
-                      <span>{TYPE_DESCS[key] || ""}</span>
-                    </span>
-                    <i className="fas fa-check mq-opt-check" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="mq-empty">لا يوجد نوع مطابق لبحثك</div>
-          )}
-        </div>
-      )}
-    </div>
+      {mounted &&
+        open &&
+        createPortal(
+          <div
+            ref={popRef}
+            className="mq-pop mq-pop-fixed"
+            role="listbox"
+            aria-label="أنواع العقود"
+            style={popStyle}
+          >
+            <div className="mq-search">
+              <i className="fas fa-magnifying-glass" />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="ابحث عن نوع العقد…"
+                aria-label="ابحث عن نوع العقد"
+              />
+            </div>
+            {filtered.length ? (
+              <ul className="mq-list">
+                {filtered.map(([key, name]) => (
+                  <li key={key}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={active === key}
+                      className={`mq-opt${active === key ? " active" : ""}`}
+                      onClick={() => pick(key)}
+                    >
+                      <span className="mq-opt-ico">
+                        <i className={`fas ${TYPE_ICONS[key] || "fa-file-contract"}`} />
+                      </span>
+                      <span className="mq-opt-txt">
+                        <b>{name}</b>
+                        <span>{TYPE_DESCS[key] || ""}</span>
+                      </span>
+                      <i className="fas fa-check mq-opt-check" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="mq-empty">لا يوجد نوع مطابق لبحثك</div>
+            )}
+          </div>,
+          document.body
+        )}
+    </>
   );
 }

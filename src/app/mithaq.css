@@ -1186,3 +1186,10 @@ h1, h2, h3, h4, h5, .btn {
 
 /* القائمة المفتوحة بوضع fixed (نسخة السايدبار) */
 .mq-pop-fixed { position: fixed; }
+
+/* ===== v5: شيفرون المنتقي + تحسينات الموبايل ===== */
+.mq-opt .chev { transition: transform 0.2s ease; }
+.mq-opt .chev.rotated { transform: rotate(180deg); }
+@media (max-width: 480px) {
+  .mq-pop-fixed { width: min(94vw, 340px) !important; }
+}

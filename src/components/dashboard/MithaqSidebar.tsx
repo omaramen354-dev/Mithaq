@@ -94,7 +94,7 @@ export default function MithaqSidebar({
             <span>إنشاء عقد جديد</span>
           </button>
           <div className="sidebar-picker-slot">
-            <ContractTypePicker variant="sidebar" />
+            <ContractTypePicker />
           </div>
 
           <div className="nav-section-title" style={{ marginTop: 10 }}>
