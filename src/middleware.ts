@@ -26,6 +26,6 @@ export const config = {
      - المسار الرئيسي / يمر من الـ middleware لكن authorized يعيده true
        للضيوف والمسجلين (عام) — انظر authConfig.callbacks.authorized
     */
-    "/((?!api|share|verify|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|ico|webp)$).*)",
+    "/((?!api|share|verify|opengraph-image|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|ico|webp)$).*)",
   ],
 };

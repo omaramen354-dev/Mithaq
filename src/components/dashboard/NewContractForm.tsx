@@ -14,6 +14,7 @@ import {
 } from "@/lib/guest-draft";
 import ClausePickerModal from "./ClausePickerModal";
 import LoginGateModal from "./LoginGateModal";
+import SaveSuccessModal from "./SaveSuccessModal";
 
 /* ============================================================
    NewContractForm — نموذج إنشاء العقد (الهوية الأسطورية)
@@ -125,6 +126,20 @@ export default function NewContractForm({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateAction, setGateAction] = useState<"save" | "print">("save");
+
+  /* شاشة النجاح بعد الحفظ: العقد المحفوظ + رابط المشاركة */
+  const [saved, setSaved] = useState<{
+    contract: {
+      id: string;
+      type: string;
+      party1Name: string;
+      party2Name: string;
+      status: string;
+      contentHash?: string | null;
+      updatedAt?: string | Date | null;
+    };
+    shareUrl: string;
+  } | null>(null);
 
   /* ===== استعادة المسودة المحفوظة (مرة واحدة) ===== */
   const restoredRef = useRef(false);
@@ -243,6 +258,10 @@ export default function NewContractForm({
       const data = await res.json();
       if (!res.ok || !data.ok)
         throw new Error(data.message || "تعذر إنشاء العقد");
+      /* شاشة النجاح: البصمة + رابط المشاركة + واتساب */
+      if (data.contract && data.shareUrl) {
+        setSaved({ contract: data.contract, shareUrl: data.shareUrl });
+      }
       setOpen(false);
       setForm(EMPTY_FORM);
       setClauses([]);
@@ -680,6 +699,14 @@ export default function NewContractForm({
         action={gateAction}
         onClose={() => setGateOpen(false)}
       />
+
+      {saved && (
+        <SaveSuccessModal
+          contract={saved.contract}
+          shareUrl={saved.shareUrl}
+          onClose={() => setSaved(null)}
+        />
+      )}
     </section>
   );
 }
