@@ -114,7 +114,7 @@ export default async function AdminPage() {
           <div className="admin-identity">
             <span className="mithaq-logo-box">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mithaq-logo.svg" alt="شعار ميثاق" width={56} height={33} />
+              <img src="/mithaq-logo-v2.svg" alt="شعار ميثاق" width={48} height={48} />
             </span>
             <div>
               <div className="admin-kicker">منصة ميثاق — الإدارة</div>

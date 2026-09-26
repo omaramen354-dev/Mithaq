@@ -17,7 +17,7 @@ export default async function OGImage() {
   const [sansBold, displayBlack, logoSvg] = await Promise.all([
     readFile(path.join(fontsDir, "og-thmanyah-sans-bold.otf")),
     readFile(path.join(fontsDir, "og-thmanyah-display-black.otf")),
-    readFile(path.join(process.cwd(), "public/mithaq-logo.svg")),
+    readFile(path.join(process.cwd(), "public/mithaq-logo-v2.svg")),
   ]);
   const logoDataUri = `data:image/svg+xml;base64,${logoSvg.toString("base64")}`;
 

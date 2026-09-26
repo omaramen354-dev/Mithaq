@@ -45,10 +45,10 @@ export default function MithaqHero() {
             {/* اللوغو الجديد — من ملف add داخل صندوقه الأخضر الداكن */}
             <span className="mithaq-logo-box">
               <Image
-                src="/mithaq-logo.svg"
+                src="/mithaq-logo-v2.svg"
                 alt="شعار ميثاق"
-                width={56}
-                height={33}
+                width={48}
+                height={48}
                 priority
               />
             </span>

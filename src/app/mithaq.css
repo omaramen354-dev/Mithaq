@@ -1055,7 +1055,7 @@ h1, h2, h3, h4, h5, .btn {
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
 }
 .mithaq-logo-box img { display: block; }
-.sidebar-logo .mithaq-logo-box img { width: 52px; height: auto; }
+.sidebar-logo .mithaq-logo-box img { width: 44px; height: 44px; }
 .sidebar-logo { height: auto; padding: 14px 16px; }
 
 /* ===== أنيميشن دخول الهيرو ===== */
@@ -1323,7 +1323,7 @@ h1, h2, h3, h4, h5, .btn {
   .hero-tagline { font-size: 16px; }
   .hero p.lead { font-size: 14px; line-height: 1.9; }
   .platform-name-text { font-size: 17px; }
-  .platform-logo-inline .mithaq-logo-box img { width: 44px; height: auto; }
+  .platform-logo-inline .mithaq-logo-box img { width: 40px; height: 40px; }
   .hero-badge { font-size: 11px; padding: 6px 12px; }
 
   /* الأزرار: مريحة للإبهام وتملأ الصف */

@@ -68,10 +68,10 @@ export default function MithaqSidebar({
         <div className="sidebar-logo">
           <span className="mithaq-logo-box">
             <Image
-              src="/mithaq-logo.svg"
+              src="/mithaq-logo-v2.svg"
               alt="شعار ميثاق"
-              width={52}
-              height={31}
+              width={44}
+              height={44}
               priority
             />
           </span>
