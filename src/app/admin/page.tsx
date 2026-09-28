@@ -1,10 +1,11 @@
 import { auth, signOut, adminEmails } from "@/lib/auth";
 import { db } from "@/db";
-import { contracts, users } from "@/db/schema";
+import { contracts, paymentRequests, users } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
+import PaymentsManager from "./PaymentsManager";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -60,6 +61,7 @@ export default async function AdminPage() {
     premiumUsers,
     recentContracts,
     typeCounts,
+    payReqs,
   ] = await Promise.all([
     db.select({ n: sql<number>`count(*)::int` }).from(contracts),
     db
@@ -89,6 +91,12 @@ export default async function AdminPage() {
       .groupBy(contracts.type)
       .orderBy(desc(sql`count(*)`))
       .limit(5),
+    /* طلبات الدفع — أولاً المعلقة ثم الأحدث */
+    db
+      .select()
+      .from(paymentRequests)
+      .orderBy(desc(paymentRequests.createdAt))
+      .limit(30),
   ]);
 
   const draftContracts = totalContracts[0].n - signedContracts[0].n - partialContracts[0].n;
@@ -155,6 +163,20 @@ export default async function AdminPage() {
           </div>
         ))}
       </section>
+
+      {/* طلبات الدفع — تأكيد يدوي آمن */}
+      <PaymentsManager
+        requests={payReqs.map((r) => ({
+          id: r.id,
+          userId: r.userId,
+          plan: r.plan,
+          amountUsd: r.amountUsd,
+          method: r.method,
+          status: r.status,
+          txRef: r.txRef,
+          createdAt: r.createdAt.toISOString(),
+        }))}
+      />
 
       <div className="admin-grid">
         {/* أحدث العقود */}

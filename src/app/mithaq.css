@@ -1852,3 +1852,540 @@ html.mithaq-modal-open { overflow: hidden; }
   .mode-select { grid-template-columns: 1fr; }
   .modal-header { padding: 22px 20px; }
 }
+
+/* ============================================================
+   الأسعار والباقات (/pricing) + طلبات الدفع في الأدمن
+   نفس الهوية: زمردي + ذهبي + عاجي
+   ============================================================ */
+
+.pricing-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 500px at 85% -5%, rgba(212, 168, 67, 0.1), transparent 60%),
+    radial-gradient(900px 480px at 0% 100%, rgba(29, 74, 62, 0.07), transparent 55%),
+    var(--page-bg);
+  padding-bottom: 70px;
+}
+
+.pricing-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px clamp(16px, 5vw, 54px);
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.pricing-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.pricing-back:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+
+.pricing-logo { display: flex; align-items: center; gap: 12px; }
+
+.pricing-brand {
+  font-family: var(--font-thmanyah);
+  font-weight: 800;
+  color: var(--green);
+  font-size: 21px;
+  letter-spacing: 1px;
+}
+
+.pricing-intro { max-width: 860px; margin: 0 auto; padding: 52px 20px 8px; text-align: center; }
+
+.pricing-title {
+  font-family: var(--font-thmanyah);
+  font-size: clamp(30px, 5.4vw, 46px);
+  color: var(--green);
+  margin: 12px 0 10px;
+}
+
+.gold { color: var(--gold-dark); }
+
+.pricing-sub {
+  color: var(--text-2);
+  font-size: clamp(15px, 2.2vw, 17.5px);
+  line-height: 1.9;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.pricing-guest-note,
+.pricing-hello {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pricing-guest-note {
+  background: rgba(212, 168, 67, 0.12);
+  border: 1px solid rgba(212, 168, 67, 0.4);
+  color: var(--gold-dark);
+}
+
+.pricing-guest-note a { color: var(--green); font-weight: 800; }
+
+.pricing-hello {
+  background: rgba(29, 74, 62, 0.07);
+  border: 1px solid var(--line);
+  color: var(--green);
+}
+
+/* ===== شبكة الباقات ===== */
+.pricing-grid {
+  max-width: 1240px;
+  margin: 44px auto 0;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
+  gap: 20px;
+}
+
+.plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 26px 22px 22px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.plan-card:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(29, 74, 62, 0.13); }
+
+.plan-card.popular {
+  border: 2px solid var(--gold);
+  background: linear-gradient(180deg, rgba(212, 168, 67, 0.07), var(--card-bg) 55%);
+}
+
+.plan-ribbon {
+  position: absolute;
+  top: 16px;
+  left: -34px;
+  transform: rotate(-45deg);
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 5px 38px;
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 14px rgba(184, 146, 46, 0.4);
+}
+
+.plan-head { text-align: center; margin-bottom: 16px; }
+
+.plan-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: var(--gold-light);
+  font-size: 21px;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 20px rgba(29, 74, 62, 0.25);
+}
+
+.plan-title {
+  font-family: var(--font-thmanyah);
+  color: var(--green);
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.plan-price { display: flex; flex-direction: column; gap: 2px; }
+
+.plan-price b {
+  font-family: var(--font-thmanyah);
+  font-size: 26px;
+  color: var(--gold-dark);
+}
+
+.plan-price span { color: var(--text-2); font-size: 13px; }
+
+.plan-tagline {
+  color: var(--text-2);
+  font-size: 13.5px;
+  line-height: 1.75;
+  margin-top: 10px;
+  min-height: 48px;
+}
+
+.plan-features { list-style: none; padding: 0; margin: 0 0 18px; flex: 1; }
+
+.plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7.5px 0;
+  color: var(--text);
+  font-size: 14px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.plan-features li:last-child { border-bottom: 0; }
+
+.plan-features li i { color: var(--gold-dark); font-size: 12px; }
+
+.plan-cta { text-align: center; }
+
+.plan-btn { width: 100%; justify-content: center; }
+
+.plan-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 12px;
+}
+
+.plan-state.ok { background: rgba(29, 74, 62, 0.09); color: var(--green); }
+.plan-state.wait { background: rgba(212, 168, 67, 0.13); color: var(--gold-dark); }
+
+/* ===== طلباتي ===== */
+.pricing-myreqs {
+  max-width: 760px;
+  margin: 40px auto 0;
+  padding: 0 20px;
+}
+
+.pricing-myreqs h2,
+.pricing-faq h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-thmanyah);
+  color: var(--green);
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+.pricing-myreqs ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px; }
+
+.pricing-myreqs li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.myreq-plan { font-weight: 800; color: var(--green); flex: 1; }
+
+.myreq-state { font-weight: 700; font-size: 13px; }
+
+.myreq-state.s-pending, .myreq-state.s-manual_review { color: var(--gold-dark); }
+.myreq-state.s-paid { color: #1d7a43; }
+.myreq-state.s-rejected { color: #b03a2e; }
+
+.myreq-date { color: var(--text-2); font-size: 12.5px; }
+
+/* ===== كيف تتم عملية الدفع ===== */
+.pricing-faq {
+  max-width: 760px;
+  margin: 44px auto 0;
+  padding: 0 20px;
+}
+
+.pricing-steps {
+  margin: 0;
+  padding-inline-start: 22px;
+  color: var(--text);
+  line-height: 2.1;
+  font-size: 15px;
+}
+
+.pricing-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 16px;
+  background: rgba(29, 74, 62, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: var(--green);
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.pricing-note i { margin-top: 4px; }
+
+/* ===== نافذة إثبات الدفع ===== */
+.paypop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(8, 25, 20, 0.55);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.paypop {
+  width: min(520px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: var(--card-bg);
+  border-radius: 26px;
+  border: 1px solid rgba(212, 168, 67, 0.5);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.3);
+}
+
+.paypop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  border-radius: 26px 26px 0 0;
+}
+
+.paypop-head h3 {
+  font-family: var(--font-thmanyah);
+  color: var(--gold-light);
+  font-size: 17px;
+}
+
+.paypop-close {
+  background: rgba(255, 255, 255, 0.12);
+  border: 0;
+  color: var(--gold-light);
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.paypop-close:hover { background: rgba(255, 255, 255, 0.22); }
+
+.paypop-body { padding: 20px 22px 24px; }
+
+.paypop-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+
+.paypop-method {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 13px 10px;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.paypop-method.active {
+  border-color: var(--gold);
+  background: rgba(212, 168, 67, 0.1);
+  color: var(--green);
+  box-shadow: 0 4px 14px rgba(212, 168, 67, 0.2);
+}
+
+.paypop-box {
+  background: var(--ivory);
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.paypop-box-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  color: var(--green);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.paypop-wallet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.paypop-wallet code {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--green);
+  word-break: break-all;
+}
+
+.paypop-wallet button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: var(--green);
+  color: var(--gold-light);
+  border-radius: 9px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.paypop-warn {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-top: 11px;
+  color: #b03a2e;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.paypop-warn i { margin-top: 3px; }
+
+.paypop-sham { display: grid; gap: 8px; font-size: 14.5px; color: var(--text); }
+.paypop-sham span { color: var(--text-2); font-size: 13px; }
+
+.paypop-label {
+  display: block;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--green);
+  margin: 12px 0 7px;
+}
+
+.paypop-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  font-size: 14.5px;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.paypop-input:focus { border-color: var(--gold); }
+
+.paypop-msg {
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.paypop-msg.ok { background: rgba(29, 116, 67, 0.1); color: #1d7a43; }
+.paypop-msg.bad { background: rgba(176, 58, 46, 0.09); color: #b03a2e; }
+
+.paypop-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+
+.paypop-foot {
+  margin-top: 14px;
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+/* ===== طلبات الدفع في الأدمن ===== */
+.admin-pay-badge {
+  margin-inline-start: auto;
+  background: rgba(212, 168, 67, 0.16);
+  color: var(--gold-dark);
+  font-weight: 800;
+  font-size: 12px;
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+
+.paymgr-err {
+  background: rgba(176, 58, 46, 0.09);
+  color: #b03a2e;
+  font-weight: 700;
+  font-size: 13.5px;
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin-bottom: 10px;
+}
+
+.paymgr-list { display: grid; gap: 10px; }
+
+.paymgr-row { align-items: flex-start; }
+
+.paymgr-tx {
+  font-size: 12px;
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.paymgr-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+.paymgr-btn { padding: 8px 16px; font-size: 13px; }
+
+.paymgr-btn.bad { color: #b03a2e; border-color: rgba(176, 58, 46, 0.4); }
+
+.paymgr-done { margin-top: 12px; }
+
+.paymgr-done summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text-2);
+  font-size: 13.5px;
+  padding: 6px 0;
+}
+
+@media (max-width: 640px) {
+  .paypop-actions { grid-template-columns: 1fr; }
+  .pricing-hero { padding: 14px 16px; }
+  .pricing-intro { padding-top: 36px; }
+  .pricing-grid { gap: 14px; }
+  .paymgr-actions { flex-direction: column; width: 100%; }
+  .paymgr-btn { width: 100%; justify-content: center; }
+}

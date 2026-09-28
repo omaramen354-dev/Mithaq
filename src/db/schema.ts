@@ -28,6 +28,11 @@ export const users = pgTable(
     address: text("address").default(""),
     plan: text("plan").notNull().default("free"),
     planExpiresAt: timestamp("plan_expires_at", { withTimezone: true }),
+    /* باقات دفعة واحدة (single/basic/verified) — تبقى true للأبد
+       بعد أول شراء: صاحبها يُستثنى من حد الباقة المجانية */
+    paidOnce: boolean("paid_once").notNull().default(false),
+    /* هل استُهلكت باقة العقد الواحد؟ (يُضبط true عند حفظ أول عقد بعدها) */
+    isSingleUsed: boolean("is_single_used").notNull().default(false),
     preferences: jsonb("preferences")
       .$type<{
         darkMode: boolean;

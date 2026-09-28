@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { contracts } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { contracts, users } from "@/db/schema";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { normalize, buildContractContent } from "@/lib/contract-text";
 import { CONTRACT_TYPES } from "@/lib/contract-types";
 import { contractFingerprint, shareUrlFor } from "@/lib/fingerprint";
@@ -62,6 +62,52 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.dbId) {
     return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
+  }
+
+  /* ===== حد الباقة المجانية — منع الإساءة قبل أي معالجة =====
+     المجاني: 3 عقود شهرياً. يُستثنى من الحد:
+     - من اشترى باقة دفعة واحدة سابقاً (paidOnce)
+     - صاحب باقة once فعّالة (single/basic/verified)
+     - صاحب اشتراك شهري غير منتهٍ (freelancer/office) */
+  {
+    const uRows = await db
+      .select({
+        plan: users.plan,
+        planExpiresAt: users.planExpiresAt,
+        paidOnce: users.paidOnce,
+      })
+      .from(users)
+      .where(eq(users.id, session.user.dbId))
+      .limit(1);
+    const u = uRows[0];
+    const planId = u?.plan || "free";
+    const expired = u?.planExpiresAt ? u.planExpiresAt.getTime() < Date.now() : false;
+    const onceActive = planId === "single" || planId === "basic" || planId === "verified";
+    const monthlyActive = (planId === "freelancer" || planId === "office") && !expired;
+    const isPaid = onceActive || monthlyActive || Boolean(u?.paidOnce);
+
+    if (!isPaid) {
+      const monthStart = new Date();
+      monthStart.setUTCDate(1);
+      monthStart.setUTCHours(0, 0, 0, 0);
+      const usedRows = await db
+        .select({ n: sql<number>`count(*)::int` })
+        .from(contracts)
+        .where(
+          and(eq(contracts.ownerId, session.user.dbId), sql`${contracts.createdAt} >= ${monthStart}`)
+        );
+      if ((usedRows[0]?.n || 0) >= 3) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message:
+              "وصلت حد الباقة المجانية (3 عقود شهرياً) — ترقَّ لباقة موثّق لإنشاء عقود غير محدودة.",
+            upgrade: true,
+          },
+          { status: 402 }
+        );
+      }
+    }
   }
 
   let body: CreateBody;

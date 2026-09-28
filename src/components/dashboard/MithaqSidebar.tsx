@@ -118,6 +118,16 @@ export default function MithaqSidebar({
             <i className="ico fas fa-shield-halved" />
             <span>المميزات</span>
           </button>
+          <button
+            className="nav-link"
+            onClick={() => {
+              setOpen(false);
+              window.location.href = "/pricing";
+            }}
+          >
+            <i className="ico fas fa-crown" />
+            <span>الباقات والأسعار</span>
+          </button>
 
           <div className="nav-section-title" style={{ marginTop: 10 }}>
             الحساب

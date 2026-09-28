@@ -1327,6 +1327,16 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
                   {error}
                 </p>
               )}
+              {error && error.indexOf("حد الباقة المجانية") !== -1 && (
+                <a
+                  className="btn btn-primary"
+                  href="/pricing"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 14, textDecoration: "none" }}
+                >
+                  <i className="fas fa-crown" />
+                  ترقية الباقة
+                </a>
+              )}
 
               {/* الفوتر */}
               <div className="modal-footer" style={{ padding: 0 }}>
