@@ -39,6 +39,11 @@ export default function MithaqSidebar({
     }
   };
 
+  const openNewContract = () => {
+    setOpen(false);
+    window.dispatchEvent(new CustomEvent("mithaq:open-contract-modal"));
+  };
+
   return (
     <>
       {/* زر الفتح للجوال */}
@@ -89,7 +94,7 @@ export default function MithaqSidebar({
             <i className="ico fas fa-house" />
             <span>لوحة التحكم</span>
           </button>
-          <button className="nav-link" onClick={() => go("create")}>
+          <button className="nav-link" onClick={openNewContract}>
             <i className="ico fas fa-file-circle-plus" />
             <span>إنشاء عقد جديد</span>
           </button>

@@ -45,9 +45,7 @@ export default function DashboardTopbar({ isAdmin = false }: { isAdmin?: boolean
           className="icon-btn"
           title="عقد جديد"
           onClick={() => {
-            document
-              .getElementById("create")
-              ?.scrollIntoView({ behavior: "smooth" });
+            window.dispatchEvent(new CustomEvent("mithaq:open-contract-modal"));
           }}
         >
           <i className="fas fa-plus" />

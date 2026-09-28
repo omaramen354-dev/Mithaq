@@ -12,7 +12,7 @@ import {
   MithaqFooter,
 } from "@/components/dashboard/MithaqSections";
 import ContractsTable from "@/components/dashboard/ContractsTable";
-import NewContractForm from "@/components/dashboard/NewContractForm";
+import ContractModal from "@/components/dashboard/ContractModal";
 import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 
@@ -59,20 +59,25 @@ export default async function Home() {
 
         <StatsBar contracts={rows.length} />
 
-        {/* قسم إنشاء العقد — نموذج ميثاق الحي داخل التصميم الأسطوري */}
+        {/* قسم إنشاء العقد — ترويسة القسم + نافذة إنشاء العقد المنبثقة
+            (المودال نفسه يُفتح من الأزرار أو من اختيار نوع عقد، ويعالج
+            استعادة مسودة الضيف مرة واحدة — لا يوجد نموذج مضمّن هنا) */}
         <section className="section form-section reveal" id="create">
           <div className="section-header">
             <div>
               <div className="section-label">إنشاء عقد</div>
               <h2 className="section-title">وثيقتك الجديدة</h2>
               <p className="section-sub">
-                املأ البيانات واختر البنود — سيتولد نص العقد أمامك فوراً ببصمة
-                SHA-256.
+                اضغط «إنشاء عقد جديد» في الأعلى أو اختر قالباً — ستُفتح لك نافذة
+                الإنشاء ويتولد نص العقد أمامك فوراً ببصمة SHA-256.
               </p>
             </div>
           </div>
-          <NewContractForm mode={isUser ? "user" : "guest"} />
         </section>
+
+        {/* نافذة إنشاء العقد المنبثقة — تُفتح من الأزرار (mithaq:open-contract-modal)
+            أو من اختيار نوع العقد (mithaq:pick-type)، وتعالج استعادة مسودة الضيف */}
+        <ContractModal mode={isUser ? "user" : "guest"} />
 
         <ContractTypes />
 

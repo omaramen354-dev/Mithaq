@@ -7,13 +7,13 @@
    ============================================================ */
 
 export default function MithaqHeroButtons() {
-  function scrollToCreate() {
-    document.getElementById("create")?.scrollIntoView({ behavior: "smooth" });
+  function openContractModal() {
+    window.dispatchEvent(new CustomEvent("mithaq:open-contract-modal"));
   }
 
   return (
     <div className="hero-actions">
-      <button className="btn btn-primary" onClick={scrollToCreate}>
+      <button className="btn btn-primary" onClick={openContractModal}>
         <i className="fas fa-file-circle-plus" />
         إنشاء عقد جديد
       </button>
