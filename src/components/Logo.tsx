@@ -3,7 +3,7 @@
 export default function Logo({ height = 32 }: { height?: number }) {
   return (
     <img
-      src="/logo.svg"
+      src="/mithaq-logo-v2.svg"
       alt="ميثاق — منصة العقود الذكية"
       height={height}
       style={{ height, width: "auto", display: "block" }}

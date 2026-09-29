@@ -26,8 +26,10 @@ export const authConfig = {
         return true;
       }
 
-      /* الرئيسية / عامة للضيوف والمسجلين على حد سواء */
+      /* الرئيسية / وصفحة الأسعار /pricing عامة للضيوف والمسجلين —
+         الضيف يرى الباقات ويُطلب منه الدخول عند الاشتراك فقط */
       if (request.nextUrl.pathname === "/") return true;
+      if (request.nextUrl.pathname === "/pricing") return true;
 
       /* بقية الصفحات التطبيقية (مثل /print) للمسجلين فقط —
          مع حفظ المسار المطلوب في callbackUrl للعودة بعد الدخول */

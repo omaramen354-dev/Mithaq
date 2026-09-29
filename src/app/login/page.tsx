@@ -112,7 +112,12 @@ export default function LoginPage() {
         <button
           className="btn"
           style={{ width: "100%", justifyContent: "center", padding: "13px 18px" }}
-          onClick={() => signIn("google", { callbackUrl: "/" })}
+          onClick={() => {
+            /* العودة إلى الصفحة التي أتى منها المستخدم (مثل /pricing) */
+            const cb =
+              new URLSearchParams(window.location.search).get("callbackUrl") || "/";
+            signIn("google", { callbackUrl: cb });
+          }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
             <path

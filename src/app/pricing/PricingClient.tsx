@@ -147,10 +147,10 @@ export default function PricingClient({
           <div className="pricing-guest-note">
             <i className="fas fa-circle-info" />
             أنت تصفح كزائر —{" "}
-            <Link href="/login">
+            <Link href="/login?callbackUrl=%2Fpricing">
               سجّل الدخول بجوجل
             </Link>{" "}
-            أولاً حتى يُربط الطلب بحسابك.
+            أولاً حتى يُربط الطلب بحسابك (وستعود هنا تلقائياً).
           </div>
         )}
         {isLoggedIn && userName && (
