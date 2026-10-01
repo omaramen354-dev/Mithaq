@@ -39,7 +39,30 @@ type ErrorBody = {
 const MAX_MSG = 500;
 const MAX_STACK = 3000;
 
+/* ===== حد إغراق بسيط لكل IP (نافذة متحركة في الذاكرة) =====
+   يعمل لكل نسخة من الخادم — كافٍ لمنع الإغراق العادي دون
+   تعقيد خارجي. الغرض حماية سجل الأحداث من التضخم */
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 15;
+const rateHits = new Map<string, number[]>();
+
+function isFlooding(ip: string): boolean {
+  const now = Date.now();
+  if (rateHits.size > 5000) rateHits.clear(); /* تنظيف ذاكرة وقائي */
+  const arr = (rateHits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  arr.push(now);
+  rateHits.set(ip, arr);
+  return arr.length > RATE_MAX;
+}
+
 export async function POST(req: NextRequest) {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  if (isFlooding(ip)) {
+    /* 429 صامت — لا نكتب شيئاً حتى لا يكون الإغراق وسيلة للتضخم */
+    return new NextResponse(null, { status: 429 });
+  }
+
   let body: ErrorBody;
   try {
     body = (await req.json()) as ErrorBody;

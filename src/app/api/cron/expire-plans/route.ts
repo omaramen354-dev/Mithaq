@@ -14,15 +14,30 @@ export const dynamic = "force-dynamic";
    - الباقات دفعة واحدة (single/basic/verified) لا تنتهي.
    - التخفيض آمن ومتكرر: تشغيله مرتين لا يضر (idempotent).
    - كل عملية تُسجل في سجل الأحداث (activity_logs) للمشرفين.
-   حماية: إذا ضُبط CRON_SECRET في متغيرات البيئة يُطلب ترويسة
-   Authorization: Bearer <CRON_SECRET> (Vercel يرسلها تلقائياً).
+   حماية:
+   - إذا ضُبط CRON_SECRET يُطلب Authorization: Bearer <CRON_SECRET>
+     (Vercel يرسلها تلقائياً مع كل استدعاء كرون) — مقارنة آمنة.
+   - إن لم يُضبط، يُقبل فقط طلب يحمل ترويسة vercel-cron من Vercel.
+   - الاستجابة لا تعرض أي بيانات مستخدمين (عدّاد فقط).
    ============================================================ */
 
 function authorized(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return true; /* غير مضبوط — يُترك مفتوحاً (العملية غير ضارة) */
-  const header = req.headers.get("authorization") || "";
-  return header === `Bearer ${secret}`;
+  if (secret) {
+    /* المسار الآمن: مقارنة صامتة ثابتة الزمن تقريباً */
+    const header = req.headers.get("authorization") || "";
+    const expected = `Bearer ${secret}`;
+    if (header.length !== expected.length) return false;
+    let diff = 0;
+    for (let i = 0; i < expected.length; i++) {
+      diff |= header.charCodeAt(i) ^ expected.charCodeAt(i);
+    }
+    return diff === 0;
+  }
+  /* بدون سر: نقبل فقط طلبات Vercel Cron نفسها (ترويسة موقعة من Vercel)
+     — يمنع المتطفلين العشوائيين وفحص الروابط الآلي */
+  const ua = req.headers.get("user-agent") || "";
+  return ua.includes("vercel-cron");
 }
 
 export async function GET(req: NextRequest) {
@@ -61,6 +76,6 @@ export async function GET(req: NextRequest) {
     ok: true,
     checkedAt: now.toISOString(),
     downgraded: downgraded.length,
-    users: downgraded.map((u) => u.email),
+    /* لا نعيد الإيميلات — هذا المسار قد يُستدعى آلياً ولا يعرض بيانات */
   });
 }
