@@ -200,6 +200,11 @@ export function MithaqFooter() {
         <span className="gold">مِــيــثَــاق</span> — منظومة العقود والتوثيق
         الإلكتروني
       </div>
+      <div className="footer-links">
+        <a href="/privacy">سياسة الخصوصية</a>
+        <span aria-hidden>·</span>
+        <a href="/terms">الشروط والأحكام</a>
+      </div>
       <div style={{ fontSize: 11, opacity: 0.75 }}>
         عقودك بثقة وسهولة · بصمة SHA-256 · توقيع رقمي · تحقق عام
       </div>
