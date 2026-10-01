@@ -7,6 +7,7 @@ import { normalize, buildContractContent } from "@/lib/contract-text";
 import { CONTRACT_TYPES } from "@/lib/contract-types";
 import { contractFingerprint, shareUrlFor } from "@/lib/fingerprint";
 import { randomUUID } from "crypto";
+import { logEvent } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -173,6 +174,17 @@ export async function POST(req: NextRequest) {
 
   const inserted = await db.insert(contracts).values(contract).returning();
   const row = inserted[0];
+
+  await logEvent({
+    action: "contract_created",
+    entity: "contract",
+    entityId: row.id,
+    actorId: session.user.dbId,
+    actorName: session.user.name || "",
+    actorEmail: session.user.email || "",
+    detail: `عقد ${CONTRACT_TYPES[d.type!] || d.type} — ${row.party1Name} ↔ ${row.party2Name}`,
+    meta: { type: d.type, signingMode: row.signingMode },
+  });
 
   return NextResponse.json(
     {

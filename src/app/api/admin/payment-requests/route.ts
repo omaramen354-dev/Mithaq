@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { paymentRequests, users } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { findPlan, MONTH_DAYS } from "@/lib/plans";
+import { logEvent } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -75,6 +76,18 @@ export async function POST(req: NextRequest) {
       .update(paymentRequests)
       .set({ status: "rejected", updatedAt: new Date() })
       .where(eq(paymentRequests.id, id));
+
+    await logEvent({
+      action: "payment_rejected",
+      entity: "payment",
+      entityId: id,
+      actorId: session.user.dbId,
+      actorName: session.user.name || "",
+      actorEmail: session.user.email || "",
+      detail: `رفض طلب دفعة (${reqRow.plan}) — ${reqRow.amountUsd} USDT عبر ${reqRow.method}`,
+      meta: { plan: reqRow.plan, method: reqRow.method, txRef: reqRow.txRef },
+    });
+
     return NextResponse.json({ ok: true, message: "تم رفض الطلب." });
   }
 
@@ -118,6 +131,17 @@ export async function POST(req: NextRequest) {
         isSingleUsed: plan.id === "single" ? false : undefined,
       })
       .where(eq(users.id, reqRow.userId!));
+  });
+
+  await logEvent({
+    action: "payment_confirmed",
+    entity: "payment",
+    entityId: id,
+    actorId: session.user.dbId,
+    actorName: session.user.name || "",
+    actorEmail: session.user.email || "",
+    detail: `تأكيد دفعة (${reqRow.plan}) — ${reqRow.amountUsd} USDT عبر ${reqRow.method} وتفعيل باقة ${plan.title}`,
+    meta: { plan: plan.id, method: reqRow.method, txRef: reqRow.txRef, targetUser: reqRow.userId },
   });
 
   return NextResponse.json({

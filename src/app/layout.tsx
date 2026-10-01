@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./mithaq.css";
+import ErrorReporter from "@/components/ErrorReporter";
 
 /* خط ثمانية — Sans للنصوص + Serif Display للعناوين الكبيرة */
 const thmanyahSans = localFont({
@@ -55,6 +56,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${thmanyahSans.variable} ${thmanyahDisplay.variable}`}>
+        <ErrorReporter />
         {children}
       </body>
     </html>

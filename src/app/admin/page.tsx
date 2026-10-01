@@ -6,6 +6,9 @@ import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 import PaymentsManager from "./PaymentsManager";
+import UsersManager from "./UsersManager";
+import LogsManager from "./LogsManager";
+import ErrorsManager from "./ErrorsManager";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -164,6 +167,12 @@ export default async function AdminPage() {
         ))}
       </section>
 
+      {/* المستخدمون — إدارة كاملة: بحث، فلترة، ترقية باقات، صلاحيات */}
+      <UsersManager currentAdminId={session?.user?.dbId || ""} />
+
+      {/* لوحة الأخطاء الحية — أي عطل يُلتقط تلقائياً ويظهر هنا */}
+      <ErrorsManager />
+
       {/* طلبات الدفع — تأكيد يدوي آمن */}
       <PaymentsManager
         requests={payReqs.map((r) => ({
@@ -225,6 +234,8 @@ export default async function AdminPage() {
 
         {/* الجانب: أنواع العقود + المشرفون */}
         <div className="admin-side">
+          <LogsManager />
+
           <section className="admin-panel reveal">
             <div className="admin-panel-head">
               <i className="fas fa-chart-simple" />

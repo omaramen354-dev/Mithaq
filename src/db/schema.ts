@@ -175,6 +175,27 @@ export const paymentRequests = pgTable("payment_requests", {
     .defaultNow(),
 });
 
+/* ===== سجل الأحداث — اللوجس المركزي للمنصة (للإدارة) =====
+   entity: contract | user | payment | auth | system
+   action: مثال created | signed | payment_confirmed | plan_changed | login ...
+   يتسقبل 500 سجل مع تخزين سريع بالفهرسة على الحدث الزمني */
+export const activityLogs = pgTable(
+  "activity_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
+    actorName: text("actor_name").default(""),
+    actorEmail: text("actor_email").default(""),
+    action: text("action").notNull(),
+    entity: text("entity").notNull(),
+    entityId: text("entity_id").default(""),
+    detail: text("detail").default(""),
+    meta: jsonb("meta").$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("activity_logs_created_idx").on(t.createdAt), index("activity_logs_entity_idx").on(t.entity)]
+);
+
 /* ===== أنواع مستنتجة للاستخدام في الكود ===== */
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -183,3 +204,4 @@ export type NewContract = typeof contracts.$inferInsert;
 export type SignatureEvent = typeof signatureEvents.$inferSelect;
 export type PaymentRequest = typeof paymentRequests.$inferSelect;
 export type GuestPromptSeen = typeof guestPromptSeen.$inferSelect;
+export type ActivityLog = typeof activityLogs.$inferSelect;

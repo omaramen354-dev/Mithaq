@@ -103,6 +103,19 @@ const statements = [
     seen_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
   )`,
+  /* activity_logs — اللوجس المركزي للمنصة (سجل أحداث الإدارة) */
+  `CREATE TABLE IF NOT EXISTS activity_logs (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    actor_id uuid REFERENCES users(id) ON DELETE SET NULL,
+    actor_name text DEFAULT '',
+    actor_email text DEFAULT '',
+    action text NOT NULL,
+    entity text NOT NULL,
+    entity_id text DEFAULT '',
+    detail text DEFAULT '',
+    meta jsonb DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
   /* الفهارس */
   `CREATE INDEX IF NOT EXISTS users_email_idx ON users (email)`,
   `CREATE INDEX IF NOT EXISTS contracts_owner_idx ON contracts (owner_id)`,
@@ -110,6 +123,8 @@ const statements = [
   `CREATE INDEX IF NOT EXISTS contracts_created_idx ON contracts (created_at)`,
   `CREATE INDEX IF NOT EXISTS sig_events_contract_idx ON signature_events (contract_id)`,
   `CREATE UNIQUE INDEX IF NOT EXISTS guest_prompt_ip_hash_idx ON guest_prompt_seen (ip_hash)`,
+  `CREATE INDEX IF NOT EXISTS activity_logs_created_idx ON activity_logs (created_at)`,
+  `CREATE INDEX IF NOT EXISTS activity_logs_entity_idx ON activity_logs (entity)`,
 ];
 
 console.log("⏳ إنشاء الجداول في Neon عبر HTTPS...");

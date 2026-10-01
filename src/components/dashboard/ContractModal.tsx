@@ -37,6 +37,7 @@ import {
 import ClausePickerModal from "./ClausePickerModal";
 import LoginGateModal from "./LoginGateModal";
 import SaveSuccessModal from "./SaveSuccessModal";
+import { DEFAULT_CLAUSES } from "@/lib/clauses";
 
 /* ============================================================
    ContractModal — نافذة إنشاء العقد المنبثقة (نفس النسخة القديمة)
@@ -272,7 +273,9 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
     };
   }, [open]);
 
-  /* ===== حدث الفتح من الأزرار (هيرو/سايدبار/توب بار) + اختيار النوع ===== */
+  /* ===== حدث الفتح من الأزرار (هيرو/سايدبار/توب بار) + اختيار النوع =====
+     عند اختيار نوع العقد تُملأ البنود الافتراضية تلقائياً في حقل البنود
+     ليحرّرها المستخدم مباشرة بدل تركها مخفية في الخادم */
   useEffect(() => {
     const onOpen = () => {
       resetAll();
@@ -282,6 +285,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
       const t = (e as CustomEvent<string>).detail;
       if (t && CONTRACT_TYPES[t]) {
         setType(t);
+        setClauses(DEFAULT_CLAUSES[t] ? [...DEFAULT_CLAUSES[t]] : []);
         setOpen(true);
       }
     };
@@ -604,7 +608,16 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
                   className="form-select"
                   required
                   value={type}
-                  onChange={(e) => setType(e.target.value)}
+                  onChange={(e) => {
+                    const nextType = e.target.value;
+                    setType(nextType);
+                    /* تعبئة البنود الافتراضية للنوع المختار تلقائياً —
+                       فقط إذا لم يكتب المستخدم بنوداً خاصة به بعد */
+                    const hasCustom = clauses.some((c) => c.trim());
+                    if (!hasCustom && DEFAULT_CLAUSES[nextType]) {
+                      setClauses([...DEFAULT_CLAUSES[nextType]]);
+                    }
+                  }}
                 >
                   {Object.entries(CONTRACT_TYPES).map(([key, name]) => (
                     <option key={key} value={key}>
@@ -1214,8 +1227,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
               {/* البنود */}
               <div className="form-group">
                 <label className="form-label">
-                  <i className="fas fa-list-check" /> البنود — كل بند في سطر
-                  مستقل
+                  <i className="fas fa-list-check" /> البنود — كل بند في سطر مستقل
                 </label>
                 <textarea
                   className="form-input"
@@ -1235,6 +1247,29 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
                     onClick={() => setPickerOpen(true)}
                   >
                     ＋ بنود جاهزة (محررة قانونياً)
+                  </button>
+                  <button
+                    className="btn-modal-secondary"
+                    type="button"
+                    style={{ padding: "9px 16px", fontSize: 12.5 }}
+                    onClick={() => {
+                      /* إضافة سطر فارغ جديد لبند يدوي + توجيه المؤشر إليه */
+                      setClauses((cs) => {
+                        const arr = cs.filter((c, i) => c.trim() || i < cs.length - 1);
+                        return [...arr, ""];
+                      });
+                      setTimeout(() => {
+                        const ta = document.querySelector<HTMLTextAreaElement>(
+                          ".mithaq-modal textarea.form-input"
+                        );
+                        if (ta) {
+                          ta.focus();
+                          ta.selectionStart = ta.selectionEnd = ta.value.length;
+                        }
+                      }, 0);
+                    }}
+                  >
+                    ＋ إضافة بند
                   </button>
                   {clauses.length > 0 && (
                     <button

@@ -8,6 +8,7 @@ import { contractFingerprint, verifyPathFor } from "@/lib/fingerprint";
 import { contractTypeName } from "@/lib/contract-types";
 import { notifyContractEvent } from "@/lib/telegram";
 import { shareUrlFor } from "@/lib/fingerprint";
+import { logEvent } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -148,6 +149,15 @@ export async function POST(
     .update(contracts)
     .set({ content, contentHash, updatedAt: new Date() })
     .where(eq(contracts.id, contract.id));
+
+  await logEvent({
+    action: fresh.status === "signed" ? "contract_signed" : "contract_partially_signed",
+    entity: "contract",
+    entityId: fresh.id,
+    actorName: signerName,
+    detail: `${party === "party1" ? "الطرف الأول" : "الطرف الثاني"} وقّع عقد ${contractTypeName(fresh.type)} — ${fresh.party1Name} ↔ ${fresh.party2Name}`,
+    meta: { party, ip: meta.ipAddress },
+  });
 
   /* إشعار تيليجرام (لا يفشل الطلب إذا فشل الإشعار) */
   const base = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
