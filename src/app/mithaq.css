@@ -1664,6 +1664,7 @@ h1, h2, h3, h4, h5, .btn {
 .b-signed { background: rgba(29, 74, 62, 0.12); color: var(--green); }
 .b-partial { background: rgba(212, 168, 67, 0.16); color: var(--gold-dark); }
 .b-draft { background: rgba(119, 119, 119, 0.12); color: var(--text-2); }
+.b-expired { background: rgba(192, 57, 43, 0.13); color: #c0392b; }
 .admin-row-date { font-size: 10.5px; color: var(--text-2); font-weight: 600; }
 .admin-empty { padding: 26px 10px; text-align: center; font-size: 13px; font-weight: 700; color: var(--text-2); }
 
@@ -1757,8 +1758,11 @@ h1, h2, h3, h4, h5, .btn {
 
 /* الإحصاءات السريعة للحسابات */
 .admin-user-stats {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
   margin-bottom: 14px;
+}
+@media (max-width: 1024px) {
+  .admin-user-stats { grid-template-columns: repeat(3, 1fr); }
 }
 .austat {
   display: flex; align-items: center; gap: 10px;
@@ -1773,6 +1777,8 @@ h1, h2, h3, h4, h5, .btn {
 }
 .austat.gold { border-color: rgba(212, 168, 67, 0.4); background: rgba(212, 168, 67, 0.06); }
 .austat.gold i { background: rgba(212, 168, 67, 0.16); color: var(--gold-dark); }
+.austat.warn { border-color: rgba(192, 57, 43, 0.35); background: rgba(192, 57, 43, 0.05); }
+.austat.warn i { background: rgba(192, 57, 43, 0.12); color: #c0392b; }
 .austat b {
   display: block;
   font-family: var(--font-thmanyah-display), var(--font-thmanyah), sans-serif;

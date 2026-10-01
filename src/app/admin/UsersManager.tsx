@@ -37,7 +37,16 @@ const PLAN_NAMES: Record<string, string> = {
   office: "المكاتب",
 };
 
-type PlanFilter = "all" | "paid" | "free" | "admin";
+type PlanFilter = "all" | "paid" | "free" | "admin" | "expired";
+
+/* هل انتهى اشتراك شهري لهذا المستخدم؟ (المستقل/المكاتب بعد تاريخ الانتهاء) */
+function isExpired(u: AdminUser): boolean {
+  return (
+    (u.plan === "freelancer" || u.plan === "office") &&
+    !!u.planExpiresAt &&
+    new Date(u.planExpiresAt).getTime() < Date.now()
+  );
+}
 
 export default function UsersManager({ currentAdminId }: { currentAdminId: string }) {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -86,6 +95,7 @@ export default function UsersManager({ currentAdminId }: { currentAdminId: strin
       if (filter === "admin" && !u.isAdmin) return false;
       if (filter === "free" && (u.plan !== "free" || u.isAdmin)) return false;
       if (filter === "paid" && (u.plan === "free" || u.isAdmin)) return false;
+      if (filter === "expired" && !isExpired(u)) return false;
       return true;
     });
   }, [users, query, filter]);
@@ -98,6 +108,7 @@ export default function UsersManager({ currentAdminId }: { currentAdminId: strin
       today: users.filter(
         (u) => Date.now() - new Date(u.createdAt).getTime() < 864e5
       ).length,
+      expired: users.filter(isExpired).length,
     }),
     [users]
   );
@@ -183,6 +194,13 @@ export default function UsersManager({ currentAdminId }: { currentAdminId: strin
             <span>انضموا اليوم</span>
           </div>
         </div>
+        <div className="austat warn">
+          <i className="fas fa-hourglass-end" />
+          <div>
+            <b>{stats.expired}</b>
+            <span>اشتراكات منتهية</span>
+          </div>
+        </div>
       </div>
 
       {/* البحث والفلترة */}
@@ -206,6 +224,7 @@ export default function UsersManager({ currentAdminId }: { currentAdminId: strin
             [
               ["all", "الكل"],
               ["paid", "مدفوع"],
+              ["expired", "منتهية"],
               ["free", "مجاني"],
               ["admin", "مشرفون"],
             ] as const
@@ -282,7 +301,13 @@ export default function UsersManager({ currentAdminId }: { currentAdminId: strin
                   {/* الباقة الحالية */}
                   <span
                     className={`admin-badge ${
-                      u.isAdmin ? "b-signed" : u.plan === "free" ? "b-draft" : "b-partial"
+                      u.isAdmin
+                        ? "b-signed"
+                        : expired
+                          ? "b-expired"
+                          : u.plan === "free"
+                            ? "b-draft"
+                            : "b-partial"
                     }`}
                   >
                     {u.isAdmin ? "مشرف" : PLAN_NAMES[u.plan] || u.plan}

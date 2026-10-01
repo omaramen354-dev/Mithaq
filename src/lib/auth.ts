@@ -59,6 +59,17 @@ async function syncUser(profile: {
     .limit(1);
 
   if (existing.length) {
+    const now = new Date();
+
+    /* شبكة أمان: الاشتراك الشهري المنتهي يُعاد للمجانية فوراً عند
+       أول دخول — حتى قبل موعد كرون Vercel اليومي */
+    const monthly =
+      existing[0].plan === "freelancer" || existing[0].plan === "office";
+    const planExpired =
+      monthly &&
+      existing[0].planExpiresAt !== null &&
+      existing[0].planExpiresAt.getTime() < now.getTime();
+
     const updated = await db
       .update(users)
       .set({
@@ -66,7 +77,8 @@ async function syncUser(profile: {
         email,
         picture: profile.picture || existing[0].picture,
         isAdmin: isAdminFlag || existing[0].isAdmin,
-        lastSeenAt: new Date(),
+        lastSeenAt: now,
+        ...(planExpired ? { plan: "free", planExpiresAt: null } : {}),
       })
       .where(eq(users.id, existing[0].id))
       .returning();
