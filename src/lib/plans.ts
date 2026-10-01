@@ -51,8 +51,8 @@ export const PLANS: Plan[] = [
     priceUsd: 5,
     priceSyp: 75000,
     unit: "once",
-    tagline: "لمن يريد وثيقة مرتبة وقابلة للمشاركة بدون تعقيد.",
-    features: ["PDF احترافي", "رابط مشاركة", "حفظ دائم"],
+    tagline: "7 عقود شهرياً بجودة احترافية — تدفع مرة واحدة.",
+    features: ["7 عقود شهرياً", "PDF احترافي", "رابط مشاركة", "حفظ دائم"],
   },
   {
     id: "verified",
@@ -120,14 +120,14 @@ export function priceLabelSyp(p: Plan): string {
 /* مدد التفعيل بالأيام — إشتراك شهر كامل */
 export const MONTH_DAYS = 30;
 
-/* الباقات ذات حدود شهرية (نفس فلسفة القديم: freelancer/office)
-   — النسخة الحالية تفتح غير محدود عند التفعيل، والحدّ يُدار من
-   إعدادات المشرف مستقبلاً */
+/* الحدود الشهرية لكل باقة — يُطبقها الخادم عند إنشاء العقد
+   null = بلا حد (الموثّقة دفعة واحدة، والمستقل/المكاتب طوال
+   فاعلية الاشتراك الشهري، والعقد الواحد تُدار عبر isSingleUsed) */
 export const PLAN_LIMITS: Record<string, number | null> = {
   free: 3, // 3 عقود شهرياً
   single: null, // عقد واحد (تُدار عبر isSingleUsed)
-  basic: null,
-  verified: null,
-  freelancer: null,
-  office: null,
+  basic: 7, // 7 عقود شهرياً
+  verified: null, // غير محدود
+  freelancer: null, // غير محدود طوال الاشتراك
+  office: null, // غير محدود طوال الاشتراك
 };

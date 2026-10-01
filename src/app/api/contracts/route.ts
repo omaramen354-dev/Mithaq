@@ -8,6 +8,7 @@ import { CONTRACT_TYPES } from "@/lib/contract-types";
 import { contractFingerprint, shareUrlFor } from "@/lib/fingerprint";
 import { randomUUID } from "crypto";
 import { logEvent } from "@/lib/logger";
+import { PLAN_LIMITS } from "@/lib/plans";
 
 export const runtime = "nodejs";
 
@@ -85,9 +86,19 @@ export async function POST(req: NextRequest) {
     const expired = u?.planExpiresAt ? u.planExpiresAt.getTime() < Date.now() : false;
     const onceActive = planId === "single" || planId === "basic" || planId === "verified";
     const monthlyActive = (planId === "freelancer" || planId === "office") && !expired;
-    const isPaid = onceActive || monthlyActive || Boolean(u?.paidOnce);
+    /* ===== تطبيق حدود الباقات (PLAN_LIMITS) =====
+       - بلا حد: موثّق، عقد واحد، من دفع سابقاً (paidOnce)،
+         أو اشتراك شهري حي (مستقل/مكاتب) — غير محدود فعلاً
+       - بحد شهري: المجاني 3، وأساسي 7 (دفعة واحدة تُحتسب شهرياً) */
+    const unlimited =
+      planId === "verified" ||
+      planId === "single" ||
+      Boolean(u?.paidOnce) ||
+      monthlyActive;
 
-    if (!isPaid) {
+    if (!unlimited) {
+      const effectivePlan = planId === "basic" ? "basic" : "free";
+      const limit = PLAN_LIMITS[effectivePlan] ?? PLAN_LIMITS.free ?? 3;
       const monthStart = new Date();
       monthStart.setUTCDate(1);
       monthStart.setUTCHours(0, 0, 0, 0);
@@ -97,12 +108,15 @@ export async function POST(req: NextRequest) {
         .where(
           and(eq(contracts.ownerId, session.user.dbId), sql`${contracts.createdAt} >= ${monthStart}`)
         );
-      if ((usedRows[0]?.n || 0) >= 3) {
+      if ((usedRows[0]?.n || 0) >= limit) {
+        const msg =
+          effectivePlan === "basic"
+            ? `وصلت حد باقة أساسي (${limit} عقود شهرياً) — ترقَّ لباقة موثّق لإنشاء عقود غير محدودة.`
+            : `وصلت حد الباقة المجانية (${limit} عقود شهرياً) — ترقَّ لباقة موثّق لإنشاء عقود غير محدودة.`;
         return NextResponse.json(
           {
             ok: false,
-            message:
-              "وصلت حد الباقة المجانية (3 عقود شهرياً) — ترقَّ لباقة موثّق لإنشاء عقود غير محدودة.",
+            message: msg,
             upgrade: true,
           },
           { status: 402 }
