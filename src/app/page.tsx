@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { contracts, type Contract } from "@/db/schema";
+import { contracts, users, type Contract } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { signOut } from "@/lib/auth";
 import MithaqSidebar from "@/components/dashboard/MithaqSidebar";
@@ -15,6 +15,7 @@ import ContractsTable from "@/components/dashboard/ContractsTable";
 import ContractModal from "@/components/dashboard/ContractModal";
 import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
+import WelcomeBack from "@/components/dashboard/WelcomeBack";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,25 @@ export default async function Home() {
         .orderBy(desc(contracts.createdAt))
     : [];
 
+  /* بيانات الحساب للترحيب وبطاقة الباقة */
+  const meRows = isUser
+    ? await db
+        .select({
+          plan: users.plan,
+          planExpiresAt: users.planExpiresAt,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .where(eq(users.id, dbId!))
+        .limit(1)
+    : [];
+  const me = meRows[0];
+  const signedCount = rows.filter((c) => c.status === "signed").length;
+  /* جديد = حسابه عمره أقل من 24 ساعة أو لم ينشئ أي عقد بعد */
+  const isNewUser =
+    !!me &&
+    (Date.now() - me.createdAt.getTime() < 864e5 || rows.length === 0);
+
   return (
     <>
       <RevealOnScroll />
@@ -46,6 +66,8 @@ export default async function Home() {
         userName={session?.user?.name}
         userPicture={session?.user?.picture}
         contractsCount={rows.length}
+        plan={me?.plan}
+        planExpiresAt={me?.planExpiresAt?.toISOString() || null}
         signOutAction={async () => {
           "use server";
           await signOut({ redirectTo: "/login" });
@@ -53,9 +75,28 @@ export default async function Home() {
       />
 
       <div className="main-wrapper">
-        <DashboardTopbar isAdmin={Boolean(session?.user?.isAdmin)} />
+        <DashboardTopbar
+          isAdmin={Boolean(session?.user?.isAdmin)}
+          userName={isUser ? session?.user?.name : null}
+        />
 
-        <MithaqHero />
+        <MithaqHero
+          mode={isUser ? "user" : "guest"}
+          userName={session?.user?.name}
+          contractsCount={rows.length}
+          signedCount={signedCount}
+        />
+
+        {isUser && (
+          <WelcomeBack
+            name={session?.user?.name || "صديقنا"}
+            picture={session?.user?.picture}
+            isNew={isNewUser}
+            contractsCount={rows.length}
+            signedCount={signedCount}
+            plan={me?.plan || "free"}
+          />
+        )}
 
         <StatsBar contracts={rows.length} />
 

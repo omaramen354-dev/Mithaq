@@ -275,6 +275,22 @@ h1, h2, h3, h4, h5, .btn {
 }
 
 .topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-user-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 800;
+  color: var(--gold-dark);
+  background: linear-gradient(135deg, rgba(212, 168, 67, 0.12), rgba(246, 217, 121, 0.08));
+  border: 1px solid rgba(212, 168, 67, 0.4);
+  border-radius: 999px;
+  padding: 4px 12px;
+  margin-inline-start: 10px;
+}
+.topbar-user-pill i { font-size: 9px; }
+
+@media (max-width: 900px) {
+  .topbar-user-pill { display: none; }
+}
+
 .topbar-title {
   font-size: 15px;
   font-weight: 700;
@@ -1185,7 +1201,8 @@ h1, h2, h3, h4, h5, .btn {
 .sidebar-picker-slot .mq-pop { border-color: rgba(212, 168, 67, 0.35); }
 
 /* القائمة المفتوحة بوضع fixed (نسخة السايدبار) */
-.mq-pop-fixed { position: fixed; }
+/* القائمة المنبثقة عبر Portal — fixed وفوق كل شيء (السايدبار 100، الهيدر 50) */
+.mq-pop-fixed { position: fixed; z-index: 950; }
 
 /* ===== v5: شيفرون المنتقي + تحسينات الموبايل ===== */
 .mq-opt .chev { transition: transform 0.2s ease; }
@@ -1379,6 +1396,154 @@ h1, h2, h3, h4, h5, .btn {
   .stat-num { font-size: 19px; }
   .topbar-title { max-width: 48vw; }
 }
+
+/* ============================================================
+   إشعار الترحيب الذكي — WelcomeBack
+   ============================================================ */
+.welcome-toast {
+  position: fixed;
+  bottom: 24px;
+  inset-inline-end: 24px; /* يسار الشاشة في RTL — بعيداً عن السايدبار */
+  z-index: 900;
+  display: flex; align-items: flex-start; gap: 13px;
+  width: min(400px, calc(100vw - 48px));
+  background: linear-gradient(145deg, #122e26 0%, #1d4a3e 55%, #1f5244 100%);
+  border: 1.5px solid rgba(212, 168, 67, 0.5);
+  border-radius: 20px;
+  padding: 17px 18px;
+  box-shadow: 0 24px 70px -12px rgba(8, 25, 20, 0.65);
+  animation: welcomeIn 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+.welcome-toast.leaving { animation: welcomeOut 0.35s ease forwards; }
+@keyframes welcomeIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes welcomeOut {
+  to { opacity: 0; transform: translateY(20px) scale(0.95); }
+}
+.welcome-toast-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(320px 130px at 85% 0%, rgba(212, 168, 67, 0.18), transparent 70%);
+}
+.welcome-avatar {
+  position: relative; width: 46px; height: 46px; flex-shrink: 0;
+  z-index: 1;
+}
+.welcome-avatar img,
+.welcome-avatar i {
+  width: 46px; height: 46px; border-radius: 50%;
+  object-fit: cover;
+  display: grid; place-items: center;
+  border: 2px solid var(--gold);
+  background: rgba(212, 168, 67, 0.15); color: var(--gold-light); font-size: 17px;
+}
+.welcome-pulse {
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(212, 168, 67, 0.6);
+  animation: welcomePulse 2s ease-out infinite;
+}
+@keyframes welcomePulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+.welcome-body {
+  flex: 1; min-width: 0; position: relative; z-index: 1;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.welcome-body b {
+  color: var(--gold-light);
+  font-size: 14.5px; font-weight: 900;
+}
+.welcome-body span {
+  color: rgba(244, 241, 225, 0.8);
+  font-size: 12px; font-weight: 600; line-height: 1.7;
+}
+.welcome-body .gold-txt { color: var(--gold-light); font-weight: 900; }
+.welcome-cta {
+  font: inherit;
+  margin-top: 6px;
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 7px;
+  border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+  color: #122e26;
+  font-size: 12px; font-weight: 900;
+  padding: 8px 16px; border-radius: 11px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.welcome-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 22px -6px rgba(212, 168, 67, 0.7); }
+.welcome-close {
+  position: relative; z-index: 1;
+  border: none; background: transparent; cursor: pointer;
+  color: rgba(244, 241, 225, 0.5); font-size: 14px;
+  padding: 2px 4px; flex-shrink: 0;
+}
+.welcome-close:hover { color: var(--gold-light); }
+@media (max-width: 640px) {
+  .welcome-toast { bottom: 14px; inset-inline-end: 14px; }
+}
+
+/* ============================================================
+   بطاقة حالة الحساب في السايدبار — UserPlanCard
+   ============================================================ */
+.upc {
+  margin: 0; /* فوتر السايدبار له padding خاص به — لا نضيف هامشاً مزدوجاً */
+  border-radius: 15px;
+  padding: 13px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+}
+.upc-top { display: flex; align-items: center; gap: 10px; }
+.upc-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+  color: #122e26; font-weight: 900; font-size: 16px;
+  border: 2px solid rgba(246, 217, 121, 0.5);
+  overflow: hidden;
+}
+.upc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.upc-id { min-width: 0; }
+.upc-name {
+  font-size: 13.5px; font-weight: 900; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.upc-plan {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 700; color: rgba(246, 217, 121, 0.85);
+  margin-top: 2px;
+}
+.upc-plan i { font-size: 9px; }
+.upc-meta {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 11px;
+}
+.upc-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 800;
+  color: rgba(244, 241, 225, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px; padding: 4px 10px;
+  text-decoration: none;
+}
+.upc-chip i { font-size: 9px; color: var(--gold-light); }
+.upc-chip.gold {
+  background: linear-gradient(135deg, rgba(212, 168, 67, 0.25), rgba(246, 217, 121, 0.15));
+  border-color: rgba(212, 168, 67, 0.5);
+  color: var(--gold-light);
+  cursor: pointer;
+}
+.upc-chip.gold:hover { background: var(--gold-dark); color: #122e26; }
+.upc-chip.gold i { color: var(--gold-light); }
+.upc-chip.warn {
+  background: rgba(192, 57, 43, 0.2);
+  border-color: rgba(192, 57, 43, 0.45);
+  color: #ffb3a7;
+}
+.upc-chip.warn i { color: #ffb3a7; }
 
 /* ============================================================
    لوحة الإدارة /admin — هوية ميثاق الكاملة

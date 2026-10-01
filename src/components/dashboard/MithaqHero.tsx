@@ -3,6 +3,14 @@
 import Image from "next/image";
 import MithaqHeroButtons from "./MithaqHeroButtons";
 
+/* تخصيص الهيرو للمسجلين: تحية باسمه + عداد عقوده */
+type HeroProps = {
+  mode?: "guest" | "user";
+  userName?: string | null;
+  contractsCount?: number;
+  signedCount?: number;
+};
+
 /* ============================================================
    MithaqHero — الهيرو الأسطوري (v2)
    نقشة السداسيات + اللوغو الجديد داخل صندوقه الأخضر الداكن
@@ -10,7 +18,12 @@ import MithaqHeroButtons from "./MithaqHeroButtons";
    المنبثقة المدمجة ضمن الأزرار بدل القسم المنفصل.
    ============================================================ */
 
-export default function MithaqHero() {
+export default function MithaqHero({
+  mode = "guest",
+  userName,
+  contractsCount = 0,
+  signedCount = 0,
+}: HeroProps) {
   return (
     <section className="hero">
       {/* نقشة السداسيات الزخرفية — نفس SVG الأصلي */}
@@ -61,12 +74,31 @@ export default function MithaqHero() {
           </div>
         </div>
 
-        <h1>
-          أنشئ عقدك
-          <br />
-          <span>بثقة وسهولة</span>
-        </h1>
-        <div className="hero-tagline">عقودك بثقة وسهولة — في دقائق</div>
+        {mode === "user" && userName ? (
+          <>
+            <h1>
+              أهلاً {userName.trim().split(" ")[0]}
+              <br />
+              <span>
+                {contractsCount === 0
+                  ? "لنبدأ عقدك الأول"
+                  : contractsCount === 1
+                    ? "عقدك الواحد بانتظار توقيعك"
+                    : `${contractsCount} عقد في أرشيفك${signedCount > 0 ? ` — ${signedCount} موقّع` : ""}`}
+              </span>
+            </h1>
+            <div className="hero-tagline">كل عقودك موثّقة ومحفوظة — في مكان واحد</div>
+          </>
+        ) : (
+          <>
+            <h1>
+              أنشئ عقدك
+              <br />
+              <span>بثقة وسهولة</span>
+            </h1>
+            <div className="hero-tagline">عقودك بثقة وسهولة — في دقائق</div>
+          </>
+        )}
         <p className="lead">
           أنشئ عقداً، عدّل البنود، أضف توقيعاً رقمياً، شارك رابطاً عاماً، واطبع
           PDF ببصمة تحقق SHA-256 — كل ذلك من مكان واحد.

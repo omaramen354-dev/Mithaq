@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import ContractTypePicker from "./ContractTypePicker";
+import UserPlanCard from "./UserPlanCard";
 
 /* ============================================================
    MithaqSidebar — السايدبار الزمردي الأسطوري (v1)
@@ -20,12 +21,16 @@ export default function MithaqSidebar({
   userPicture,
   contractsCount,
   signOutAction,
+  plan,
+  planExpiresAt,
 }: {
   mode: SidebarMode;
   userName?: string | null;
   userPicture?: string | null;
   contractsCount: number;
   signOutAction: () => Promise<void>;
+  plan?: string;
+  planExpiresAt?: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -151,26 +156,25 @@ export default function MithaqSidebar({
         </nav>
 
         <div className="sidebar-footer">
-          <div className="user-card">
-            <div className="user-avatar">
-              {mode === "user" && userPicture ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={userPicture} alt="" />
-              ) : mode === "user" && userName ? (
-                userName.trim().charAt(0) || "م"
-              ) : (
+          {mode === "user" ? (
+            <UserPlanCard
+              userName={userName || "مستخدم ميثاق"}
+              userPicture={userPicture}
+              plan={plan || "free"}
+              planExpiresAt={planExpiresAt || null}
+              contractsCount={contractsCount}
+            />
+          ) : (
+            <div className="user-card">
+              <div className="user-avatar">
                 <i className="fas fa-user" style={{ fontSize: 13 }} />
-              )}
-            </div>
-            <div className="user-info">
-              <div className="name">
-                {mode === "user" ? userName || "مستخدم ميثاق" : "زائر"}
               </div>
-              <div className="role">
-                {mode === "user" ? "حساب موثّق — Google" : "دخول اختياري"}
+              <div className="user-info">
+                <div className="name">زائر</div>
+                <div className="role">دخول اختياري — جرّب المنصة كاملة</div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </aside>
     </>

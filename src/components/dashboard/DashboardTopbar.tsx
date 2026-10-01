@@ -9,7 +9,13 @@
      (يُمرَّر isAdmin من مكوّن السيرفر — لا حاجة لـ SessionProvider)
    ============================================================ */
 
-export default function DashboardTopbar({ isAdmin = false }: { isAdmin?: boolean }) {
+export default function DashboardTopbar({
+  isAdmin = false,
+  userName,
+}: {
+  isAdmin?: boolean;
+  userName?: string | null;
+}) {
   function openSidebar() {
     const btn = document.getElementById("sidebarOpenBtn") as HTMLButtonElement | null;
     if (btn) btn.click();
@@ -33,6 +39,12 @@ export default function DashboardTopbar({ isAdmin = false }: { isAdmin?: boolean
           />
           ميثاق — لوحة التحكم
         </span>
+        {userName && (
+          <span className="topbar-user-pill" title="حسابك موثّق عبر Google">
+            <i className="fas fa-circle-check" />
+            {userName.trim().split(" ")[0]}
+          </span>
+        )}
       </div>
       <div className="topbar-actions">
         {isAdmin && (
