@@ -13,9 +13,9 @@ export const dynamic = "force-dynamic";
 
 /* ============================================================
    /print/[id] — نسخة A4 مخصصة للطباعة/حفظ PDF
-   محمية بتسجيل الدخول (المالك فقط) وتُولَّد لحظياً من Neon —
-   لا ملفات PDF مخزنة: المحتوى في قاعدة البيانات والطباعة
-   عبر حوار المتصفح (مجاني ويحافظ على العربية وRTL)
+   ترويسة رسمية أنيقة: شريط زمردي علوي + شعار ميثاق الشفاف +
+   اسم المنظومة + مرجع التوثيق، ثم مخطط العقد بخط مزدوج فاخر.
+   محمية بتسجيل الدخول (المالك فقط) وتُولَّد لحظياً من Neon.
    ============================================================ */
 
 type Props = { params: Promise<{ id: string }> };
@@ -72,45 +72,49 @@ export default async function PrintPage({ params }: Props) {
       </div>
 
       <article className="card sheet">
-        <div style={{ padding: "36px 42px" }}>
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: 13,
-              fontWeight: 700,
-              margin: "0 0 4px",
-            }}
-          >
-            بسم الله الرحمن الرحيم
-          </p>
-          <h1
-            style={{
-              textAlign: "center",
-              fontSize: 20,
-              fontWeight: 900,
-              margin: "0 0 2px",
-              color: "var(--green)",
-            }}
-          >
-            {contractTypeName(contract.type)}
-          </h1>
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: 11,
-              color: "var(--muted)",
-              margin: "0 0 22px",
-            }}
-          >
-            منظومة ميثاق للعقود والتوثيق الإلكتروني · مرجع {ref}
+        {/* ===== الشريط الزمردي العلوي ===== */}
+        <div className="sheet-topband" aria-hidden />
+
+        {/* ===== الترويسة الرسمية ===== */}
+        <header className="sheet-head">
+          <div className="sheet-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/mithaq-logo-transparent.svg"
+              alt="شعار ميثاق"
+              className="sheet-logo"
+            />
+            <div className="sheet-brand-text">
+              <b>مِــيــثَــاق</b>
+              <span>منظومة العقود والتوثيق الإلكتروني</span>
+            </div>
+          </div>
+          <div className="sheet-ref">
+            <span>مرجع الوثيقة</span>
+            <b>{ref}</b>
+          </div>
+        </header>
+
+        <div className="sheet-rule" aria-hidden>
+          <span />
+          <i className="fas fa-scale-balanced" />
+          <span />
+        </div>
+
+        <div className="sheet-body">
+          <p className="sheet-bismillah">بسم الله الرحمن الرحيم</p>
+          <h1 className="sheet-title">{contractTypeName(contract.type)}</h1>
+          <p className="sheet-subtitle">
+            عقد إلكتروني موثّق — حرر بتاريخ{" "}
+            <b>{arDate(contract.createdAt)}</b>
+            {contract.city ? ` في ${contract.city}` : ""}
           </p>
 
-          <p style={{ fontSize: 13 }}>
-            حُرّر هذا العقد في {contract.city ? contract.city + "، " : ""}بتاريخ{" "}
-            <b>{arDate(contract.createdAt)}</b> بين كلٍّ من:
+          <p className="sheet-intro">
+            حُرّر هذا العقد بناءً على الرضا والاتفاق المتبادل بين كلٍّ من:
           </p>
 
-          <div className="grid2" style={{ margin: "14px 0 18px" }}>
+          <div className="grid2 sheet-parties">
             <div className="box">
               <b>الطرف الأول</b>
               {contract.party1Name}
@@ -119,6 +123,9 @@ export default async function PrintPage({ params }: Props) {
               <b>الطرف الثاني</b>
               {contract.party2Name}
             </div>
+          </div>
+
+          <div className="grid2 sheet-parties">
             {contract.subject && (
               <div className="box" style={{ gridColumn: "1 / -1" }}>
                 <b>موضوع العقد</b>
@@ -145,8 +152,8 @@ export default async function PrintPage({ params }: Props) {
             )}
           </div>
 
-          <h2 style={{ fontSize: 14, borderBottom: "1px solid var(--line)", paddingBottom: 6 }}>
-            بنود العقد
+          <h2 className="sheet-section-title">
+            <span>بنود العقد</span>
           </h2>
           <ol className="clauses">
             {clauses.map((cl, i) => (
@@ -155,65 +162,67 @@ export default async function PrintPage({ params }: Props) {
           </ol>
 
           {contract.notes && (
-            <p style={{ fontSize: 12, marginTop: 12 }}>
+            <p className="sheet-notes">
               <b>ملاحظات:</b> {contract.notes}
             </p>
           )}
 
-          <p style={{ fontSize: 12.5, marginTop: 18 }}>
-            يقر الطرفان بأنهما اطلعا على بنود هذا العقد وفهما مضمونه وقبلا الالتزام به.
+          <p className="sheet-ack">
+            يقر الطرفان بأنهما اطلعا على بنود هذا العقد وفهما مضمونه وقبلا
+            الالتزام به كاملًا ودون تحفظ، ووقّعا عليه بإرادتهما الحرة.
           </p>
 
-          <div className="grid2" style={{ marginTop: 34 }}>
-            <div className="box">
+          {/* ===== التوقيعات ===== */}
+          <div className="grid2 sheet-sign">
+            <div className="box sig-box">
               <b>توقيع الطرف الأول</b>
               {contract.sig1DataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={contract.sig1DataUrl}
                   alt="توقيع الطرف الأول"
-                  style={{ maxHeight: 60, maxWidth: "90%" }}
+                  style={{ maxHeight: 60, maxWidth: "90%", objectFit: "contain" }}
                 />
               ) : (
-                "____________________"
+                <span className="sig-line" />
               )}
-              <small style={{ display: "block", color: "var(--muted)", fontSize: 10 }}>
+              <small>
                 {contract.sig1Name || contract.party1Name}
                 {contract.sig1SignedAt ? ` · ${arDate(contract.sig1SignedAt)}` : ""}
               </small>
             </div>
-            <div className="box">
+            <div className="box sig-box">
               <b>توقيع الطرف الثاني</b>
               {contract.sig2DataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={contract.sig2DataUrl}
                   alt="توقيع الطرف الثاني"
-                  style={{ maxHeight: 60, maxWidth: "90%" }}
+                  style={{ maxHeight: 60, maxWidth: "90%", objectFit: "contain" }}
                 />
               ) : (
-                "____________________"
+                <span className="sig-line" />
               )}
-              <small style={{ display: "block", color: "var(--muted)", fontSize: 10 }}>
+              <small>
                 {contract.sig2Name || contract.party2Name}
                 {contract.sig2SignedAt ? ` · ${arDate(contract.sig2SignedAt)}` : ""}
               </small>
             </div>
           </div>
-
-          <p
-            style={{
-              marginTop: 26,
-              fontSize: 9.5,
-              color: "var(--muted)",
-              borderTop: "1px dashed var(--line)",
-              paddingTop: 8,
-              direction: "ltr",
-              textAlign: "left",
-            }}
-          >
-            Ref: {ref} · Fingerprint: {contract.contentHash.toUpperCase()} · Verified via
-            miithaq.com/verify/{contract.id}
-          </p>
         </div>
+
+        {/* ===== تذييل التحقق ===== */}
+        <footer className="sheet-foot">
+          <div className="sheet-foot-inner">
+            <div>
+              <b>التحقق من سلامة الوثيقة</b>
+              <span>
+                امسح الرمز أو زر miithaq.com/verify/{contract.id}
+              </span>
+            </div>
+            <code>FP: {contract.contentHash.toUpperCase().slice(0, 16)}…</code>
+          </div>
+        </footer>
       </article>
     </main>
   );

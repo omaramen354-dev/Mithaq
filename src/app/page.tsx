@@ -16,6 +16,7 @@ import ContractModal from "@/components/dashboard/ContractModal";
 import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 import WelcomeBack from "@/components/dashboard/WelcomeBack";
+import AccountOverview from "@/components/dashboard/AccountOverview";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +96,17 @@ export default async function Home() {
             contractsCount={rows.length}
             signedCount={signedCount}
             plan={me?.plan || "free"}
+          />
+        )}
+
+        {/* لوحة حساب العميل: انتهاء الاشتراك + الإحصائيات + آخر العقود */}
+        {isUser && (
+          <AccountOverview
+            userName={session?.user?.name || "صديقنا"}
+            plan={me?.plan || "free"}
+            planExpiresAt={me?.planExpiresAt?.toISOString() || null}
+            contracts={rows}
+            memberSince={me?.createdAt?.toISOString() || null}
           />
         )}
 

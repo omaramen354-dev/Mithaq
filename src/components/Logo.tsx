@@ -1,9 +1,9 @@
-/* شعار ميثاق الرسمي — يُستخدم في كل ترويسات المنصة
-   اللوغو: خط كوفي + إطار مزدوج (أخضر داكن #162E1C / كريمي / ذهبي) */
+/* شعار ميثاق الرسمي — النسخة الشفافة (بلا المربع الداكن الخارجي)
+   تُعرض على خلفيات داكنة مباشرة: السايدبار، الهيرو، الترويسات */
 export default function Logo({ height = 32 }: { height?: number }) {
   return (
     <img
-      src="/mithaq-logo-v2.svg"
+      src="/mithaq-logo-transparent.svg"
       alt="ميثاق — منصة العقود الذكية"
       height={height}
       style={{ height, width: "auto", display: "block" }}

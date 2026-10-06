@@ -117,7 +117,7 @@ export default function ContractsTable({
                 <div className="contract-title">
                   {c.party1Name} × {c.party2Name}
                 </div>
-                <div className="contract-parties" style={{ fontFamily: "var(--font-cairo)", direction: "ltr", textAlign: "right" }}>
+                <div className="contract-parties" style={{ direction: "ltr", textAlign: "right" }}>
                   {ref} · {c.amount || "بدون قيمة"}
                 </div>
               </div>

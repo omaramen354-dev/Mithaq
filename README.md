@@ -136,7 +136,7 @@ npm run build      # بناء الإنتاج
 │   ├── db/
 │   │   ├── schema.ts            # 5 جداول (users, contracts, signature_events, guest_prompt_seen, payment_requests)
 │   │   └── index.ts             # اتصال Neon عبر Drizzle (neon-http)
-│   ├── auth.config.ts           # إعداد Edge للـ middleware (بلا DB)
+│   ├── auth.config.ts           # إعداد Edge للـ proxy (بلا DB)
 │   ├── lib/
 │   │   ├── auth.ts              # Auth.js v5 + مزامنة users + صلاحية المشرف
 │   │   ├── clauses.ts           # البنود الافتراضية لكل أنواع العقود
@@ -148,7 +148,7 @@ npm run build      # بناء الإنتاج
 │   │   ├── whatsapp.ts          # رسالة المشاركة الرسمية
 │   │   ├── telegram.ts          # إشعارات تيليجرام (اختياري)
 │   │   └── format.ts            # التواريخ العربية
-│   ├── middleware.ts            # Guest-First: الصفحة الرئيسية و /share و /verify عامة؛ الحماية داخل الـ API
+│   ├── proxy.ts                 # Guest-First (Middleware سابقاً في Next 15): الصفحة الرئيسية و /share و /verify عامة؛ الحماية داخل الـ API
 │   ├── app/
 │   │   ├── page.tsx             # لوحة العقود (عامة — الدخول عند الحفظ)
 │   │   ├── mithaq.css           # التصميم الأسطوري + ستايلات المودال

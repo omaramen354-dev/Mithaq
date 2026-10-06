@@ -191,9 +191,211 @@ h3 {
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
-/* ===== طباعة A4 — صفحة /print/[id] ===== */
+/* ===== طباعة A4 — صفحة /print/[id] — الترويسة الرسمية ===== */
 .sheet {
   max-width: 800px;
+}
+
+/* الشريط الزمردي العلوي */
+.sheet-topband {
+  height: 8px;
+  background: linear-gradient(90deg, #071f1a, var(--green) 35%, #2e6d5c 55%, var(--gold) 100%);
+}
+
+/* الترويسة: الشعار + اسم المنظومة + المرجع */
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 26px 42px 0;
+}
+.sheet-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sheet-logo {
+  width: 58px;
+  height: auto;
+  display: block;
+}
+.sheet-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+.sheet-brand-text b {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--green);
+  letter-spacing: 1px;
+}
+.sheet-brand-text span {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+}
+.sheet-ref {
+  text-align: center;
+  border: 1.5px solid rgba(212, 168, 67, 0.45);
+  border-radius: 12px;
+  padding: 8px 18px;
+  background: rgba(212, 168, 67, 0.06);
+}
+.sheet-ref span {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.sheet-ref b {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--green);
+  direction: ltr;
+  display: inline-block;
+}
+
+/* الفاصل المزخرف تحت الترويسة */
+.sheet-rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 42px 0;
+  color: var(--gold);
+}
+.sheet-rule span {
+  flex: 1;
+  height: 2.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.sheet-rule i {
+  font-size: 15px;
+}
+
+.sheet-body {
+  padding: 18px 42px 26px;
+}
+.sheet-bismillah {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.sheet-title {
+  text-align: center;
+  font-size: 21px;
+  font-weight: 900;
+  margin: 0 0 4px;
+  color: var(--green);
+}
+.sheet-subtitle {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.sheet-subtitle b { color: var(--green); }
+.sheet-intro {
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+.sheet-parties {
+  margin: 0 0 14px;
+}
+.sheet-section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--green);
+  margin: 20px 0 10px;
+}
+.sheet-section-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(212, 168, 67, 0.5), transparent);
+}
+.sheet-notes {
+  font-size: 12.5px;
+  margin-top: 12px;
+}
+.sheet-ack {
+  font-size: 12.5px;
+  margin-top: 18px;
+  line-height: 1.9;
+}
+
+/* صناديق التوقيع المفاخرة */
+.sig-box {
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+}
+.sig-box small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: auto;
+}
+.sig-line {
+  display: block;
+  margin-top: 26px;
+  border-bottom: 1.5px dotted #9aa89f;
+}
+
+/* تذييل التحقق */
+.sheet-foot {
+  border-top: 1px dashed var(--line);
+  background: rgba(244, 241, 225, 0.5);
+}
+.sheet-foot-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 42px;
+}
+.sheet-foot b {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 900;
+  color: var(--green);
+}
+.sheet-foot span {
+  font-size: 9.5px;
+  color: var(--muted);
+  direction: ltr;
+  display: inline-block;
+}
+.sheet-foot code {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--muted);
+  direction: ltr;
+}
+
+/* هوامش داخلية للشاشة — تتساوى مع padding الترويسة */
+@media screen and (max-width: 640px) {
+  .sheet-head,
+  .sheet-foot-inner {
+    padding-inline: 22px;
+  }
+  .sheet-rule {
+    margin-inline: 22px;
+  }
+  .sheet-body {
+    padding: 16px 22px 20px;
+  }
 }
 @media print {
   body {
@@ -226,6 +428,35 @@ h3 {
   }
   @page {
     size: A4;
-    margin: 16mm 14mm;
+    margin: 14mm 13mm;
+  }
+  /* الترويسة الرسمية داخل الطباعة */
+  .sheet-topband {
+    height: 6px;
+    margin: -14mm -13mm 0;
+  }
+  .sheet-logo {
+    width: 52px;
+  }
+  .sheet-brand-text b {
+    font-size: 19px;
+  }
+  .sig-box {
+    break-inside: avoid;
+  }
+  .sheet-foot {
+    break-inside: avoid;
+  }
+  .sheet-foot-inner {
+    padding-inline: 0;
+  }
+  .sheet-head {
+    padding-inline: 0;
+  }
+  .sheet-rule {
+    margin-inline: 0;
+  }
+  .sheet-body {
+    padding: 16px 0 10px;
   }
 }

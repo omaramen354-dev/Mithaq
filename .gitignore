@@ -6,6 +6,7 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+__MACOSX/
 
 # Temporary test / debug artifacts
 .tmp*

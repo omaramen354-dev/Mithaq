@@ -42,6 +42,10 @@ export default function UserPlanCard({
     planExpiresAt &&
     new Date(planExpiresAt).getTime() < Date.now();
 
+  const daysLeft = planExpiresAt
+    ? Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 864e5)
+    : null;
+
   const expiresLabel = planExpiresAt
     ? new Date(planExpiresAt).toLocaleDateString("ar-SY", {
         day: "numeric",
@@ -80,9 +84,14 @@ export default function UserPlanCard({
             اشتراك منتهٍ
           </span>
         ) : expiresLabel && plan !== "free" ? (
-          <span className="upc-chip" title="ينتهي الاشتراك">
-            <i className="fas fa-calendar-check" />
-            حتى {expiresLabel}
+          <span
+            className="upc-chip"
+            title={`ينتهي الاشتراك في ${expiresLabel}`}
+          >
+            <i className="fas fa-hourglass-half" />
+            {daysLeft !== null && daysLeft <= 7
+              ? `${daysLeft} أيام متبقية`
+              : `حتى ${expiresLabel}`}
           </span>
         ) : plan === "free" ? (
           <a className="upc-chip gold" href="/pricing" title="ترقية الباقة">

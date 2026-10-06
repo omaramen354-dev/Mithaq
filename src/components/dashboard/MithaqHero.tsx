@@ -55,13 +55,13 @@ export default function MithaqHero({
       <div className="hero-content">
         <div className="platform-name-banner">
           <div className="platform-logo-inline">
-            {/* اللوغو الجديد — من ملف add داخل صندوقه الأخضر الداكن */}
+            {/* اللوغو الشفاف الجديد — يطفو بخلفية الهيرو مباشرة */}
             <span className="mithaq-logo-box">
               <Image
-                src="/mithaq-logo-v2.svg"
+                src="/mithaq-logo-transparent.svg"
                 alt="شعار ميثاق"
-                width={48}
-                height={48}
+                width={50}
+                height={50}
                 priority
               />
             </span>
