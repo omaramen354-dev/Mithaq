@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>ميثاق — أنيميشن اللوغو (4 أنماط · جاهز للتسجيل)</title>
+<style>
+/* ============================================================
+   أنيميشن لوغو ميثاق — 4 أنماط حلقيّة (Loop)
+   ============================================================
+   الاستخدام:
+   1) افتح الملف في Chrome (يجب أن يكون الملف ضمن المشروع
+      ليعمل مسار الخطوط واللوغو).
+   2) لكل نمط 4 ثوانٍ كاملة ثم يعيد نفسه — مثالي للحلقة
+      في الريلز/الستوري.
+   3) التسجيل: شاشة كاملة (F11) + تسجيل شاشة، أو استخدم
+      DevTools → Ctrl+Shift+P → "Capture node screenshot"
+      لإطار ثابت.
+   4) زر إخفاء الواجهة أسفل يسار يخفي كل شيء عدا الأنميشن
+      قبل التسجيل.
+   ============================================================ */
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-700.woff2") format("woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "ThmanyahDisplay";
+  src: url("../../src/app/fonts/thmanyah-display-900.woff2") format("woff2");
+  font-weight: 900;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #111;
+  font-family: "Thmanyah", sans-serif;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 34px; padding: 40px;
+}
+.page-title { color: rgba(255,255,255,0.85); font-size: 22px; font-weight: 700; }
+.page-title small { display: block; color: rgba(255,255,255,0.4); font-size: 14px; margin-top: 4px; }
+
+/* ===== مسرح الأنميشن (1080×1080 جاهز للتصدير) ===== */
+.stage {
+  width: 1080px; height: 1080px;
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #0B1F1A 0%, #122E26 55%, #1D4A3E 100%);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.stage .ornament {
+  position: absolute; inset: 0; opacity: 0.05; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.7'%3E%3Cpolygon points='45,3 84,25 84,65 45,87 6,65 6,25'/%3E%3C/g%3E%3C/svg%3E");
+}
+.stage .aura {
+  position: absolute; width: 1000px; height: 600px;
+  background: radial-gradient(closest-side, rgba(212,168,67,0.18), transparent);
+  pointer-events: none;
+}
+
+/* ===== اللوغو ===== */
+.logo { width: 420px; display: block; position: relative; z-index: 1; }
+
+/* ===== النمط 1: التنفّس الذهبي (الأسطوري) ===== */
+/* هالة ذهبية تتنفس حول اللوغو + رفعة خفيفة — أنيق للحلقة المستمرة */
+.style-breath .logo {
+  animation: breathLift 4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.style-breath .logo {
+  filter: drop-shadow(0 20px 60px rgba(0,0,0,0.55));
+}
+.style-breath::after {
+  content: "";
+  position: absolute; width: 560px; height: 560px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(212,168,67,0.22), rgba(212,168,67,0.05) 55%, transparent 75%);
+  animation: breathAura 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes breathLift {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-18px) scale(1.04); }
+}
+@keyframes breathAura {
+  0%, 100% { opacity: 0.35; transform: scale(0.92); }
+  50% { opacity: 0.85; transform: scale(1.06); }
+}
+
+/* ===== النمط 2: الختم الملكي ===== */
+/* اللوغو ينزل كختم يُطبع، مع حلقة ذهبية تتوسع وتهتز خفيفاً عند الارتطام */
+.style-stamp .logo {
+  animation: stampDrop 4s cubic-bezier(0.34, 1.3, 0.64, 1) infinite;
+  filter: drop-shadow(0 24px 50px rgba(0,0,0,0.6));
+}
+.style-stamp::before {
+  content: "";
+  position: absolute; width: 460px; height: 460px; border-radius: 50%;
+  border: 4px solid rgba(212,168,67,0.55);
+  opacity: 0;
+  animation: stampRing 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes stampDrop {
+  0% { transform: translateY(-340px) scale(1.25); opacity: 0; }
+  38% { transform: translateY(0) scale(1); opacity: 1; }
+  44% { transform: translateY(10px) scale(0.985); }
+  52% { transform: translateY(-6px) scale(1.005); }
+  60%, 88% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(30px) scale(0.96); opacity: 0; }
+}
+@keyframes stampRing {
+  0%, 38% { opacity: 0; transform: scale(0.7); }
+  44% { opacity: 0.9; transform: scale(0.86); }
+  72% { opacity: 0; transform: scale(1.22); }
+  100% { opacity: 0; transform: scale(1.22); }
+}
+
+/* ===== النمط 3: الخط الذهبي (Draw-in) ===== */
+/* اللوغو يظهر من العتمة مع شعاع ضوئي يمر فوقه كضوء مصقول ذهب */
+.style-shine .logo {
+  animation: shineFade 4s ease-in-out infinite;
+  position: relative;
+  filter: drop-shadow(0 16px 44px rgba(0,0,0,0.5));
+}
+.style-shine .logo::after {
+  content: "";
+  position: absolute; inset: -60px;
+  background: linear-gradient(115deg, transparent 30%, rgba(246,217,121,0.38) 47%, rgba(255,255,255,0.55) 50%, rgba(246,217,121,0.38) 53%, transparent 70%);
+  background-size: 280% 280%;
+  mix-blend-mode: screen;
+  animation: shineSweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shineFade {
+  0% { opacity: 0.25; transform: scale(0.97); }
+  18%, 82% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.25; transform: scale(0.97); }
+}
+@keyframes shineSweep {
+  0% { background-position: 130% 0; opacity: 0; }
+  15% { opacity: 1; }
+  42% { background-position: -30% 0; opacity: 1; }
+  55%, 100% { background-position: -30% 0; opacity: 0; }
+}
+
+/* ===== النمط 4: الوصول (Reveal) ===== */
+/* القلم يشطب خطاً ذهبياً ثم يظهر اللوغو فوقه — يروي قصة التوثيق */
+.style-reveal .logo {
+  clip-path: inset(0 100% 0 0);
+  animation: revealClip 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  filter: drop-shadow(0 18px 50px rgba(0,0,0,0.55));
+}
+.style-reveal::before {
+  content: "";
+  position: absolute; width: 700px; height: 7px; border-radius: 4px;
+  background: linear-gradient(90deg, transparent, #F6D979, transparent);
+  animation: revealLine 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes revealLine {
+  0%, 6% { transform: scaleX(0); opacity: 0; }
+  14% { opacity: 1; transform: scaleX(1); }
+  34% { transform: scaleX(1); opacity: 1; }
+  40% { transform: scaleX(1); opacity: 0; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+@keyframes revealClip {
+  0%, 10% { clip-path: inset(0 100% 0 0); }
+  46% { clip-path: inset(0 0 0 0); }
+  88% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 0 0 0); opacity: 0.2; }
+}
+
+/* ===== التحكم بالنمط ===== */
+.style-breath, .style-stamp, .style-shine, .style-reveal { display: none; }
+.stage[data-style="breath"].style-breath { display: grid; }
+.stage[data-style="stamp"].style-stamp { display: grid; }
+.stage[data-style="shine"].style-shine { display: grid; }
+.stage[data-style="reveal"].style-reveal { display: grid; }
+/* عندما تكون النمط على نفس عنصر المسرح */
+.stage[data-style="breath"] .style-breath,
+.stage[data-style="stamp"] .style-stamp,
+.stage[data-style="shine"] .style-shine,
+.stage[data-style="reveal"] .style-reveal { display: grid; }
+
+/* ===== واجهة الاختيار (تُخفى عند التسجيل) ===== */
+.ui {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 10px; z-index: 10;
+  background: rgba(0,0,0,0.75); padding: 12px; border-radius: 16px;
+  backdrop-filter: blur(8px);
+}
+.ui button {
+  font-family: "Thmanyah", sans-serif;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 10px 18px; border-radius: 10px;
+  transition: all 0.2s;
+}
+.ui button:hover { background: rgba(212,168,67,0.2); border-color: rgba(212,168,67,0.5); color: #F6D979; }
+.ui button.on { background: linear-gradient(135deg, #D4A843, #F6D979); color: #0A1D17; border: none; }
+.ui .hide-ui { opacity: 0.55; }
+body.rec .ui, body.rec .page-title { display: none; }
+body.rec { padding: 0; gap: 0; background: #0A1D17; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  أنيميشن لوغو ميثاق — اختر النمط وسجّل 4 ثوانٍ لكل دورة
+  <small>للتسجيل النظيف: اضغط «إخفاء الواجهة» ثم F11 + تسجيل الشاشة</small>
+</div>
+
+<!-- المسرح الوحيد — يتبدل حسب الاختيار -->
+<div class="stage style-breath" data-style="breath" id="stage">
+  <div class="ornament"></div>
+  <div class="aura"></div>
+
+  <!-- النمط 1: التنفّس -->
+  <div class="style-breath">
+    <img class="logo" src="../../public/mithaq-logo-transparent.svg" alt="">
+  </div>
+
+  <!-- النمط 2: الختم -->
+  <div class="style-stamp">
+    <img class="logo" src="../../public/mithaq-logo-transparent.svg" alt="">
+  </div>
+
+  <!-- النمط 3: اللمعان -->
+  <div class="style-shine">
+    <img class="logo" src="../../public/mithaq-logo-transparent.svg" alt="">
+  </div>
+
+  <!-- النمط 4: الكشف -->
+  <div class="style-reveal">
+    <img class="logo" src="../../public/mithaq-logo-transparent.svg" alt="">
+  </div>
+</div>
+
+<div class="ui">
+  <button data-s="breath" class="on">١ التنفّس الذهبي</button>
+  <button data-s="stamp">٢ الختم الملكي</button>
+  <button data-s="shine">٣ اللمعان الذهبي</button>
+  <button data-s="reveal">٤ الكشف بالقلم</button>
+  <button class="hide-ui" onclick="document.body.classList.add('rec')">إخفاء الواجهة ( للتسجيل )</button>
+</div>
+
+<script>
+  const stage = document.getElementById("stage");
+  document.querySelectorAll(".ui button[data-s]").forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll(".ui button[data-s]").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      stage.dataset.style = b.dataset.s;
+      stage.className = "stage style-" + b.dataset.s;
+      /* إعادة تشغيل الأنميشن من الصفر */
+      stage.querySelectorAll(".logo").forEach(l => {
+        l.style.animation = "none"; void l.offsetWidth; l.style.animation = "";
+      });
+    };
+  });
+  /* إظهار الواجهة مجدداً بزر Esc */
+  document.addEventListener("keydown", e => { if (e.key === "Escape") document.body.classList.remove("rec"); });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</body>
+</html>

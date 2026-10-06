@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>ميثاق — كاروسيل متحرك (رييلز 1080×1920)</title>
+<style>
+/* ============================================================
+   كاروسيل ميثاق المتحرك — نسخة ريلز/تيك توك 1080×1920
+   ============================================================
+   نفس قصة النسخة الثابتة (6 مشاهد) لكن كل مشهد يُدخل عناصره
+   بحركة متدرجة، والخلفية تنبض بهدوء — جاهز للتسجيل كمونتاج.
+   التسجيل لكل مشهد: 4 ثوانٍ (الأنميشن يكتمل خلال 2.2 ثانية
+   ويثبت 1.8 ثانية). المجموع ≈ 24 ثانية ريلز مثالي.
+   التحكم: أزرار أسفل الشاشة للتنقل بين المشاهد، أو مفاتيح
+   الأسهم يمين/يسار. زر «إخفاء الواجهة» للتسجيل النظيف.
+   ============================================================ */
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-700.woff2") format("woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-400.woff2") format("woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "ThmanyahDisplay";
+  src: url("../../src/app/fonts/thmanyah-display-900.woff2") format("woff2");
+  font-weight: 900;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #111;
+  font-family: "Thmanyah", sans-serif;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 30px; padding: 34px;
+}
+.page-title { color: rgba(255,255,255,0.85); font-size: 21px; font-weight: 700; text-align: center; }
+.page-title small { display: block; color: rgba(255,255,255,0.4); font-size: 13.5px; margin-top: 4px; }
+
+/* ===== إطار الريلز ===== */
+.reel {
+  width: 1080px; height: 1920px;
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #0B1F1A 0%, #122E26 55%, #1D4A3E 100%);
+  flex-shrink: 0;
+}
+.reel .photo {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  filter: saturate(0.82) contrast(1.04) brightness(0.88);
+  /* تنبّض بهدوء — إحساس حي بدون تشتيت */
+  animation: photoPulse 7s ease-in-out infinite;
+  transform-origin: 50% 40%;
+}
+@keyframes photoPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+.reel .shade { position: absolute; inset: 0; }
+.reel .shade.vertical { background: linear-gradient(180deg, rgba(11,31,26,0.32) 0%, rgba(11,31,26,0.55) 40%, rgba(9,26,21,0.94) 76%, #0A1D17 100%); }
+.reel .shade.side { background: linear-gradient(12deg, rgba(9,26,21,0.96) 0%, rgba(11,31,26,0.62) 46%, rgba(11,31,26,0.18) 100%); }
+.reel .aura {
+  position: absolute; width: 1000px; height: 560px; bottom: -160px; left: -220px;
+  background: radial-gradient(closest-side, rgba(212,168,67,0.15), transparent);
+  pointer-events: none;
+}
+
+/* ===== شريط علوي ===== */
+.topbar {
+  position: absolute; top: 0; right: 0; left: 0; z-index: 3;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 58px 72px 0;
+}
+.brand { display: flex; align-items: center; gap: 20px; }
+.brand img { width: 92px; height: 92px; filter: drop-shadow(0 6px 24px rgba(0,0,0,0.55)); }
+.brand .bname b { display: block; font-family: "ThmanyahDisplay","Thmanyah",sans-serif; font-size: 42px; font-weight: 900; color: #F6D979; }
+.brand .bname span { display: block; font-size: 15px; font-weight: 700; color: rgba(246,217,121,0.55); letter-spacing: 7px; }
+.counter {
+  font-size: 23px; font-weight: 700; color: rgba(244,241,225,0.75);
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(212,168,67,0.35);
+  padding: 10px 24px; border-radius: 999px; direction: ltr;
+  backdrop-filter: blur(6px);
+}
+
+/* ===== المحتوى وحركات الدخول ===== */
+.content {
+  position: absolute; bottom: 0; right: 0; left: 0; z-index: 2;
+  padding: 0 72px 170px;
+}
+.kicker {
+  display: inline-flex; align-self: flex-start; align-items: center; gap: 12px;
+  font-size: 27px; font-weight: 900; color: #0A1D17;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  padding: 13px 30px; border-radius: 999px; margin-bottom: 30px;
+  box-shadow: 0 14px 40px -10px rgba(212,168,67,0.55);
+  opacity: 0; animation: up 0.7s cubic-bezier(0.22,1,0.36,1) 0.15s forwards;
+}
+.h {
+  font-family: "ThmanyahDisplay","Thmanyah",sans-serif;
+  font-size: 86px; line-height: 1.22; font-weight: 900; color: #fff;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.45);
+  opacity: 0; animation: up 0.75s cubic-bezier(0.22,1,0.36,1) 0.35s forwards;
+}
+.h .gold { color: #F6D979; }
+.lead {
+  margin-top: 24px; font-size: 34px; line-height: 1.8; font-weight: 700;
+  color: rgba(244,241,225,0.92); max-width: 860px;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.4);
+  opacity: 0; animation: up 0.75s cubic-bezier(0.22,1,0.36,1) 0.55s forwards;
+}
+.lead b { color: #F6D979; }
+.quote {
+  margin-top: 32px; border-inline-start: 5px solid #D4A843;
+  padding: 8px 26px 8px 0; font-size: 30px; line-height: 1.75; font-weight: 700;
+  color: rgba(244,241,225,0.85); font-style: italic;
+  opacity: 0; animation: up 0.75s cubic-bezier(0.22,1,0.36,1) 0.6s forwards;
+}
+.quote .who { display: block; margin-top: 10px; font-style: normal; font-size: 22px; font-weight: 700; color: rgba(246,217,121,0.75); }
+.steps { margin-top: 38px; display: flex; flex-direction: column; gap: 18px; }
+.step {
+  display: flex; align-items: center; gap: 20px;
+  background: rgba(10,29,23,0.55); border: 1.5px solid rgba(212,168,67,0.30);
+  border-radius: 20px; padding: 18px 24px; backdrop-filter: blur(10px);
+  opacity: 0; animation: up 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+.step:nth-child(1) { animation-delay: 0.55s; }
+.step:nth-child(2) { animation-delay: 0.75s; }
+.step:nth-child(3) { animation-delay: 0.95s; }
+.step:nth-child(4) { animation-delay: 1.15s; }
+.step .n {
+  width: 62px; height: 62px; border-radius: 17px; flex-shrink: 0;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  color: #0A1D17; font-size: 32px; font-weight: 900; display: grid; place-items: center;
+}
+.step p { font-size: 30px; font-weight: 700; color: rgba(244,241,225,0.95); }
+.step p b { color: #F6D979; }
+@keyframes up {
+  from { opacity: 0; transform: translateY(46px); }
+  to { opacity: 1; transform: none; }
+}
+
+.trustline {
+  position: absolute; bottom: 44px; right: 72px; z-index: 3;
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 21px; font-weight: 700; color: rgba(246,217,121,0.75);
+  opacity: 0; animation: up 0.6s ease 1.3s forwards;
+}
+.trustline i { font-size: 17px; }
+.swipe-hint {
+  position: absolute; bottom: 44px; left: 72px; z-index: 3;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 23px; font-weight: 700; color: rgba(244,241,225,0.6);
+  opacity: 0; animation: swipeNudge 2.2s ease 1.6s infinite;
+}
+.swipe-hint i { color: #F6D979; }
+@keyframes swipeNudge {
+  0% { opacity: 0; transform: translateX(16px); }
+  30%, 70% { opacity: 0.9; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-8px); }
+}
+
+/* ===== المشهد 1: الغلاف المتحرك ===== */
+.scene-cover {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 0 72px;
+}
+.scene-cover .logoHero {
+  width: 215px; opacity: 0;
+  animation: logoArrive 1.1s cubic-bezier(0.34,1.3,0.64,1) 0.1s forwards;
+  filter: drop-shadow(0 24px 70px rgba(0,0,0,0.65)) drop-shadow(0 0 60px rgba(212,168,67,0.28));
+}
+@keyframes logoArrive {
+  0% { opacity: 0; transform: translateY(-120px) scale(1.25); }
+  55% { opacity: 1; transform: translateY(12px) scale(0.99); }
+  72% { transform: translateY(-5px) scale(1.005); }
+  100% { opacity: 1; transform: none; }
+}
+.scene-cover .launchTag {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  color: #0A1D17; font-size: 30px; font-weight: 900;
+  padding: 14px 38px; border-radius: 999px; margin-top: 46px;
+  box-shadow: 0 18px 50px -12px rgba(212,168,67,0.65);
+  opacity: 0; animation: up 0.7s cubic-bezier(0.22,1,0.36,1) 0.7s forwards;
+}
+.scene-cover h1 {
+  font-family: "ThmanyahDisplay","Thmanyah",sans-serif;
+  font-size: 108px; font-weight: 900; color: #F6D979; letter-spacing: 2px; margin-top: 26px;
+  text-shadow: 0 8px 44px rgba(0,0,0,0.55);
+  opacity: 0; animation: up 0.8s cubic-bezier(0.22,1,0.36,1) 0.9s forwards;
+}
+.scene-cover .en {
+  font-size: 34px; letter-spacing: 18px; color: rgba(246,217,121,0.6);
+  font-weight: 700; margin-top: 8px;
+  opacity: 0; animation: up 0.7s ease 1.1s forwards;
+}
+.scene-cover .tag {
+  margin-top: 40px; font-size: 50px; font-weight: 900; color: #fff; line-height: 1.55;
+  text-shadow: 0 4px 26px rgba(0,0,0,0.5);
+  opacity: 0; animation: up 0.8s cubic-bezier(0.22,1,0.36,1) 1.25s forwards;
+}
+.scene-cover .tag .gold { color: #F6D979; }
+
+/* ===== المشهد 6: CTA ===== */
+.scene-cta {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 0 72px;
+}
+.scene-cta .logoEnd {
+  width: 250px; margin-bottom: 16px;
+  filter: drop-shadow(0 18px 50px rgba(0,0,0,0.55)) drop-shadow(0 0 44px rgba(212,168,67,0.25));
+  opacity: 0; animation: logoArrive 1s cubic-bezier(0.34,1.3,0.64,1) 0.1s forwards;
+}
+.scene-cta h1 {
+  font-family: "ThmanyahDisplay","Thmanyah",sans-serif;
+  font-size: 88px; font-weight: 900; color: #fff; line-height: 1.25;
+  opacity: 0; animation: up 0.75s cubic-bezier(0.22,1,0.36,1) 0.5s forwards;
+}
+.scene-cta h1 .gold { color: #F6D979; }
+.scene-cta .sub {
+  margin-top: 18px; font-size: 34px; font-weight: 700;
+  color: rgba(244,241,225,0.85); line-height: 1.75; max-width: 840px;
+  opacity: 0; animation: up 0.75s cubic-bezier(0.22,1,0.36,1) 0.7s forwards;
+}
+.scene-cta .sub b { color: #F6D979; }
+.cta-btn {
+  margin-top: 44px;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  color: #0A1D17; font-size: 46px; font-weight: 900;
+  padding: 30px 92px; border-radius: 999px;
+  box-shadow: 0 26px 70px -12px rgba(212,168,67,0.75);
+  opacity: 0; animation: ctaPop 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.95s forwards;
+}
+@keyframes ctaPop {
+  0% { opacity: 0; transform: scale(0.7); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.cta-url {
+  margin-top: 28px; font-size: 56px; font-weight: 900; color: #F6D979;
+  direction: ltr; letter-spacing: 2px;
+  opacity: 0; animation: up 0.7s ease 1.15s forwards;
+}
+.cta-note {
+  margin-top: 10px; font-size: 26px; font-weight: 700; color: rgba(244,241,225,0.6);
+  opacity: 0; animation: up 0.7s ease 1.3s forwards;
+}
+
+/* ===== إدارة المشاهد ===== */
+.scene { display: none; }
+.scene.on { display: block; }
+.scene .anim-run, .scene.on .anim-run { /* placeholder */ }
+/* إعادة تشغيل أنميشن المشهد عند التفعيل */
+.scene.on * { animation-play-state: running; }
+
+/* ===== واجهة التحكم (تُخفى للتسجيل) ===== */
+.ui {
+  position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 10; flex-wrap: wrap; justify-content: center;
+  background: rgba(0,0,0,0.78); padding: 10px; border-radius: 14px;
+  backdrop-filter: blur(8px);
+}
+.ui button {
+  font-family: "Thmanyah", sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 9px 14px; border-radius: 9px;
+}
+.ui button.on { background: linear-gradient(135deg, #D4A843, #F6D979); color: #0A1D17; border: none; }
+body.rec .ui, body.rec .page-title { display: none; }
+body.rec { padding: 0; gap: 0; background: #0A1D17; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  كاروسيل ميثاق المتحرك — ريلز 1080×1920 (سجّل كل مشهد 4 ثوانٍ)
+  <small>التنقل: الأزرار بالأسفل أو أسهم لوحة المفاتيح ← → · للتسجيل: «إخفاء الواجهة» ثم F11</small>
+</div>
+
+<div class="reel" id="reel">
+
+  <!-- ═══ المشهد 1: الغلاف ═══ -->
+  <div class="scene on" data-s="1">
+    <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1600&auto=format&fit=crop')"></div>
+    <div class="shade side"></div>
+    <div class="aura"></div>
+    <div class="scene-cover">
+      <img class="logoHero" src="../../public/mithaq-logo-transparent.svg" alt="">
+      <div class="launchTag">🚀 انطلقت رسمياً</div>
+      <h1>مِــيــثَــاق</h1>
+      <div class="en">M I T H A Q</div>
+      <div class="tag">اتفاقك يستاهل ورقة<br><span class="gold">تقتدر عليها</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ المشهد 2: الوجع ═══ -->
+  <div class="scene" data-s="2">
+    <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1600&auto=format&fit=crop')"></div>
+    <div class="shade vertical"></div>
+    <div class="aura"></div>
+    <div class="topbar">
+      <div class="brand">
+        <img src="../../public/mithaq-logo-transparent.svg" alt="">
+        <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+      </div>
+      <div class="counter">2 / 6</div>
+    </div>
+    <div class="content">
+      <div class="kicker">كلنا عشنا هالموقف 😮‍💨</div>
+      <h1 class="h">«خبرني أوصلنـه<br><span class="gold">بعد أسبوعين»</span></h1>
+      <div class="quote">
+        «موعد مع المحامي، بعدين طباعة، بعدين مواصلة لبيت الطرف الثاني،
+        وبعدين يتضح إن النسخة الموقّعة عدّلها أحد من دون ما أحد ينتبه…»
+        <span class="who">— قصة مألوفة لكل من وقّع عقداً في حياته</span>
+      </div>
+    </div>
+    <div class="trustline"><i class="fas fa-shield-halved"></i> منصة عقود إلكترونية</div>
+    <div class="swipe-hint"><i class="fas fa-arrow-left"></i><span>كمّل</span></div>
+  </div>
+
+  <!-- ═══ المشهد 3: الحل ═══ -->
+  <div class="scene" data-s="3">
+    <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1600&auto=format&fit=crop')"></div>
+    <div class="shade vertical"></div>
+    <div class="aura"></div>
+    <div class="topbar">
+      <div class="brand">
+        <img src="../../public/mithaq-logo-transparent.svg" alt="">
+        <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+      </div>
+      <div class="counter">3 / 6</div>
+    </div>
+    <div class="content">
+      <div class="kicker">مع ميثاق ✨</div>
+      <h1 class="h">عقدك موثّق<br><span class="gold">قبل فنجانك الثاني</span></h1>
+      <div class="steps">
+        <div class="step"><div class="n">١</div><p>اختر من <b>11 قالباً</b> محرّراً قانونياً</p></div>
+        <div class="step"><div class="n">٢</div><p>املأ الأطراف والمبلغ والمدة — <b>من جوالك</b></p></div>
+        <div class="step"><div class="n">٣</div><p>عدّل البنود بنفسك — <b>كل شيء واضح</b></p></div>
+        <div class="step"><div class="n">٤</div><p>يُتولّد النص مع <b>بصمة تحقق فورية</b></p></div>
+      </div>
+    </div>
+    <div class="trustline"><i class="fas fa-bolt"></i> 5 دقائق فقط</div>
+    <div class="swipe-hint"><i class="fas fa-arrow-left"></i><span>كمّل</span></div>
+  </div>
+
+  <!-- ═══ المشهد 4: التوقيع ═══ -->
+  <div class="scene" data-s="4">
+    <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1600&auto=format&fit=crop')"></div>
+    <div class="shade vertical"></div>
+    <div class="aura"></div>
+    <div class="topbar">
+      <div class="brand">
+        <img src="../../public/mithaq-logo-transparent.svg" alt="">
+        <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+      </div>
+      <div class="counter">4 / 6</div>
+    </div>
+    <div class="content">
+      <div class="kicker">التوقيع ✍️</div>
+      <h1 class="h">الطرف الثاني يوقّع<br><span class="gold">من جهازه — بإصبعه</span></h1>
+      <p class="lead">
+        أرسل رابط عقدك عبر واتساب. يفتحه، يقرأه كاملاً،
+        <b>ويرسم توقيعه بإصبعه</b>. مع تسجيل الوقت والجهاز لكل توقيع —
+        سجل إثبات يعمل تلقائياً.
+      </p>
+    </div>
+    <div class="trustline"><i class="fas fa-mobile-screen"></i> توقيع عن بُعد بالكامل</div>
+    <div class="swipe-hint"><i class="fas fa-arrow-left"></i><span>كمّل</span></div>
+  </div>
+
+  <!-- ═══ المشهد 5: الأمان ═══ -->
+  <div class="scene" data-s="5">
+    <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1600&auto=format&fit=crop')"></div>
+    <div class="shade vertical"></div>
+    <div class="aura"></div>
+    <div class="topbar">
+      <div class="brand">
+        <img src="../../public/mithaq-logo-transparent.svg" alt="">
+        <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+      </div>
+      <div class="counter">5 / 6</div>
+    </div>
+    <div class="content">
+      <div class="kicker">الضمانة 🛡️</div>
+      <h1 class="h">حرف واحد يتعدّل؟<br><span class="gold">البصمة تنكشف فوراً</span></h1>
+      <p class="lead">
+        كل عقد يُختم ببصمة <b>SHA-256</b> مرتبطة بمحتواه الكامل.
+        أي تعديل بعد التوقيع — ولو حرف واحد — يُبطل التطابق فوراً.
+        ولكل عقد <b>صفحة تحقق عامة</b> يتأكد منها أي طرف.
+      </p>
+    </div>
+    <div class="trustline"><i class="fas fa-fingerprint"></i> بصمة لا تتكرر</div>
+    <div class="swipe-hint"><i class="fas fa-arrow-left"></i><span>كمّل</span></div>
+  </div>
+
+  <!-- ═══ المشهد 6: CTA ═══ -->
+  <div class="scene" data-s="6">
+    <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1600&auto=format&fit=crop'); opacity:0.28"></div>
+    <div class="shade vertical"></div>
+    <div class="aura"></div>
+    <div class="topbar">
+      <div class="brand">
+        <img src="../../public/mithaq-logo-transparent.svg" alt="">
+        <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+      </div>
+      <div class="counter">6 / 6</div>
+    </div>
+    <div class="scene-cta">
+      <img class="logoEnd" src="../../public/mithaq-logo-transparent.svg" alt="">
+      <h1>أول <span class="gold">3 عقود كل شهر</span><br>على حسابنا</h1>
+      <p class="sub">بدون بطاقة، بدون التزام — سجّل بحساب Google بثانية ووثّق أول اتفاق ليك اليوم.</p>
+      <div class="cta-btn">ابدأ عقودك الآن</div>
+      <div class="cta-url">miithaq.com</div>
+      <div class="cta-note">عقودك بثقة وسهولة — في دقائق</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="ui">
+  <button data-s="1" class="on">١ الغلاف</button>
+  <button data-s="2">٢ الوجع</button>
+  <button data-s="3">٣ الحل</button>
+  <button data-s="4">٤ التوقيع</button>
+  <button data-s="5">٥ الأمان</button>
+  <button data-s="6">٦ CTA</button>
+  <button onclick="document.body.classList.add('rec')">إخفاء الواجهة ( للتسجيل )</button>
+</div>
+
+<script>
+  const scenes = document.querySelectorAll(".scene");
+  const btns = document.querySelectorAll(".ui button[data-s]");
+  function show(n) {
+    scenes.forEach(s => {
+      const on = s.dataset.s === String(n);
+      s.classList.toggle("on", on);
+      if (on) {
+        /* إعادة تشغيل كل الأنميشنات من الصفر */
+        s.querySelectorAll("*").forEach(el => {
+          el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+        });
+      }
+    });
+    btns.forEach(b => b.classList.toggle("on", b.dataset.s === String(n)));
+  }
+  btns.forEach(b => b.onclick = () => show(b.dataset.s));
+  document.addEventListener("keydown", e => {
+    const cur = Number(document.querySelector(".scene.on").dataset.s);
+    if (e.key === "ArrowLeft") show(cur === 6 ? 1 : cur + 1);
+    if (e.key === "ArrowRight") show(cur === 1 ? 6 : cur - 1);
+    if (e.key === "Escape") document.body.classList.remove("rec");
+  });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</body>
+</html>

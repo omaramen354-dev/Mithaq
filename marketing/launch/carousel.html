@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>ميثاق — كاروسيل الإطلاق v2 (6 شرائح 1080×1350)</title>
+<style>
+/* ============================================================
+   كاروسيل ميثاق v2 — «قصص حقيقية»
+   ============إلهام التصميم============
+   صور واقعية بشرية + تدرج زمردي عميق يضمن وضوح النص،
+   لوغو شفاف كبير وواثق (بلا صناديق ضيقة)، طباعة ضخمة درامية.
+   الصور من Unsplash (روابط مستقرة) — تعمل عند فتح الملف بالإنترنت.
+   التصدير: Chrome → DevTools → Ctrl+Shift+P → Capture node screenshot
+   لكل عنصر .slide — أو F12 → Device toolbar ثم أداة القص.
+   ============================================================ */
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-700.woff2") format("woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-400.woff2") format("woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "ThmanyahDisplay";
+  src: url("../../src/app/fonts/thmanyah-display-900.woff2") format("woff2");
+  font-weight: 900;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #191919; display: flex; flex-direction: column; align-items: center; gap: 44px; padding: 40px; font-family: "Thmanyah", sans-serif; }
+
+#exportBar {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+  z-index: 99; display: flex; align-items: center; gap: 14px;
+  background: rgba(0,0,0,0.82); border: 1px solid rgba(212,168,67,0.45);
+  padding: 10px 16px; border-radius: 14px; backdrop-filter: blur(8px);
+}
+#exportBar button {
+  font-family: "Thmanyah", sans-serif; font-size: 15px; font-weight: 800;
+  cursor: pointer; color: #0A1D17;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  border: none; padding: 10px 20px; border-radius: 10px;
+}
+#exportBar span { font-size: 13.5px; font-weight: 700; color: rgba(255,255,255,0.75); }
+
+.slide {
+  width: 1080px; height: 1350px;
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #0B1F1A 0%, #122E26 55%, #1D4A3E 100%);
+  display: flex; flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* ===== طبقة الصورة الواقعية + التدرج الدرامي ===== */
+.photo {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  filter: saturate(0.82) contrast(1.04) brightness(0.9);
+}
+/* ستائر التدرج: أعمق من الأسفل حيث النص، خفيفة من الأعلى حيث الصورة تتنفس */
+.shade { position: absolute; inset: 0; }
+.shade.vertical { background: linear-gradient(180deg, rgba(11,31,26,0.30) 0%, rgba(11,31,26,0.55) 42%, rgba(9,26,21,0.94) 78%, #0A1D17 100%); }
+.shade.side { background: linear-gradient(12deg, rgba(9,26,21,0.96) 0%, rgba(11,31,26,0.62) 48%, rgba(11,31,26,0.18) 100%); }
+
+/* هالة ذهبية خافتة فوق الصورة — تربط الصورة بالهوية */
+.goldAura {
+  position: absolute; width: 900px; height: 520px; bottom: -180px; left: -200px;
+  background: radial-gradient(closest-side, rgba(212,168,67,0.16), transparent);
+  pointer-events: none;
+}
+
+/* ===== شريط علوي: لوغو كبير واضح — لا صناديق ضيقة ===== */
+.topbar {
+  position: relative; z-index: 3;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 64px 80px 0;
+}
+.brand { display: flex; align-items: center; gap: 22px; }
+.brand img { width: 96px; height: 96px; display: block; filter: drop-shadow(0 6px 24px rgba(0,0,0,0.55)); }
+.brand .bname { display: flex; flex-direction: column; line-height: 1.15; }
+.brand .bname b { font-family: "ThmanyahDisplay","Thmanyah",sans-serif; font-size: 44px; font-weight: 900; color: #F6D979; letter-spacing: 1px; }
+.brand .bname span { font-size: 16px; font-weight: 700; color: rgba(246,217,121,0.55); letter-spacing: 7px; }
+.counter {
+  font-size: 24px; font-weight: 700; color: rgba(244,241,225,0.75);
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(212,168,67,0.35);
+  padding: 10px 26px; border-radius: 999px;
+  direction: ltr; backdrop-filter: blur(6px);
+}
+
+/* ===== المحتوى ===== */
+.content {
+  position: relative; z-index: 2;
+  margin-top: auto;
+  padding: 0 80px 150px;
+  display: flex; flex-direction: column;
+}
+.kicker {
+  display: inline-flex; align-self: flex-start; align-items: center; gap: 12px;
+  font-size: 27px; font-weight: 900; color: #0A1D17;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  padding: 13px 32px; border-radius: 999px;
+  margin-bottom: 34px;
+  box-shadow: 0 14px 40px -10px rgba(212,168,67,0.55);
+}
+.h {
+  font-family: "ThmanyahDisplay","Thmanyah",sans-serif;
+  font-size: 88px; line-height: 1.22; font-weight: 900; color: #fff;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.45);
+}
+.h .gold { color: #F6D979; }
+.lead {
+  margin-top: 26px;
+  font-size: 35px; line-height: 1.8; font-weight: 700;
+  color: rgba(244,241,225,0.92);
+  max-width: 840px;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.4);
+}
+.lead b { color: #F6D979; }
+
+/* اقتباس إنساني (شهادة/حكاية) */
+.quote {
+  margin-top: 36px;
+  border-inline-start: 5px solid #D4A843;
+  padding: 8px 28px 8px 0;
+  font-size: 31px; line-height: 1.75; font-weight: 700;
+  color: rgba(244,241,225,0.85);
+  font-style: italic;
+}
+.quote .who { display: block; margin-top: 12px; font-style: normal; font-size: 23px; font-weight: 700; color: rgba(246,217,121,0.75); }
+
+/* خطوات زجاجية */
+.steps { margin-top: 42px; display: flex; flex-direction: column; gap: 20px; }
+.step {
+  display: flex; align-items: center; gap: 22px;
+  background: rgba(10,29,23,0.55);
+  border: 1.5px solid rgba(212,168,67,0.30);
+  border-radius: 20px; padding: 20px 26px;
+  backdrop-filter: blur(10px);
+}
+.step .n {
+  width: 64px; height: 64px; border-radius: 18px; flex-shrink: 0;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  color: #0A1D17; font-size: 33px; font-weight: 900;
+  display: grid; place-items: center;
+}
+.step p { font-size: 31px; font-weight: 700; color: rgba(244,241,225,0.95); }
+.step p b { color: #F6D979; }
+
+/* سطر مؤشر السحب */
+.swipe {
+  position: absolute; bottom: 48px; left: 80px; z-index: 3;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 25px; font-weight: 700; color: rgba(244,241,225,0.65);
+}
+.swipe i { color: #F6D979; }
+
+/* ===== الشريحة 1: الغلاف ===== */
+.cover { justify-content: flex-end; }
+.cover .logoHero {
+  width: 210px; margin: 0 auto 10px;
+  filter: drop-shadow(0 24px 70px rgba(0,0,0,0.65)) drop-shadow(0 0 60px rgba(212,168,67,0.28));
+}
+.coverCenter {
+  position: relative; z-index: 2;
+  margin: auto 0; padding: 0 80px;
+  text-align: center; display: flex; flex-direction: column; align-items: center;
+}
+.coverCenter .launchTag {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  color: #0A1D17; font-size: 30px; font-weight: 900;
+  padding: 14px 40px; border-radius: 999px;
+  box-shadow: 0 18px 50px -12px rgba(212,168,67,0.65);
+  margin-bottom: 40px;
+}
+.coverCenter h1 {
+  font-family: "ThmanyahDisplay","Thmanyah",sans-serif;
+  font-size: 112px; font-weight: 900; color: #F6D979; letter-spacing: 2px;
+  text-shadow: 0 8px 44px rgba(0,0,0,0.55);
+}
+.coverCenter .en { font-size: 32px; letter-spacing: 16px; color: rgba(246,217,121,0.6); font-weight: 700; margin-top: 6px; }
+.coverCenter .tag {
+  margin-top: 44px;
+  font-size: 52px; font-weight: 900; color: #fff; line-height: 1.55;
+  text-shadow: 0 4px 26px rgba(0,0,0,0.5);
+}
+.coverCenter .tag .gold { color: #F6D979; }
+
+/* ===== الشريحة 6: CTA ===== */
+.cta-final {
+  position: relative; z-index: 2;
+  margin: auto 0; padding: 0 80px;
+  text-align: center; display: flex; flex-direction: column; align-items: center;
+}
+.cta-final .logoEnd { width: 240px; filter: drop-shadow(0 18px 50px rgba(0,0,0,0.55)) drop-shadow(0 0 44px rgba(212,168,67,0.25)); margin-bottom: 20px; }
+.cta-final h1 { font-family: "ThmanyahDisplay","Thmanyah",sans-serif; font-size: 92px; font-weight: 900; color: #fff; line-height: 1.25; }
+.cta-final h1 .gold { color: #F6D979; }
+.cta-final .sub { margin-top: 20px; font-size: 36px; font-weight: 700; color: rgba(244,241,225,0.85); line-height: 1.75; max-width: 820px; }
+.cta-final .sub b { color: #F6D979; }
+.cta-btn {
+  margin-top: 52px;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  color: #0A1D17; font-size: 48px; font-weight: 900;
+  padding: 32px 100px; border-radius: 999px;
+  box-shadow: 0 26px 70px -12px rgba(212,168,67,0.75);
+}
+.cta-url { margin-top: 32px; font-size: 58px; font-weight: 900; color: #F6D979; direction: ltr; letter-spacing: 2px; }
+.cta-note { margin-top: 12px; font-size: 27px; font-weight: 700; color: rgba(244,241,225,0.6); }
+
+/* شارة تحقق صغيرة أسفل الشرائح الداخلية */
+.trustline {
+  position: absolute; bottom: 48px; right: 80px; z-index: 3;
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 21px; font-weight: 700; color: rgba(246,217,121,0.75);
+}
+.trustline i { font-size: 18px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ الشريحة 1: الغلاف — مصافحة حقيقية ═══════════ -->
+<div class="slide" id="s1">
+  <!-- الصورة: مصافحة شريكين — ثقة متبادلة -->
+  <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1600&auto=format&fit=crop')"></div>
+  <div class="shade side"></div>
+  <div class="goldAura"></div>
+
+  <div class="coverCenter">
+    <!-- اللوغو الشفاف بحجم واثق — بلا صندوق -->
+    <img class="logoHero" src="../../public/mithaq-logo-transparent.svg" alt="">
+    <div class="launchTag">🚀 انطلقت رسمياً</div>
+    <h1>مِــيــثَــاق</h1>
+    <div class="en">M I T H A Q</div>
+    <div class="tag">اتفاقك يستاهل ورقة<br><span class="gold">تقتدر عليها</span></div>
+  </div>
+
+  <div class="swipe"><span>القصة كاملة بالسحب</span><i class="fas fa-arrow-left"></i></div>
+</div>
+
+<!-- ═══════════ الشريحة 2: وجع الحقيقي — الملفات المتناثرة ═══════════ -->
+<div class="slide" id="s2">
+  <!-- الصورة: ورق ومستندات متراكمة وفوضى — إحساس الضياع -->
+  <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1600&auto=format&fit=crop')"></div>
+  <div class="shade vertical"></div>
+  <div class="goldAura"></div>
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="../../public/mithaq-logo-transparent.svg" alt="">
+      <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+    </div>
+    <div class="counter">2 / 6</div>
+  </div>
+
+  <div class="content">
+    <div class="kicker">كلنا عشنا هالموقف 😮‍💨</div>
+    <h1 class="h">«خبرني أوصلнем<br><span class="gold">بعد أسبوعين»</span></h1>
+    <div class="quote">
+      «موعد مع المحامي، بعدين طباعة، بعدين مواصلة لبيت الطرف الثاني،
+      وبعدين يتضح إن النسخة الموقّعة عدّلها أحد من دون ما أحد ينتبه…»
+      <span class="who">— قصة مألوفة لكل من وقّع عقداً في حياته</span>
+    </div>
+  </div>
+
+  <div class="swipe"><span>اسحب</span><i class="fas fa-arrow-left"></i></div>
+  <div class="trustline"><i class="fas fa-shield-halved"></i> منصة عقود إلكترونية</div>
+</div>
+
+<!-- ═══════════ الشريحة 3: البطل — إنسان ينهي عقداً من جواله ═══════════ -->
+<div class="slide" id="s3">
+  <!-- الصورة: شخص يعمل من جواله/حاسوبه بهدوء وثقة -->
+  <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1600&auto=format&fit=crop')"></div>
+  <div class="shade vertical"></div>
+  <div class="goldAura"></div>
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="../../public/mithaq-logo-transparent.svg" alt="">
+      <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+    </div>
+    <div class="counter">3 / 6</div>
+  </div>
+
+  <div class="content">
+    <div class="kicker">مع ميثاق ✨</div>
+    <h1 class="h">عقدك موثّق<br><span class="gold">قبل فنجانك الثاني</span></h1>
+    <div class="steps">
+      <div class="step"><div class="n">١</div><p>اختر من <b>11 قالباً</b> محرّراً قانونياً</p></div>
+      <div class="step"><div class="n">٢</div><p>املأ الأطراف والمبلغ والمدة — <b>من جوالك</b></p></div>
+      <div class="step"><div class="n">٣</div><p>عدّل البنود بنفسك — <b>كل شيء واضح أمامك</b></p></div>
+      <div class="step"><div class="n">٤</div><p>يُتولّد النص مع <b>بصمة تحقق فورية</b></p></div>
+    </div>
+  </div>
+
+  <div class="swipe"><span>اسحب</span><i class="fas fa-arrow-left"></i></div>
+  <div class="trustline"><i class="fas fa-bolt"></i> 5 دقائق فقط</div>
+</div>
+
+<!-- ═══════════ الشريحة 4: التوقيع عن بُعد — يد ترسم التوقيع ═══════════ -->
+<div class="slide" id="s4">
+  <!-- الصورة: توقيع بالقلم على ورق — الإحساس الرسمي الذي يحبه الناس، لكن عبر الرابط -->
+  <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1600&auto=format&fit=crop')"></div>
+  <div class="shade vertical"></div>
+  <div class="goldAura"></div>
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="../../public/mithaq-logo-transparent.svg" alt="">
+      <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+    </div>
+    <div class="counter">4 / 6</div>
+  </div>
+
+  <div class="content">
+    <div class="kicker">التوقيع ✍️</div>
+    <h1 class="h">الطرف الثاني يوقّع<br><span class="gold">من جهازه — بإصبعه</span></h1>
+    <p class="lead">
+      أرسل رابط عقدك عبر واتساب. يفتحه، يقرأه كاملاً،
+      <b>ويرسم توقيعه بإصبعه</b>. مع تسجيل الوقت والجهاز لكل توقيع —
+      سجل إثبات يعمل تلقائياً.
+    </p>
+  </div>
+
+  <div class="swipe"><span>اسحب</span><i class="fas fa-arrow-left"></i></div>
+  <div class="trustline"><i class="fas fa-mobile-screen"></i> توقيع عن بُعد بالكامل</div>
+</div>
+
+<!-- ═══════════ الشريحة 5: الأمان — بصمة لا تُخترق ═══════════ -->
+<div class="slide" id="s5">
+  <!-- الصورة: قفل/درع حقيقي — إحساس الحماية الملموسة -->
+  <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1600&auto=format&fit=crop')"></div>
+  <div class="shade vertical"></div>
+  <div class="goldAura"></div>
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="../../public/mithaq-logo-transparent.svg" alt="">
+      <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+    </div>
+    <div class="counter">5 / 6</div>
+  </div>
+
+  <div class="content">
+    <div class="kicker">الضمانة 🛡️</div>
+    <h1 class="h">حرف واحد يتعدّل؟<br><span class="gold">البصمة تنكشف فوراً</span></h1>
+    <p class="lead">
+      كل عقد يُختم ببصمة <b>SHA-256</b> مرتبطة بمحتواه الكامل.
+      أي تعديل بعد التوقيع — ولو حرف واحد — يُبطل التطابق فوراً.
+      ولكل عقد <b>صفحة تحقق عامة</b> يتأكد منها أي طرف.
+    </p>
+  </div>
+
+  <div class="swipe"><span>اسحب</span><i class="fas fa-arrow-left"></i></div>
+  <div class="trustline"><i class="fas fa-fingerprint"></i> بصمة لا تتكرر</div>
+</div>
+
+<!-- ═══════════ الشريحة 6: CTA — ابدأ مجاناً اليوم ═══════════ -->
+<div class="slide" id="s6">
+  <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1600&auto=format&fit=crop'); opacity:0.28"></div>
+  <div class="shade vertical"></div>
+  <div class="goldAura"></div>
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="../../public/mithaq-logo-transparent.svg" alt="">
+      <div class="bname"><b>ميثاق</b><span>MITHAQ</span></div>
+    </div>
+    <div class="counter">6 / 6</div>
+  </div>
+
+  <div class="cta-final">
+    <img class="logoEnd" src="../../public/mithaq-logo-transparent.svg" alt="">
+    <h1>أول <span class="gold">3 عقود كل شهر</span><br>على حسابنا</h1>
+    <p class="sub">
+      بدون بطاقة، بدون التزام — سجّل بحساب Google بثانية
+      ووثّق أول اتفاق ليك اليوم.
+    </p>
+    <div class="cta-btn">ابدأ عقودك الآن</div>
+    <div class="cta-url">miithaq.com</div>
+    <div class="cta-note">عقودك بثقة وسهولة — في دقائق</div>
+  </div>
+</div>
+
+<!-- شريط التصدير (لا يظهر في الصورة النهائية) -->
+<div id="exportBar">
+  <button onclick="exportAll()">⬇️ تصدير كل الشرائح PNG (1080×1350)</button>
+  <span id="exportStatus"></span>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<script type="module">
+/* ============================================================
+   تصدير الشرائح كصور PNG — مكتبة html-to-image
+   جودة ×2 (pixelRatio:2) لمقياس حاد على إنستغرام
+   ============================================================ */
+import { toPng } from "https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/+esm";
+
+const status = document.getElementById("exportStatus");
+
+window.exportAll = async function exportAll() {
+  const slides = document.querySelectorAll(".slide");
+  status.textContent = "⏳ جاري التصدير...";
+  for (let i = 0; i < slides.length; i++) {
+    try {
+      const url = await toPng(slides[i], {
+        pixelRatio: 2,
+        width: 1080,
+        height: 1350,
+        style: { transform: "none", margin: "0" },
+        cacheBust: true,
+        filter: (node) => !node.id || node.id !== "exportBar",
+      });
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mithaq-slide-${i + 1}.png`;
+      a.click();
+      status.textContent = `✅ ${i + 1}/${slides.length}`;
+      await new Promise((r) => setTimeout(r, 600));
+    } catch (e) {
+      console.error("export error slide", i + 1, e);
+      status.textContent = `❌ فشل الشريحة ${i + 1}`;
+    }
+  }
+  status.textContent = "✅ تم التصدير";
+};
+</script>
+</body>
+</html>

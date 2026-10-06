@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>ميثاق — ستوري الإطلاق v2 (1080×1920)</title>
+<style>
+/* ============================================================
+   ستوري إطلاق ميثاق v2 — 1080×1920 (إنستغرام/واتساب ستوري)
+   النمط السطوري الموحّد: صورة واقعية + لوغو شفاف ضخم + أنيميشن
+   التصدير: Chrome → فحص العنصر .story → Ctrl+Shift+P → Capture node screenshot
+   ============================================================ */
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-700.woff2") format("woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-400.woff2") format("woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "ThmanyahDisplay";
+  src: url("../../src/app/fonts/thmanyah-display-900.woff2") format("woff2");
+  font-weight: 900;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #191919; display: grid; place-items: center; min-height: 100vh; font-family: "Thmanyah", sans-serif; }
+
+.story {
+  width: 1080px; height: 1920px;
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #0B1F1A 0%, #122E26 55%, #1D4A3E 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 120px 90px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* الصورة الواقعية */
+.photo {
+  position: absolute; inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1600&auto=format&fit=crop');
+  background-size: cover; background-position: center;
+  filter: saturate(0.8) contrast(1.05) brightness(0.85);
+}
+.shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(11,31,26,0.4) 0%, rgba(11,31,26,0.66) 45%, rgba(9,26,21,0.96) 82%, #0A1D17 100%);
+}
+.aura {
+  position: absolute; width: 1100px; height: 640px; top: 16%;
+  background: radial-gradient(closest-side, rgba(212,168,67,0.18), transparent);
+  pointer-events: none;
+}
+
+/* العناصر */
+.badge {
+  position: relative; z-index: 1;
+  font-size: 33px; font-weight: 900; color: #0A1D17;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  padding: 16px 48px; border-radius: 999px;
+  margin-bottom: 64px;
+  box-shadow: 0 18px 50px -12px rgba(212,168,67,0.65);
+  animation: down 0.8s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+}
+.logoHero {
+  position: relative; z-index: 1;
+  width: 400px;
+  filter: drop-shadow(0 24px 70px rgba(0,0,0,0.65)) drop-shadow(0 0 60px rgba(212,168,67,0.3));
+  animation: stamp 1s cubic-bezier(0.34,1.3,0.64,1) 0.25s both;
+}
+.name {
+  position: relative; z-index: 1;
+  font-family: "ThmanyahDisplay","Thmanyah",sans-serif;
+  font-size: 116px; font-weight: 900; color: #F6D979; letter-spacing: 3px; margin-top: 26px;
+  text-shadow: 0 8px 44px rgba(0,0,0,0.55);
+  animation: up 0.8s cubic-bezier(0.22,1,0.36,1) 0.55s both;
+}
+.en-name {
+  position: relative; z-index: 1;
+  font-size: 34px; letter-spacing: 18px; font-weight: 700;
+  color: rgba(246,217,121,0.6); margin-top: 8px;
+  animation: up 0.8s ease 0.7s both;
+}
+.divider {
+  width: 280px; height: 4px; margin: 52px 0;
+  background: linear-gradient(90deg, transparent, #D4A843, transparent);
+  position: relative; z-index: 1;
+  animation: up 0.8s ease 0.8s both;
+}
+.headline {
+  position: relative; z-index: 1;
+  font-family: "ThmanyahDisplay","Thmanyah",sans-serif;
+  font-size: 90px; font-weight: 900; color: #fff; line-height: 1.35;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  animation: up 0.85s cubic-bezier(0.22,1,0.36,1) 0.9s both;
+}
+.headline .gold { color: #F6D979; }
+.sub {
+  position: relative; z-index: 1;
+  margin-top: 30px;
+  font-size: 38px; font-weight: 700; color: rgba(244,241,225,0.85);
+  line-height: 1.8;
+  animation: up 0.85s cubic-bezier(0.22,1,0.36,1) 1.05s both;
+}
+.sub b { color: #F6D979; }
+.cta {
+  position: relative; z-index: 1;
+  margin-top: 80px;
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  animation: pop 0.7s cubic-bezier(0.34,1.56,0.64,1) 1.25s both;
+}
+.cta-btn {
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  color: #0A1D17; font-size: 50px; font-weight: 900;
+  padding: 34px 104px; border-radius: 999px;
+  box-shadow: 0 24px 70px -12px rgba(212,168,67,0.75);
+}
+.cta-url { font-size: 58px; font-weight: 900; color: #F6D979; direction: ltr; letter-spacing: 1px; }
+.up-arrow { font-size: 42px; color: rgba(244,241,225,0.75); }
+
+@keyframes up { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: none; } }
+@keyframes down { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: none; } }
+@keyframes stamp {
+  0% { opacity: 0; transform: translateY(-140px) scale(1.3); }
+  60% { opacity: 1; transform: translateY(14px) scale(0.985); }
+  78% { transform: translateY(-6px) scale(1.005); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes pop { from { opacity: 0; transform: scale(0.72); } to { opacity: 1; transform: scale(1); } }
+</style>
+</head>
+<body>
+
+<div class="story">
+  <div class="photo"></div>
+  <div class="shade"></div>
+  <div class="aura"></div>
+
+  <div class="badge">🚀 انطلقت رسمياً</div>
+
+  <img class="logoHero" src="../../public/mithaq-logo-transparent.svg" alt="">
+
+  <div class="name">مِــيــثَــاق</div>
+  <div class="en-name">MITHAQ</div>
+
+  <div class="divider"></div>
+
+  <h1 class="headline">
+    عقودك بثقة وسهولة<br>
+    <span class="gold">في دقائق معدودة</span>
+  </h1>
+
+  <p class="sub">
+    إنشاء · توقيع بالرسم · تحقق ببصمة <b>SHA-256</b>
+  </p>
+
+  <div class="cta">
+    <span class="up-arrow">👆 اضغط الرابط أعلى الشاشة</span>
+    <div class="cta-url">miithaq.com</div>
+    <div class="cta-btn">جرّب مجاناً</div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</body>
+</html>

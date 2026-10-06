@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>ميثاق — منشور الإطلاق v2 (مربع 1080)</title>
+<style>
+/* ============================================================
+   منشور إطلاق ميثاق v2 — 1080×1080
+   نفس روح الكاروسيل السطوري: صورة واقعية تلامس القلب +
+   لوغو شفاف كبير واثق بلا صناديق ضيقة + طباعة ضخمة درامية
+   التصدير: Chrome → فحص العنصر .post → Ctrl+Shift+P → Capture node screenshot
+   ============================================================ */
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-700.woff2") format("woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Thmanyah";
+  src: url("../../src/app/fonts/thmanyah-sans-400.woff2") format("woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "ThmanyahDisplay";
+  src: url("../../src/app/fonts/thmanyah-display-900.woff2") format("woff2");
+  font-weight: 900;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #191919; display: grid; place-items: center; min-height: 100vh; font-family: "Thmanyah", sans-serif; }
+
+.post {
+  width: 1080px; height: 1080px;
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #0B1F1A 0%, #122E26 55%, #1D4A3E 100%);
+  display: flex; flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* الصورة الواقعية + الستائر */
+.photo {
+  position: absolute; inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1600&auto=format&fit=crop');
+  background-size: cover; background-position: center;
+  filter: saturate(0.82) contrast(1.04) brightness(0.88);
+}
+.shade { position: absolute; inset: 0; }
+.shade.v { background: linear-gradient(180deg, rgba(11,31,26,0.34) 0%, rgba(11,31,26,0.6) 45%, rgba(9,26,21,0.95) 80%, #0A1D17 100%); }
+.aura {
+  position: absolute; width: 900px; height: 500px; bottom: -170px; left: -200px;
+  background: radial-gradient(closest-side, rgba(212,168,67,0.16), transparent);
+  pointer-events: none;
+}
+
+/* الترويسة: لوغو شفاف كبير — بلا صندوق */
+.brand {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 24px;
+  padding: 62px 80px 0;
+}
+.brand img { width: 100px; height: 100px; filter: drop-shadow(0 6px 24px rgba(0,0,0,0.55)); }
+.brand .bname b {
+  display: block;
+  font-family: "ThmanyahDisplay","Thmanyah",sans-serif;
+  font-size: 46px; font-weight: 900; color: #F6D979; letter-spacing: 1px;
+}
+.brand .bname span { display: block; font-size: 16px; font-weight: 700; color: rgba(246,217,121,0.55); letter-spacing: 8px; }
+.launch-badge {
+  margin-inline-start: auto;
+  background: linear-gradient(135deg, #D4A843, #F6D979);
+  color: #0A1D17; font-weight: 900; font-size: 29px;
+  padding: 15px 36px; border-radius: 999px;
+  box-shadow: 0 14px 40px -8px rgba(212,168,67,0.6);
+}
+
+/* العنوان */
+.headline {
+  position: relative; z-index: 2;
+  margin-top: auto;
+  padding: 0 80px;
+  font-family: "ThmanyahDisplay", "Thmanyah", sans-serif;
+  font-size: 94px; line-height: 1.22; font-weight: 900; color: #FFFFFF;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+.headline .gold { color: #F6D979; }
+
+.sub {
+  position: relative; z-index: 2;
+  margin-top: 24px; padding: 0 80px;
+  font-size: 36px; font-weight: 700; color: rgba(244,241,225,0.92);
+  line-height: 1.7; max-width: 900px;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.4);
+}
+.sub b { color: #F6D979; }
+
+/* شريط المزايا */
+.features {
+  position: relative; z-index: 2;
+  margin: 44px 80px 0;
+  display: flex; gap: 16px;
+}
+.feat {
+  flex: 1;
+  background: rgba(10,29,23,0.55);
+  border: 1.5px solid rgba(212,168,67,0.32);
+  border-radius: 20px;
+  padding: 24px 16px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.feat i { display: block; font-size: 38px; color: #F6D979; margin-bottom: 10px; }
+.feat b { display: block; color: #fff; font-size: 25px; font-weight: 900; }
+.feat span { display: block; color: rgba(244,241,225,0.6); font-size: 17px; font-weight: 700; margin-top: 4px; }
+
+/* الرابط */
+.url {
+  position: relative; z-index: 2;
+  margin: 36px 80px 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(212,168,67,0.13);
+  border: 2px solid rgba(212,168,67,0.5);
+  border-radius: 999px;
+  padding: 22px 40px;
+  backdrop-filter: blur(8px);
+}
+.url b { font-size: 44px; font-weight: 900; color: #F6D979; letter-spacing: 1px; direction: ltr; }
+.url span { font-size: 23px; font-weight: 700; color: rgba(244,241,225,0.75); }
+
+.rim { position: absolute; bottom: 0; right: 0; left: 0; height: 10px; z-index: 2;
+  background: linear-gradient(90deg, #D4A843, #F6D979, #D4A843); }
+</style>
+</head>
+<body>
+
+<div class="post">
+  <div class="photo"></div>
+  <div class="shade v"></div>
+  <div class="aura"></div>
+  <div class="rim"></div>
+
+  <div class="brand">
+    <img src="../../public/mithaq-logo-transparent.svg" alt="">
+    <div class="bname">
+      <b>مِــيــثَــاق</b>
+      <span>MITHAQ</span>
+    </div>
+    <div class="launch-badge">انطلقت رسمياً 🚀</div>
+  </div>
+
+  <h1 class="headline">
+    اتفاقك يستاهل ورقة<br>
+    <span class="gold">تقتدر عليها</span>
+  </h1>
+
+  <p class="sub">
+    عقد كامل <b>في 5 دقائق</b> من جوالك — توقيع إلكتروني بالرسم،
+    وبصمة تحقق تكشف أي تعديل.
+  </p>
+
+  <div class="features">
+    <div class="feat">
+      <i class="fas fa-file-signature"></i>
+      <b>توقيع بالرسم</b>
+      <span>من جهازين</span>
+    </div>
+    <div class="feat">
+      <i class="fas fa-fingerprint"></i>
+      <b>بصمة SHA-256</b>
+      <span>تكشف التعديل</span>
+    </div>
+    <div class="feat">
+      <i class="fas fa-shield-halved"></i>
+      <b>تحقق عام</b>
+      <span>صفحة لكل عقد</span>
+    </div>
+  </div>
+
+  <div class="url">
+    <b>miithaq.com</b>
+    <span>مجاناً — أول 3 عقود كل شهر</span>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</body>
+</html>
