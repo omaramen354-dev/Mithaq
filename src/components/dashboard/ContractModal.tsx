@@ -319,6 +319,11 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
             throw new Error(data.message || "تعذر حفظ العقد");
           clearGuestDraft();
           setNotice("✅ تم حفظ عقدك في عقودك بنجاح");
+          /* الفلو كالنسخة القديمة: المسودة المستعادة تُفتح صفحة التوقيع مباشرة */
+          if (data.contract?.id) {
+            window.location.assign(`/sign/${data.contract.id}`);
+            return;
+          }
           router.refresh();
         } catch {
           fillFromDraft(draft);
@@ -492,11 +497,16 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
       const data = await res.json();
       if (!res.ok || !data.ok)
         throw new Error(data.message || "تعذر إنشاء العقد");
+      setOpen(false);
+      resetAll();
+      /* الفلو كالنسخة القديمة: بعد الحفظ تُفتح صفحة التوقيع مباشرة (بلا نزول للأسفل) */
+      if (data.contract?.id) {
+        window.location.assign(`/sign/${data.contract.id}`);
+        return;
+      }
       if (data.contract && data.shareUrl) {
         setSaved({ contract: data.contract, shareUrl: data.shareUrl });
       }
-      setOpen(false);
-      resetAll();
       router.refresh();
     } catch (e) {
       setError((e as Error).message);

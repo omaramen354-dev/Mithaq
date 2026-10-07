@@ -164,6 +164,11 @@ export default function NewContractForm({
           clearGuestDraft();
           setNotice("✅ تم حفظ عقدك في عقودك بنجاح");
           setOpen(false);
+          /* الفلو كالنسخة القديمة: المسودة المستعادة تُفتح صفحة التوقيع مباشرة */
+          if (data.contract?.id) {
+            window.location.assign(`/sign/${data.contract.id}`);
+            return;
+          }
           router.refresh();
         } catch (e) {
           setForm(formFromDraft(draft));
@@ -258,13 +263,18 @@ export default function NewContractForm({
       const data = await res.json();
       if (!res.ok || !data.ok)
         throw new Error(data.message || "تعذر إنشاء العقد");
-      /* شاشة النجاح: البصمة + رابط المشاركة + واتساب */
-      if (data.contract && data.shareUrl) {
-        setSaved({ contract: data.contract, shareUrl: data.shareUrl });
-      }
       setOpen(false);
       setForm(EMPTY_FORM);
       setClauses([]);
+      /* الفلو كالنسخة القديمة: بعد الحفظ تُفتح صفحة التوقيع مباشرة (بلا نزول للأسفل) */
+      if (data.contract?.id) {
+        window.location.assign(`/sign/${data.contract.id}`);
+        return;
+      }
+      /* احتياطي: شاشة النجاح (البصمة + رابط المشاركة + واتساب) */
+      if (data.contract && data.shareUrl) {
+        setSaved({ contract: data.contract, shareUrl: data.shareUrl });
+      }
       router.refresh();
     } catch (e) {
       setError((e as Error).message);

@@ -460,3 +460,82 @@ h3 {
     padding: 16px 0 10px;
   }
 }
+
+/* ============================================================
+   صفحة التوقيع /sign/[id] — شريط المراحل + رمز QR
+   ============================================================ */
+
+.sign-steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.sign-step {
+  flex: 1 1 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 800;
+  transition: 0.24s var(--ease);
+}
+
+.sign-step i {
+  color: var(--gold);
+}
+
+.sign-step.active {
+  background: linear-gradient(135deg, var(--green), var(--green-2));
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(29, 74, 62, 0.24);
+}
+
+.sign-step.active i {
+  color: var(--gold-2);
+}
+
+.sign-step.done {
+  background: #e9f6ee;
+  border-color: #bfe3cd;
+  color: var(--green-2);
+}
+
+.sign-step.done i {
+  color: var(--green-2);
+}
+
+/* ===== تذييل الوثيقة + رمز QR ===== */
+.sheet-foot-qr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sheet-foot-qr span {
+  direction: rtl;
+  text-align: right;
+  max-width: 210px;
+  line-height: 1.5;
+}
+
+.qr-code svg {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+@media (max-width: 640px) {
+  .sign-steps .sign-step {
+    flex: 1 1 100%;
+  }
+}
+

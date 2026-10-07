@@ -2732,40 +2732,55 @@ html.mithaq-modal-open .main-wrapper { margin-inline-start: 0; }
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 18px clamp(16px, 5vw, 54px);
-  border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
+  padding: 14px clamp(16px, 5vw, 54px);
+  /* شريط زمردي متدرج مثل الترويسات الرئيسية — يبرز اللوغو الشفاف */
+  background: linear-gradient(135deg, #071f1a 0%, var(--green) 55%, #1f5244 100%);
+  border-bottom: 2px solid var(--gold);
   position: sticky;
   top: 0;
   z-index: 40;
+  box-shadow: 0 4px 24px rgba(7, 31, 26, 0.3);
+}
+/* خط ذهبي علوي رفيع — نفس توقيع الهوية */
+.pricing-hero::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
 .pricing-back {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--green);
+  color: var(--ivory);
   text-decoration: none;
   font-weight: 700;
   font-size: 14px;
   padding: 9px 14px;
   border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  border: 1px solid rgba(212, 168, 67, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+  transition: box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
 }
 
-.pricing-back:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.pricing-back:hover {
+  background: rgba(212, 168, 67, 0.18);
+  box-shadow: 0 6px 20px rgba(7, 31, 26, 0.35);
+  transform: translateY(-1px);
+}
 
 .pricing-logo { display: flex; align-items: center; gap: 12px; }
 
 .pricing-brand {
   font-family: var(--font-thmanyah);
   font-weight: 800;
-  color: var(--green);
+  color: var(--gold-light);
   font-size: 21px;
   letter-spacing: 1px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
 .pricing-intro { max-width: 860px; margin: 0 auto; padding: 52px 20px 8px; text-align: center; }

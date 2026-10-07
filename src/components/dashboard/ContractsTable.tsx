@@ -136,8 +136,8 @@ export default function ContractsTable({
                 <div className="row-actions">
                   <Link
                     className="action-icon"
-                    href={`/share/${c.shareToken}`}
-                    title="إرسال للطرف الثاني — صفحة التوقيع"
+                    href={`/sign/${c.id}`}
+                    title="صفحة التوقيع — توقيعك ثم مشاركة الطرف الثاني"
                   >
                     <i className="fas fa-paper-plane" />
                   </Link>

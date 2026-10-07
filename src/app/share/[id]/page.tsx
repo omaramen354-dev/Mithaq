@@ -74,7 +74,17 @@ export default async function SharePage({ params }: Props) {
           }}
         >
           <div style={{ flex: 1, minWidth: 200 }}>
-            <Logo height={22} />
+            <span
+              style={{
+                display: "inline-flex",
+                padding: "6px 9px",
+                borderRadius: 12,
+                background: "linear-gradient(135deg, #071f1a, #1d4a3e)",
+                boxShadow: "0 2px 10px rgba(7,31,26,0.25)",
+              }}
+            >
+              <Logo height={22} />
+            </span>
             <small style={{ display: "block", color: "var(--muted)", fontSize: 11 }}>
               منظومة العقود والتوثيق الإلكتروني
             </small>

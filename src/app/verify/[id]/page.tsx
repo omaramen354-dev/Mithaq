@@ -78,7 +78,17 @@ export default async function VerifyPage({ params }: Props) {
             borderBottom: "1px solid var(--line)",
           }}
         >
-          <Logo height={20} />
+          <span
+            style={{
+              display: "inline-flex",
+              padding: "5px 8px",
+              borderRadius: 10,
+              background: "linear-gradient(135deg, #071f1a, #1d4a3e)",
+              boxShadow: "0 2px 10px rgba(7,31,26,0.25)",
+            }}
+          >
+            <Logo height={20} />
+          </span>
           <small style={{ color: "var(--muted)", fontSize: 11 }}>
             خدمة التحقق من العقود الرقمية
           </small>

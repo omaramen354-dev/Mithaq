@@ -257,7 +257,7 @@ export default function AccountOverview({
                     </Link>
                     <Link
                       className="action-icon"
-                      href={`/share/${c.shareToken}`}
+                      href={`/sign/${c.id}`}
                       title="صفحة التوقيع"
                     >
                       <i className="fas fa-paper-plane" />
