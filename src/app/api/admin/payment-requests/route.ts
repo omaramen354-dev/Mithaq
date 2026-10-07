@@ -115,14 +115,15 @@ export async function POST(req: NextRequest) {
   const now = new Date();
   const expires = plan.unit === "month" ? new Date(now.getTime() + MONTH_DAYS * 864e5) : null;
 
-  await db.transaction(async (tx) => {
-    await tx
+  /* ملاحظة: محرّك neon-http لا يدعم db.transaction() (يرمي استثناء دائماً)،
+     نستخدم db.batch() الذي ينفّذ التحديثين في معاملة واحدة عبر HTTP */
+  const isOnce = plan.unit === "once";
+  await db.batch([
+    db
       .update(paymentRequests)
       .set({ status: "paid", updatedAt: now })
-      .where(eq(paymentRequests.id, id));
-
-    const isOnce = plan.unit === "once";
-    await tx
+      .where(eq(paymentRequests.id, id)),
+    db
       .update(users)
       .set({
         plan: plan.id,
@@ -130,8 +131,8 @@ export async function POST(req: NextRequest) {
         paidOnce: isOnce ? true : undefined,
         isSingleUsed: plan.id === "single" ? false : undefined,
       })
-      .where(eq(users.id, reqRow.userId!));
-  });
+      .where(eq(users.id, reqRow.userId!)),
+  ]);
 
   await logEvent({
     action: "payment_confirmed",
