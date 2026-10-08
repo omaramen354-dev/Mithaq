@@ -5,6 +5,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
+import TransactionsManager from "./TransactionsManager";
 import PaymentsManager from "./PaymentsManager";
 import UsersManager from "./UsersManager";
 import LogsManager from "./LogsManager";
@@ -169,6 +170,9 @@ export default async function AdminPage() {
 
       {/* المستخدمون — إدارة كاملة: بحث، فلترة، ترقية باقات، صلاحيات */}
       <UsersManager currentAdminId={session?.user?.dbId || ""} />
+
+      {/* معاملات شام كاش — قائمتا unverified/verified مع أزرار التأكيد والتجميد وواتساب */}
+      <TransactionsManager />
 
       {/* لوحة الأخطاء الحية — أي عطل يُلتقط تلقائياً ويظهر هنا */}
       <ErrorsManager />

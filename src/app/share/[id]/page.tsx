@@ -5,6 +5,8 @@ import { eq } from "drizzle-orm";
 import { resolveClauses } from "@/lib/contract-text";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
+import { isOwnerSuspended } from "@/lib/mithaq-guard";
+import SuspendedScreen from "@/components/SuspendedScreen";
 import { contractVerification } from "@/lib/fingerprint";
 import ShareSignPad from "@/components/signing/ShareSignPad";
 import Logo from "@/components/Logo";
@@ -31,6 +33,10 @@ export default async function SharePage({ params }: Props) {
     .limit(1);
   const contract = rows[0];
   if (!contract) notFound();
+
+  /* فحص الحجب — صاحب العقد مجمّد؟ نُحجب كل شيء فوراً قبل أي توقيع */
+  const guard = await isOwnerSuspended(contract.id);
+  if (guard.suspended) return <SuspendedScreen />;
 
   const clauses = resolveClauses({
     type: contract.type,

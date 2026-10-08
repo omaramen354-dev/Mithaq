@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "./mithaq.css";
+import ThemeInit from "@/components/ThemeInit";
+import ThemeToggle from "@/components/ThemeToggle";
 import ErrorReporter from "@/components/ErrorReporter";
 
 /* خط ثمانية — Sans للنصوص + Serif Display للعناوين الكبيرة */
@@ -57,8 +59,12 @@ export default function RootLayout({
         />
       </head>
       <body className={`${thmanyahSans.variable} ${thmanyahDisplay.variable}`}>
+        {/* يمنع وميض الصفحة الفاتحة عند الاستيقاظ في الوضع الليلي */}
+        <ThemeInit />
         <ErrorReporter />
         {children}
+        {/* زر تبديل الوضع الليلي — ثابت في كل الصفحات */}
+        <ThemeToggle />
       </body>
     </html>
   );

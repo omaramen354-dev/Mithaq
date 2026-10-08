@@ -1,0 +1,207 @@
+/* ============================================================
+   ميثاق — طبقة الوضع الليلي (Dark Mode Layer)
+   تُفعَّل تلقائياً عند وجود كلاس "dark" على عنصر <html>.
+   الألوان: Dark Slate/Zinc لتتناغم مع الهوية الزمردية الذهبية.
+   يتم استيرادها في globals.css — عدّل القيم من متغيرات :root هنا.
+   ============================================================ */
+
+html.dark {
+  /* ترث نفس أسماء المتغيرات ليتناسب الموقع كاملاً تلقائياً
+     دون الحاجة لتعديل كل صفحة يدوياً */
+  --deep: #060d0b; /* الأعمق للطبقات المتدرجة */
+  --green: #1a2f28; /* بديل زمردي داكن للأقسام */
+  --green-2: #34d399; /* زمردي مضيء للنصوص المهمّة */
+  --gold: #d4a843; /* الذهبي يبقى كما هو */
+  --gold-2: #f6d979;
+  --ivory: #0b1220; /* الخلفية العامة — أزرق فحمي */
+  --ink: #e2e8f0; /* سلّيت — نص أساسي فاتح */
+  --muted: #8a95a5; /* رمادي سلات */
+  --line: #233041; /* خطوط فاصلة داكنة */
+  --bg: #0a0f1a; /* خلفية الصفحة */
+  --red: #f87171;
+
+  --shadow: 0 28px 90px rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 14px 40px rgba(0, 0, 0, 0.4);
+}
+
+html.dark body {
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 90% 4%, rgba(212, 168, 67, 0.06), transparent 420px),
+    radial-gradient(circle at 10% 92%, rgba(52, 211, 153, 0.05), transparent 470px),
+    var(--bg);
+}
+
+html.dark body::before {
+  opacity: 0.04;
+}
+
+/* ===== البطاقات والصناديق ===== */
+html.dark .card {
+  background: rgba(15, 23, 42, 0.88); /* slate-900 شفاف */
+  border-color: var(--line);
+}
+
+html.dark .box {
+  background: #111a2e;
+  border-color: var(--line);
+}
+html.dark .box b {
+  color: #6ee7b7;
+}
+
+/* ===== الأزرار ===== */
+html.dark .btn-soft {
+  color: #a7f3d0;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+html.dark .btn-soft:hover {
+  background: rgba(52, 211, 153, 0.16);
+}
+
+html.dark .btn-wa {
+  box-shadow: 0 14px 30px rgba(37, 211, 102, 0.15);
+}
+
+/* الزر الذهبي الأساسي يبقى هويةً — نضيف حداً للتباين */
+html.dark .btn {
+  color: #1c1406;
+}
+
+/* ===== الخطوط والفواصل ===== */
+html.dark h1,
+html.dark h2,
+html.dark h3 {
+  color: #d1fae5;
+}
+
+/* ===== الشارات ===== */
+html.dark .badge {
+  background: rgba(212, 168, 67, 0.1);
+  border-color: rgba(212, 168, 67, 0.3);
+  color: var(--gold-2);
+}
+html.dark .badge.signed {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: #6ee7b7;
+}
+html.dark .badge.partial {
+  background: rgba(251, 146, 60, 0.1);
+  border-color: rgba(251, 146, 60, 0.3);
+  color: #fdba74;
+}
+
+/* ===== خطوات التوقيع ===== */
+html.dark .sign-step {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: var(--line);
+  color: var(--muted);
+}
+html.dark .sign-step.active {
+  background: linear-gradient(135deg, #123a2f, #1d4a3e);
+  border-color: #2e6d5c;
+  color: #fff;
+}
+html.dark .sign-step.done {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: rgba(52, 211, 153, 0.25);
+  color: #6ee7b7;
+}
+
+/* ===== تذييل الوثيقة ===== */
+html.dark .sheet-foot {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: var(--line);
+}
+html.dark .sig-line {
+  border-color: #475569;
+}
+
+/* ===== مودال إنشاء العقد / أدوات لوحة التحكم ===== */
+html.dark .modal-card,
+html.dark .admin-gate-card,
+html.dark .admin-panel,
+html.dark .admin-stat,
+html.dark .upc,
+html.dark .pricing-card,
+html.dark .payment-pop,
+html.dark .checkout-card {
+  background: #101a2d;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+html.dark .admin-empty,
+html.dark .admin-list,
+html.dark .admin-admins {
+  color: var(--muted);
+}
+
+/* ===== صفحة الأسعار والتحقق ===== */
+html.dark .pricing-card__features li,
+html.dark .checkout-note {
+  color: var(--muted);
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background: #0c1524;
+  border-color: var(--line);
+  color: var(--ink);
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b;
+}
+
+/* ===== аналог داكن لبطاقات الحماية ===== */
+html.dark .verify-block {
+  background: #101a2d;
+  border-color: rgba(248, 113, 113, 0.35);
+}
+html.dark .verify-block__box {
+  background: rgba(248, 113, 113, 0.06);
+  border-color: rgba(248, 113, 113, 0.25);
+}
+
+/* ===== زر تبديل الوضع — ثابت في الزاوية ===== */
+.theme-toggle {
+  position: fixed;
+  z-index: 60;
+  inset-inline-end: 18px;
+  inset-inline-start: auto;
+  bottom: 18px;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 168, 67, 0.4);
+  background: linear-gradient(135deg, #071f1a, #1d4a3e);
+  color: var(--gold-2);
+  font-size: 17px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 34px rgba(7, 31, 26, 0.35);
+  transition: 0.24s ease;
+}
+.theme-toggle:hover {
+  transform: translateY(-2px) rotate(12deg);
+}
+html.dark .theme-toggle {
+  background: linear-gradient(135deg, #101a2d, #1b3a4f);
+  border-color: rgba(212, 168, 67, 0.35);
+}
+
+/* عند الطباعة تخرج الوثيقة دائماً بوضع فاتح */
+@media print {
+  html.dark body {
+    background: #fff;
+    color: #12231d;
+  }
+  .theme-toggle {
+    display: none !important;
+  }
+}

@@ -6,6 +6,7 @@ import {
   integer,
   jsonb,
   uuid,
+  pgEnum,
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
@@ -155,6 +156,52 @@ export const guestPromptSeen = pgTable(
   (t) => [uniqueIndex("guest_prompt_ip_hash_idx").on(t.ipHash)]
 );
 
+/* ===== حالات معاملات شام كاش =====
+   unverified: الحالة التلقائية فور إرسال المستخدم رقم عملية الشحن —
+               تُفعَّل مزاياه فوراً وتلقائياً بالكامل.
+   verified:   المشرف أكّد مطابقة الحوالة يدوياً (القائمة الثانية).
+   suspended:  رُصد غش أو رقم عملية وهمي — يُجمَّد حساب والدُم
+               ويُحجب hash/QR عبر /verify و /share فوراً. */
+export const transactionStatus = pgEnum("transaction_status", [
+  "unverified",
+  "verified",
+  "suspended",
+]);
+
+/* ===== معاملات شام كاش — سجل عملية الشحن ===== */
+export const transactions = pgTable(
+  "transactions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+
+    /* رقم عملية شام كاش — فريد لمنع إرسال نفس الرقم مرتين */
+    transactionNumber: text("transaction_number").notNull().unique(),
+    contactPhone: text("contact_phone").notNull().default(""),
+    planName: text("plan_name").notNull(),
+
+    status: transactionStatus("status").notNull().default("unverified"),
+
+    adminNote: text("admin_note").default(""),
+    reviewedBy: uuid("reviewed_by"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("transactions_user_idx").on(t.userId),
+    index("transactions_status_idx").on(t.status),
+    index("transactions_created_idx").on(t.createdAt),
+  ]
+);
+
 /* ===== طلبات الدفع (شام كاش / USDT / Cryptomus) ===== */
 export const paymentRequests = pgTable("payment_requests", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -205,3 +252,6 @@ export type SignatureEvent = typeof signatureEvents.$inferSelect;
 export type PaymentRequest = typeof paymentRequests.$inferSelect;
 export type GuestPromptSeen = typeof guestPromptSeen.$inferSelect;
 export type ActivityLog = typeof activityLogs.$inferSelect;
+export type Transaction = typeof transactions.$inferSelect;
+export type NewTransaction = typeof transactions.$inferInsert;
+export type TransactionStatus = (typeof transactionStatus.enumValues)[number];

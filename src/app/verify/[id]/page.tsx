@@ -5,6 +5,8 @@ import { contracts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
+import { isOwnerSuspended } from "@/lib/mithaq-guard";
+import SuspendedScreen from "@/components/SuspendedScreen";
 import Logo from "@/components/Logo";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +47,10 @@ export default async function VerifyPage({ params }: Props) {
 
   const c = rows[0];
   if (!c) notFound();
+
+  /* فحص الحجب — صاحب العقد مجمّد؟ نُحجب كل شيء فوراً قبل أي حساب */
+  const guard = await isOwnerSuspended(c.id);
+  if (guard.suspended) return <SuspendedScreen />;
 
   const { contractFingerprint } = await import("@/lib/fingerprint");
   const current = contractFingerprint({
