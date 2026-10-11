@@ -27,9 +27,9 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               /* 'unsafe-inline' مطلوب لسكربتات Next المضمّنة، وaccounts.google.com لتسجيل الدخول */
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com",
-              "style-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
               "img-src 'self' data: blob: https:",
-              "font-src 'self' data:",
+              "font-src 'self' data: https://cdnjs.cloudflare.com",
               "connect-src 'self' https:",
               "frame-src 'self' https://accounts.google.com",
               "object-src 'none'",
