@@ -67,6 +67,29 @@ a {
 }
 
 /* ===== الإيقونات — ضمان ظهور واضح على جميع الخلفيات ===== */
+/* القاعدة العامة للإيقونات - كل إيقونة-font-awesome يجب أن تظهر */
+.fa,
+.fas,
+.fab,
+.far,
+.fad,
+.fal,
+.fat,
+.fa-solid,
+.fa-regular,
+.fa-brands {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;
+  font-style: normal !important;
+  text-rendering: auto !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  line-height: 1 !important;
+}
+
 /* الإيقونات داخل العناصر Imperial بيض Imperial يتوارث اللون الزمردي أو الذهبي */
 .btn-outline i,
 .icon-btn i,
