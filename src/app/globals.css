@@ -155,6 +155,16 @@ a {
   color: var(--green-2) !important;
 }
 
+/* الإيقونات داخل البطاقات الخاصة بأنواع العقود (الدائرية الزمردية) */
+.contract-icon i,
+.contract-icon .fa,
+.contract-icon .fas {
+  color: var(--gold) !important;
+  font-size: 25px !important;
+  width: 62px !important;
+  height: 62px !important;
+}
+
 /* ===== الأزرار — الذهبية المتدرجة كما في الهوية ===== */
 .btn {
   display: inline-flex;
