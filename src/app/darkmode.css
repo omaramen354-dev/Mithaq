@@ -195,7 +195,52 @@ html.dark .theme-toggle {
   border-color: rgba(212, 168, 67, 0.35);
 }
 
-/* عند الطباعة تخرج الوثيقة دائماً بوضع فاتح */
+/* ===== الإيقونات — تباين واضح في كل وضع ===== */
+html.dark i,
+html.dark .fa {
+  color: var(--ink) !important;
+}
+html.dark .icon-btn i,
+html.dark .stat-icon i,
+html.dark .contract-icon i,
+html.dark .feature-icon i,
+html.dark .mockup-icon i,
+html.dark .mq-trigger-ico i,
+html.dark .mq-opt-ico i,
+html.dark .mq-search i,
+html.dark .ov-ico i,
+html.dark .success-check i,
+html.dark .welcome-avatar i,
+html.dark .upc-avatar i,
+html.dark .logo-svg-wrap i,
+html.dark .modal-close i {
+  color: var(--gold-2) !important;
+}
+html.dark .nav-link .ico,
+html.dark .nav-link.active .ico,
+html.dark .nav-link:hover .ico {
+  color: var(--gold) !important;
+}
+
+/* ===== الإيقونات داخل نصوص بيضاء (مثل السايدبار) ===== */
+html.dark .sidebar .ico,
+html.dark .sidebar .nav-link i,
+html.dark .sidebar .user-avatar i,
+html.dark .sidebar .btn-auth i {
+  color: var(--gold) !important;
+}
+
+/* عيّن لون الإيقونات داخل عناصر ذات خلفية بيضاء/فاتحة في الوضع الداكن */
+html.dark .card i,
+html.dark .box i,
+html.dark .sheet i,
+html.dark .form-label i,
+html.dark .form-input i,
+html.dark .form-select i {
+  color: var(--green-2) !important;
+}
+
+/* ===== عند الطباعة تخرج الوثيقة دائماً بوضع فاتح ===== */
 @media print {
   html.dark body {
     background: #fff;

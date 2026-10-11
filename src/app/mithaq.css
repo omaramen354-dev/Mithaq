@@ -3256,6 +3256,51 @@ html.mithaq-modal-open .main-wrapper { margin-inline-start: 0; }
   padding: 6px 0;
 }
 
+/* ===== إيقونات العناصر Imperial بيض Imperial يتوارث اللون =====
+   الإيقونات داخل العناصر Imperial بياض Imperial يتوارث اللون الزمردي أو الذهبي
+   حتى ما تطلع بيضاء على بياض أو تختفي في الخلفية */
+.icon-btn i,
+.topbar-user-pill i,
+.platform-name-text i,
+.hero h1 i,
+.hero-tagline i,
+.mockup-title i,
+.mockup-subtitle i,
+.hero-badge i,
+.stat-label i,
+.contract-name i,
+.contract-desc i,
+.section-title i,
+.section-sub i,
+.contract-count i,
+.type-badge i,
+.status-badge i,
+.action-icon i,
+.form-label i,
+.form-input i,
+.form-select i,
+.clause-chip i,
+.ov-label i,
+.ov-foot span i,
+.ov-cta i,
+.alog-title b i,
+.admin-err-clear i,
+.modal-steps .step i,
+.success-sub i,
+.success-block-label i,
+.welcome-body span i,
+.upc-name i,
+.upc-plan i,
+.upc-chip i,
+.footer .gold i,
+.footer-links a i,
+.nav-link i,
+.nav-link .ico,
+.nav-link.active .ico,
+.nav-link:hover .ico {
+  color: inherit;
+}
+
 @media (max-width: 640px) {
   .paypop-actions { grid-template-columns: 1fr; }
   .pricing-hero { padding: 14px 16px; }
