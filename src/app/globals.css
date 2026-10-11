@@ -66,6 +66,95 @@ a {
   color: inherit;
 }
 
+/* ===== الإيقونات — ضمان ظهور واضح على جميع الخلفيات ===== */
+/* الإيقونات داخل العناصر Imperial بيض Imperial يتوارث اللون الزمردي أو الذهبي */
+.btn-outline i,
+.icon-btn i,
+.topbar-user-pill i,
+.hero h1 i,
+.hero-tagline i,
+.mockup-title i,
+.mockup-subtitle i,
+.hero-badge i,
+.stat-label i,
+.contract-name i,
+.contract-desc i,
+.section-title i,
+.section-sub i,
+.contract-count i,
+.type-badge i,
+.status-badge i,
+.action-icon i,
+.form-label i,
+.form-input i,
+.form-select i,
+.clause-chip i,
+.ov-label i,
+.ov-foot span i,
+.ov-cta i,
+.alog-title b i,
+.admin-err-clear i,
+.modal-steps .step i,
+.success-sub i,
+.success-block-label i,
+.welcome-body span i,
+.upc-name i,
+.upc-plan i,
+.upc-chip i,
+.footer .gold i,
+.footer-links a i,
+.nav-link i,
+.nav-link .ico,
+.nav-link.active .ico,
+.nav-link:hover .ico {
+  color: var(--green) !important;
+}
+
+/* الإيقونات داخل عناصر ذات خلفية زمردية/داكنة Imperial لون ذهبي */
+.sidebar i,
+.sidebar .ico,
+.sidebar .nav-link i,
+.sidebar .nav-link .ico,
+.sidebar .user-avatar i,
+.sidebar .btn-auth i,
+.sidebar .auth-title i,
+.sidebar .user-info i,
+.hero i,
+.hero h1 i,
+.hero-tagline i,
+.mockup-icon i,
+.stat-icon i,
+.contract-icon i,
+.feature-icon i,
+.mockup-badge i,
+.success-check i,
+.welcome-avatar i,
+.upc-avatar i,
+.ov-ico i,
+.ov-empty i,
+.logo-svg-wrap i,
+.modal-close i,
+.theme-toggle i {
+  color: var(--gold) !important;
+}
+
+/* الإيقونات داخل عناصر ذات خلفية فاتحة Imperial لون زمردي/ذهبي */
+.card i,
+.box i,
+.sheet i,
+.form-input i,
+.form-select i,
+.form-textarea i,
+.clause-chip i,
+.sign-step i,
+.sheet-rule i,
+.sheet-section-title i,
+.sheet-foot-inner i,
+.ov-card i,
+.overview-recent-head h3 i {
+  color: var(--green-2) !important;
+}
+
 /* ===== الأزرار — الذهبية المتدرجة كما في الهوية ===== */
 .btn {
   display: inline-flex;
