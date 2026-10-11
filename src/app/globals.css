@@ -163,6 +163,10 @@ a {
   font-size: 25px !important;
   width: 62px !important;
   height: 62px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ===== الأزرار — الذهبية المتدرجة كما في الهوية ===== */
