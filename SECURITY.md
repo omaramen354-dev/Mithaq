@@ -31,7 +31,7 @@ zap-baseline.py -t http://<WIN_IP>:3000 -r mithaq-zap-report.html
 ملاحظات:
 - الفحص الافتراضي: spider (دقيقة واحدة) + passive scan على كل صفحة يزورها.
 - مسارات مؤهلة: `/`، `/pricing`، `/verify/[id]`، `/share/[id]`، `/privacy`، `/terms`.
-- تمكين مزيد من الزحف: `-c 10 -r 5000` (أزيد crawler +ял-pages timeout).
+- تمكين مزيد من الزحف: `-c 10 -m 5000` (أزيد زحف عناكب + حد زمني أعلى بالميلي ثانية للعنكبة).
 
 ### ج) Optional: Docker (أنظف على كالي)
 ```bash
@@ -46,7 +46,7 @@ docker run --rm --network host ghcr.io/zaproxy/zaproxy:stable \
 | CSP Wildcard / Missing | متوسط | موجودة في `next.config.ts` (خطوط + CDN مسموحين) |
 | Cookie SameSite | منخفض | `SameSite=Lax` للـ session |
 | X-Frame-Options / X-Content-Type-Options | متوسط | عن طريق `next.config.ts` headers |
-| SCRF / Cookies | — | `next-auth` يجرّها افتراضياً |
+| Cookies / CSRF | — حماية | `next-auth` يديرها افتراضياً (tokens + SameSite) |
 
 ## 3) مراجع مفيدة (GitHub) — قرار الدمج
 
@@ -58,12 +58,12 @@ docker run --rm --network host ghcr.io/zaproxy/zaproxy:stable \
 | [Accord Project](https://accordproject.org/) | ❌ لا | Smart legal contracts — خارج نطاق ميثاق (لا smart contracts) |
 | [rezmoss/awesome-security-pipeline](https://github.com/rezmoss/awesome-security-pipeline) | 🔄 لاحقاً | قائمة أدوات CI/CD أمنية — بعد ZAP ونشر Vercel |
 
-## 4) المسؤالية القانونية
-- الصيغ القانونية في `src/lib/clauses.ts` هي مزارع/بنود افتراضية قابلة للتعديل — الكود يتضمن **خدمة مراجعة قانونية مدفوعة** في `/pricing` مع ملاحظة أن المستخدم مسؤول عن اعتماد الصياغة النهائية.
+## 4) المسؤولية القانونية
+- الصيغ القانونية في `src/lib/clauses.ts` هي بنود افتراضية قابلة للتعديل — المنصة تشمل **خدمة مراجعة قانونية مدفوعة** في `/pricing` مع ملاحظة أن المستخدم مسؤول عن اعتماد الصياغة النهائية.
 - صفحتان قانونيتان مطلوبة للنشر: `/privacy` + `/terms` (موجودتان).
 - سجل الأحداث: جدول `activity_logs` يوثق كل إجراء إداري.
 
 ## 5) Q&A سريعة
-- **ZAP سيرفر على كل جهاز؟** لا — بس أداة CLI ثانية مثل npm.
+- **ZAP سيرفر على كل جهاز؟** لا — أداة CLI مثل npm تنفذها مرة من كالي تنظيمياً.
 - **لازم Kali؟** لا — يمكن من الويندوز Docker Desktop يعمل نفس الشيء، بس Kali هي الأنسب للفحص الهادف.
 - **شو بعد ZAP؟** نشر على Vercel (PROD mode)، ثم تسويق.
