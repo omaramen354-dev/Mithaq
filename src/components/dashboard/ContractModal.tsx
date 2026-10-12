@@ -48,7 +48,46 @@ import { DEFAULT_CLAUSES } from "@/lib/clauses";
    ============================================================ */
 
 type DashboardMode = "guest" | "user";
-type PopKind = "currency" | "date" | "country" | "city" | "duration" | "payment" | null;
+
+/* أيقونة Font Awesome لكل نوع عقد + وصف — نفس روح قائمة القوالب
+   في الصفحة الرئيسية (MithaqSections/ContractTypePicker) */
+const TYPE_ICONS: Record<string, string> = {
+  lease: "fa-house",
+  sale: "fa-handshake",
+  services: "fa-gears",
+  freelance: "fa-laptop-code",
+  pledge: "fa-scale-balanced",
+  supply: "fa-truck-fast",
+  partnership: "fa-people-group",
+  nda: "fa-user-lock",
+  lease_commercial: "fa-shop",
+  design: "fa-pen-ruler",
+  rent_furnished: "fa-couch",
+};
+
+const TYPE_DESCS: Record<string, string> = {
+  lease: "إيجار سكني واضح ومتوازن",
+  sale: "بيع وشراء نافياً للجهالة",
+  services: "تقديم خدمات بنطاق محدد",
+  freelance: "أعمال حرة بدفعات مرحلية",
+  pledge: "تعهدات وإقرارات ملزمة",
+  supply: "توريد مواد وسلع",
+  partnership: "شراكة بحصص واضحة",
+  nda: "اتفاقية سرية وصمت",
+  lease_commercial: "إيجار محلات ومكاتب",
+  design: "تصميم وبرمجة وتسليم ملفات",
+  rent_furnished: "إيجار مفروش بجرد تفصيلي",
+};
+
+type PopKind =
+  | "currency"
+  | "date"
+  | "country"
+  | "city"
+  | "duration"
+  | "payment"
+  | "type"
+  | null;
 type Hint = { text: string; bad: boolean } | null;
 
 export default function ContractModal({ mode }: { mode: DashboardMode }) {
@@ -87,6 +126,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
   const [cityCustom, setCityCustom] = useState(false);
   const [countryQ, setCountryQ] = useState("");
   const [cityQ, setCityQ] = useState("");
+  const [typeQ, setTypeQ] = useState("");
 
   /* طريقة السداد */
   const [payment, setPayment] = useState("");
@@ -180,6 +220,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
     setPaymentCustom(false);
     setAmountCustomHint("");
     setDurCustomHint("");
+    setTypeQ("");
     lastAmountRef.current = "";
     lastDurRef.current = "";
     setError("");
@@ -376,6 +417,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
       if (kind === "country") setCountryQ("");
       if (kind === "city") setCityQ("");
       if (kind === "payment") setPaymentQ("");
+      if (kind === "type") setTypeQ("");
       return kind;
     });
   }
@@ -388,6 +430,18 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
       setCityCustom(false);
     }
     setPop(null);
+  }
+
+  /* ===== اختيار نوع العقد: نفس تعبئة البنود الافتراضية تلقائياً ===== */
+  function pickType(nextType: string) {
+    setType(nextType);
+    setPop(null);
+    /* تعبئة البنود الافتراضية للنوع المختار تلقائياً —
+       فقط إذا لم يكتب المستخدم بنوداً خاصة به بعد */
+    const hasCustom = clauses.some((c) => c.trim());
+    if (!hasCustom && DEFAULT_CLAUSES[nextType]) {
+      setClauses([...DEFAULT_CLAUSES[nextType]]);
+    }
   }
 
   /* ===== قوائم مفلترة ===== */
@@ -419,6 +473,16 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
     () => PAYMENT_METHODS.some((m) => normAr(m.v) === normAr(paymentQ)) || !normAr(paymentQ),
     [paymentQ]
   );
+
+  /* ===== قائمة الأنواع المفلترة بالبحث ===== */
+  const typeRows = useMemo(() => {
+    const q = normAr(typeQ);
+    const entries = Object.entries(CONTRACT_TYPES);
+    if (!q) return entries;
+    return entries.filter(([key, name]) =>
+      normAr(name + " " + (TYPE_DESCS[key] || "") + " " + key).includes(q)
+    );
+  }, [typeQ]);
 
   /* ===== شبكة أيام الشهر ===== */
   const dateGrid = useMemo(() => {
@@ -608,33 +672,66 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
                 submit();
               }}
             >
-              {/* نوع العقد */}
+              {/* نوع العقد — قائمة منبثقة بنفس ستايل بقية القوائم */}
               <div className="form-group">
-                <label className="form-label" htmlFor="mqType">
+                <label className="form-label">
                   <i className="fas fa-list-ul" /> نوع العقد
                 </label>
-                <select
-                  id="mqType"
-                  className="form-select"
-                  required
-                  value={type}
-                  onChange={(e) => {
-                    const nextType = e.target.value;
-                    setType(nextType);
-                    /* تعبئة البنود الافتراضية للنوع المختار تلقائياً —
-                       فقط إذا لم يكتب المستخدم بنوداً خاصة به بعد */
-                    const hasCustom = clauses.some((c) => c.trim());
-                    if (!hasCustom && DEFAULT_CLAUSES[nextType]) {
-                      setClauses([...DEFAULT_CLAUSES[nextType]]);
-                    }
-                  }}
-                >
-                  {Object.entries(CONTRACT_TYPES).map(([key, name]) => (
-                    <option key={key} value={key}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
+                <div className="mq-relative" data-mq-field="type">
+                  <button
+                    type="button"
+                    className="mq-trigger"
+                    aria-haspopup="listbox"
+                    aria-expanded={pop === "type"}
+                    onClick={() => togglePop("type")}
+                  >
+                    <i className={`fas ${TYPE_ICONS[type] || "fa-file-contract"} mq-trigger-ico`} />
+                    <span className="mq-trigger-txt">{CONTRACT_TYPES[type] || contractTypeName(type)}</span>
+                    <i className={`fas fa-chevron-down mq-caret${pop === "type" ? " mq-rotated" : ""}`} />
+                  </button>
+                  {pop === "type" && (
+                    <div className={`mq-pop${popUp ? " mq-pop-up" : ""}`} role="listbox" aria-label="أنواع العقود">
+                      <div className="mq-search">
+                        <i className="fas fa-magnifying-glass" />
+                        <input
+                          type="text"
+                          autoComplete="off"
+                          spellCheck={false}
+                          placeholder="ابحث عن نوع العقد... (مثال: إيجار، بيع، سرية)"
+                          value={typeQ}
+                          onChange={(e) => setTypeQ(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      {typeRows.length ? (
+                        <ul className="mq-list">
+                          {typeRows.map(([tKey, tName]) => (
+                            <li key={tKey}>
+                              <button
+                                type="button"
+                                role="option"
+                                aria-selected={tKey === type}
+                                className={`mq-opt${tKey === type ? " active" : ""}`}
+                                onClick={() => pickType(tKey)}
+                              >
+                                <span className="mq-opt-ico">
+                                  <i className={`fas ${TYPE_ICONS[tKey] || "fa-file-contract"}`} />
+                                </span>
+                                <span className="mq-opt-txt">
+                                  <b>{tName}</b>
+                                  <span>{TYPE_DESCS[tKey] || ""}</span>
+                                </span>
+                                <i className="fas fa-check mq-opt-check" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="mq-empty">لا توجد أنواع مطابقة</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* نمط التوقيع */}
