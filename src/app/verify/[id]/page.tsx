@@ -68,7 +68,8 @@ export default async function VerifyPage({ params }: Props) {
     clauses: c.clauses,
     content: c.content,
   });
-  const matched = current === c.contentHash;
+  const matched = Boolean(c.contentHash) && current === c.contentHash;
+  const hasHash = Boolean(c.contentHash);
 
   const lastSign = c.sig2SignedAt || c.sig1SignedAt;
 
@@ -109,21 +110,27 @@ export default async function VerifyPage({ params }: Props) {
               padding: "14px 16px",
               borderRadius: 14,
               border: "1.5px solid",
-              borderColor: matched ? "#bfe3cd" : "#f5c2c2",
-              background: matched ? "#e9f6ee" : "#fdecec",
-              color: matched ? "#157347" : "#b91c1c",
+              borderColor: matched ? "#bfe3cd" : hasHash ? "#f5c2c2" : "#e5e0d0",
+              background: matched ? "#e9f6ee" : hasHash ? "#fdecec" : "#f7f5ec",
+              color: matched ? "#157347" : hasHash ? "#b91c1c" : "#8a7f5e",
               fontWeight: 800,
             }}
           >
-            <span style={{ fontSize: 22 }}>{matched ? "✓" : "✕"}</span>
+            <span style={{ fontSize: 22 }}>{matched ? "✓" : hasHash ? "✕" : "—"}</span>
             <div>
               <b style={{ display: "block", fontSize: 15 }}>
-                {matched ? "عقد موثق وسليم 100%" : "هذا العقد غير مطابق للبصمة الأصلية"}
+                {matched
+                  ? "عقد موثق وسليم 100%"
+                  : hasHash
+                    ? "هذا العقد غير مطابق للبصمة الأصلية"
+                    : "لا توجد بصمة رقمية مسجّلة لهذا العقد"}
               </b>
               <small style={{ fontWeight: 600, fontSize: 11 }}>
                 {matched
                   ? "البصمة الرقمية مطابقة للأصل المخزّن"
-                  : "رُصد تلاعب أو تعديل غير معتمد على المحتوى"}
+                  : hasHash
+                    ? "رُصد تلاعب أو تعديل غير معتمد على المحتوى"
+                    : "أُنشئ هذا العقد في إصدار قديم من المنصة قبل اعتماد البصمة الرقمية"}
               </small>
             </div>
           </div>
@@ -168,8 +175,8 @@ export default async function VerifyPage({ params }: Props) {
               marginTop: 16,
               padding: "12px 14px",
               borderRadius: 12,
-              border: "1.5px dashed " + (matched ? "#157347" : "#b91c1c"),
-              background: matched ? "#f2fbf5" : "#fdf2f2",
+              border: "1.5px dashed " + (matched ? "#157347" : hasHash ? "#b91c1c" : "#8a7f5e"),
+              background: matched ? "#f2fbf5" : hasHash ? "#fdf2f2" : "#f7f5ec",
             }}
           >
             <small style={{ display: "block", color: "var(--muted)", fontWeight: 700, marginBottom: 4 }}>
@@ -182,10 +189,12 @@ export default async function VerifyPage({ params }: Props) {
                 fontSize: 12,
                 fontWeight: 800,
                 wordBreak: "break-all",
-                color: matched ? "#157347" : "#b91c1c",
+                color: matched ? "#157347" : hasHash ? "#b91c1c" : "#8a7f5e",
               }}
             >
-              {c.contentHash.slice(0, 16).toUpperCase()}…
+              {c.contentHash
+                ? c.contentHash.slice(0, 16).toUpperCase() + "…"
+                : "غير مسجّلة لهذا العقد"}
             </code>
           </div>
 

@@ -205,7 +205,7 @@ export default async function SharePage({ params }: Props) {
               unicodeBidi: "embed",
             }}
           >
-            Ref: {ref} · FP: {contract.contentHash.slice(0, 24).toUpperCase()}…
+            Ref: {ref} · FP: {contract.contentHash ? contract.contentHash.slice(0, 24).toUpperCase() + "…" : "بصمة غير مسجّلة"}
           </div>
         </div>
       </article>
