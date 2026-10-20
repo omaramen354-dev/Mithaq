@@ -3584,3 +3584,18 @@ select.mq-select:focus {
   border-radius: 10px;
   max-width: 210px;
 }
+
+/* ===== بطاقات حماية التوقيع (مالك لا يوقّع نيابة + دخول Google) ===== */
+.signpad-blocked,
+.signpad-login {
+  border-color: rgba(201, 60, 60, 0.4);
+  background: linear-gradient(180deg, #fdf2f2, #fffdf6);
+}
+.signpad-login {
+  border-color: rgba(212, 168, 67, 0.5);
+  background: linear-gradient(180deg, rgba(212,168,67,0.08), rgba(255,253,246,0.9));
+}
+.signpad-blocked .signpad-title i,
+.signpad-login .signpad-title i { color: var(--gold-dark); }
+.signpad-head b b { color: var(--green); }
+.signpad-head b { line-height: 1.8; }

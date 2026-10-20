@@ -164,6 +164,7 @@ export default function ContractSheet({
             <small>
               {contract.sig2Name || contract.party2Name}
               {contract.sig2SignedAt ? ` · ${arDate(contract.sig2SignedAt)}` : ""}
+              {contract.party2Email ? ` · ${contract.party2Email}` : ""}
             </small>
           </div>
         </div>

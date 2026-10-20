@@ -20,6 +20,7 @@ type ContractLite = {
   party2Name: string;
   status: string;
   updatedAt?: string | Date | null;
+  party2Email?: string | null;
 };
 
 type Props = {
@@ -190,8 +191,9 @@ export default function OwnerSignFlow({
             أرسل العقد إلى الطرف الثاني للتوقيع
           </b>
           <p className="signpad-sub">
-            توقيعك محفوظ. شارك رابط التوقيع المشفّر مع الطرف الثاني ليوقّع من
-            جهازه — يتحدّث العقد تلقائياً فور توقيعه.
+            توقيعك محفوظ. شارك الرابط مع الطرف الثاني — يفتحه من جهازه، ويسجّل
+            دخوله بحساب Google الخاص به ثم يوقّع بنفسه، ولا يقبل النظام منك
+            التوقيع نيابةً عنه. يتحدّث العقد تلقائياً فور توقيعه.
           </p>
 
           {/* رابط مشفّر في سطر واحد — نسخ بضغطة */}
@@ -231,7 +233,8 @@ export default function OwnerSignFlow({
             ✓ العقد النهائي — موقّع من الطرفين
           </b>
           <p className="signpad-sub">
-            تم اعتماد الوثيقة وتوقيعها رقمياً من الطرفين مع ختم البصمة SHA-256.
+            تم اعتماد الوثيقة وتوقيعها رقمياً من الطرفين مع ختم البصمة SHA-256
+            {contract.party2Email || "" ? ` (الطرف الثاني: ${contract.party2Email})` : ""}.
             الوثيقة الكاملة أدناه — اطبعها أو شارك رابط التحقق.
           </p>
           <div className="signpad-actions">

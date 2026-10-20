@@ -94,10 +94,13 @@ export const contracts = pgTable(
     sig1Name: text("sig1_name"),
     sig1SignedAt: timestamp("sig1_signed_at", { withTimezone: true }),
 
-    /* توقيع الطرف الثاني */
+    /* توقيع الطرف الثاني — مرتبط بهوية حسابه Google عبر الرابط
+       كي يتعذر على صاحب العقد التوقيع نيابة عنه */
     sig2DataUrl: text("sig2_data_url"),
     sig2Name: text("sig2_name"),
     sig2SignedAt: timestamp("sig2_signed_at", { withTimezone: true }),
+    party2Email: text("party2_email"),
+    party2GoogleId: text("party2_google_id"),
 
     /* الرابط العام + QR مخزّن كـ Data URL */
     shareToken: text("share_token").notNull().unique(),
@@ -131,6 +134,8 @@ export const signatureEvents = pgTable(
       .references(() => contracts.id, { onDelete: "cascade" }),
     party: text("party").notNull(), // party1 | party2
     signerName: text("signer_name").notNull(),
+    /* بريد المُوقِّع من حسابه Google — دليل إضافي في سجل الإثبات */
+    signerEmail: text("signer_email"),
     ipAddress: text("ip_address").default("unknown"),
     userAgent: text("user_agent").default("unknown"),
     signedAt: timestamp("signed_at", { withTimezone: true })

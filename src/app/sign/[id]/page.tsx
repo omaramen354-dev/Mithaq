@@ -98,6 +98,7 @@ export default async function SignPage({ params }: Props) {
           party2Name: contract.party2Name,
           status: contract.status,
           updatedAt: contract.updatedAt,
+          party2Email: contract.party2Email,
         }}
         shareToken={contract.shareToken}
         shareUrl={shareUrl}

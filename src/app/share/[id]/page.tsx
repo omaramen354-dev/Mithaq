@@ -14,6 +14,7 @@ import { buildOfficialShareMessage, whatsappLink } from "@/lib/whatsapp";
 import { shareUrlFor } from "@/lib/fingerprint";
 import { decodeShareToken } from "@/lib/share-token";
 import { requestBaseUrl } from "@/lib/base-url";
+import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,22 @@ export default async function SharePage({ params }: Props) {
   /* فحص الحجب — صاحب العقد مجمّد؟ نُحجب كل شيء فوراً قبل أي توقيع */
   const guard = await isOwnerSuspended(contract.id);
   if (guard.suspended) return <SuspendedScreen />;
+
+  /* ===== حماية التوقيع من انتحال الطرف الثاني =====
+     ١) صاحب العقد (من حسابه) لا يوقّع مكان الطرف الثاني إطلاقاً.
+     ٢) الطرف الثاني يوقّع فقط من حسابه Google الخاص — يُربط
+        التوقيع بهويته (بريد + معرّف Google) في سجل الإثبات. */
+  const session = await auth();
+  const viewerDbId = session?.user?.dbId || null;
+  const viewerEmail = (session?.user?.email || "").toLowerCase() || null;
+  const isOwnerViewer = Boolean(
+    viewerDbId && contract.ownerId && viewerDbId === contract.ownerId
+  );
+  /* العقد مرتبط مسبقاً بحساب Google مختلف للطرف الثاني؟ */
+  const boundParty2Email = (contract.party2Email || "").toLowerCase() || null;
+  const party2Mismatch = Boolean(
+    boundParty2Email && viewerEmail && boundParty2Email !== viewerEmail
+  );
 
   const clauses = resolveClauses({
     type: contract.type,
@@ -191,6 +208,11 @@ export default async function SharePage({ params }: Props) {
               ) : (
                 <span style={{ color: "var(--muted)", fontSize: 12 }}>لم يوقع بعد</span>
               )}
+              {contract.party2Email ? (
+                <small style={{ display: "block", color: "var(--muted)", fontSize: 10 }}>
+                  وُقّع من حساب Google: {contract.party2Email}
+                </small>
+              ) : null}
             </div>
           </div>
 
@@ -219,6 +241,10 @@ export default async function SharePage({ params }: Props) {
         alreadySigned={Boolean(contract.sig2SignedAt)}
         fullySigned={contract.status === "signed"}
         waHref={waHref}
+        viewerEmail={viewerEmail}
+        isOwnerViewer={isOwnerViewer}
+        party2Mismatch={party2Mismatch}
+        boundParty2Email={boundParty2Email}
       />
     </main>
   );

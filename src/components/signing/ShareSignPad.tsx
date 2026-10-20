@@ -16,6 +16,14 @@ type Props = {
   alreadySigned: boolean;
   fullySigned: boolean;
   waHref: string;
+  /** بريد الجلسة الحالية (إن كان هناك تسجيل دخول) */
+  viewerEmail?: string | null;
+  /** هل يفتح الصفحة صاحب العقد نفسه؟ */
+  isOwnerViewer?: boolean;
+  /** هل العقد مرتبط مسبقاً بحساب Google آخر للطرف الثاني؟ */
+  party2Mismatch?: boolean;
+  /** الحساب المرتبط بالعقد مسبقاً (يُعرض عند عدم تطابقه) */
+  boundParty2Email?: string | null;
 };
 
 export default function ShareSignPad({
@@ -24,6 +32,10 @@ export default function ShareSignPad({
   alreadySigned,
   fullySigned,
   waHref,
+  viewerEmail,
+  isOwnerViewer = false,
+  party2Mismatch = false,
+  boundParty2Email = null,
 }: Props) {
   const router = useRouter();
   const padRef = useRef<SignaturePadHandle>(null);
@@ -75,7 +87,69 @@ export default function ShareSignPad({
           {fullySigned ? "موقّع من الطرفين" : "بانتظار الاعتماد"}
         </b>
         <p className="sign-done-sub">
-          شكراً لك، تم حفظ التوقيع مع وقت الجهاز وبياناته لأغراض الإثبات.
+          شكراً لك، تم حفظ التوقيع مع وقت الجهاز وبياناته وأهم حساب Google
+          المستخدم لأغراض الإثبات.
+        </p>
+      </section>
+    );
+  }
+
+  /* ===== صاحب العقد لا يوقّع نيابة عن الطرف الثاني إطلاقاً ===== */
+  if (isOwnerViewer) {
+    return (
+      <section className="card signpad-card signpad-blocked">
+        <b className="signpad-title">
+          <i className="fas fa-shield-halved" />
+          لا يمكن التوقيع من حساب صاحب العقد
+        </b>
+        <p className="signpad-sub">
+          أنت مسجّل الدخول بصفتك صاحب العقد — ولحماية إرادة الطرف الثاني لا
+          يقبل النظام توقيعه نيابة عنه بأي شكل. شارك الرابط مع الطرف الثاني
+          ليفتحه من حسابه الخاص ثم يوقّع بنفسه.
+        </p>
+      </section>
+    );
+  }
+
+  /* ===== الطرف الثاني يجب أن يدخل بحسابه Google قبل التوقيع ===== */
+  if (!viewerEmail) {
+    const cb = encodeURIComponent(`/share/${shareToken}`);
+    return (
+      <section className="card signpad-card signpad-login">
+        <b className="signpad-title">
+          <i className="fas fa-user-shield" />
+          التوقيع يتطلب دخول الطرف الثاني
+        </b>
+        <p className="signpad-sub">
+          لحماية إرادتك وسرية توقيعك، يُشترط تسجيل الدخول بحساب Google الخاص
+          بك قبل التوقيع — يُوثَّق حسابك في سجل الإثبات ولا يوقّع أحد نيابةً
+          عنك.
+        </p>
+        <div className="signpad-actions">
+          <a className="btn" href={`/api/auth/signin/google?callbackUrl=${cb}`}>
+            <i className="fab fa-google" /> الدخول بحساب Google
+          </a>
+        </div>
+        <p className="sigpad-hint">
+          <i className="fas fa-circle-info" />
+          أدخل بنفس الحساب الذي يخصك أنت (الطرف الثاني) — لا تُسلّم الرابط لغيرك.
+        </p>
+      </section>
+    );
+  }
+
+  /* ===== العقد مرتبط بحساب طرف ثانٍ آخر ===== */
+  if (party2Mismatch) {
+    return (
+      <section className="card signpad-card signpad-blocked">
+        <b className="signpad-title">
+          <i className="fas fa-triangle-exclamation" />
+          هذا العقد مرتبط بحساب طرف ثاني آخر
+        </b>
+        <p className="signpad-sub">
+          هذا العقد مرتبط بحساب <bdi>{boundParty2Email || "الطرف الثاني"}</bdi>
+          — لتوقيعه استخدم ذلك الحساب، أو تواصل مع صاحب العقد لربطه بحسابك
+          قبل التوقيع.
         </p>
       </section>
     );
@@ -88,8 +162,8 @@ export default function ShareSignPad({
         <div>
           <b>التوقيع بصفة الطرف الثاني — {party2Name}</b>
           <p>
-            ارسم توقيعك بيدك (بأكثر من لمسة)، أو ارفع صورة توقيعك، ثم اكتب
-            اسمك واعتمد.
+            أنت مسجّل بحساب <b>{viewerEmail}</b> — التوقيع مرتبط به ويسجَّل مع
+            الوقت وبيانات الجهاز ورقم IP.
           </p>
         </div>
       </div>

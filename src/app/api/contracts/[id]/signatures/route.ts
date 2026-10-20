@@ -66,16 +66,55 @@ export async function POST(
   if (!contract)
     return NextResponse.json({ ok: false, message: "العقد غير موجود." }, { status: 404 });
 
-  /* الطرف الأول يوقّع فقط من حساب صاحب العقد؛ الطرف الثاني عبر الرابط العام */
+  /* ===== التحقق من هوية المُوقِّع — منع انتحال الطرف الثاني =====
+     الطرف الأول: جلسة صاحب العقد فقط.
+     الطرف الثاني: جلسة Google إلزامية، ويُمنع صاحب العقد من
+     التوقيع نيابةً عنه، ويُمنع أي حساب غير الحساب المرتبط بالعقد. */
+  const session = await auth();
+  const viewerDbId = session?.user?.dbId || null;
+  const viewerGoogleId = (session?.user?.id || "") || null;
+  const viewerEmail = (session?.user?.email || "").toLowerCase() || null;
+
   if (party === "party1") {
-    const session = await auth();
-    if (!session?.user?.dbId || contract.ownerId !== session.user.dbId) {
+    if (!viewerDbId || contract.ownerId !== viewerDbId) {
       return NextResponse.json(
         { ok: false, message: "توقيع الطرف الأول يتطلب تسجيل دخول صاحب العقد." },
         { status: 401 }
       );
     }
+  } else {
+    if (!viewerDbId || !viewerEmail) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "توقيع الطرف الثاني يتطلب تسجيل الدخول بحساب Google الخاص به.",
+        },
+        { status: 401 }
+      );
+    }
+    if (contract.ownerId && contract.ownerId === viewerDbId) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            "صاحب العقد لا يوقّع نيابة عن الطرف الثاني — شارك الرابط مع الطرف الثاني ليفتحه بحسابه.",
+        },
+        { status: 403 }
+      );
+    }
+    const bound = (contract.party2Email || "").toLowerCase() || null;
+    if (bound && bound !== viewerEmail) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "هذا العقد مرتبط بحساب Google آخر للطرف الثاني.",
+        },
+        { status: 403 }
+      );
+    }
   }
+
+  const signerEmail = viewerEmail;
 
   if (contract.status === "signed")
     return NextResponse.json({ ok: false, message: "العقد موقّع بالكامل." }, { status: 409 });
@@ -95,7 +134,14 @@ export async function POST(
     .set({
       ...(party === "party1"
         ? { sig1DataUrl: dataUrl, sig1Name: signerName, sig1SignedAt: now }
-        : { sig2DataUrl: dataUrl, sig2Name: signerName, sig2SignedAt: now }),
+        : {
+            sig2DataUrl: dataUrl,
+            sig2Name: signerName,
+            sig2SignedAt: now,
+            /* ربط التوقيع بهوية حساب الطرف الثاني Google */
+            party2Email: viewerEmail,
+            party2GoogleId: viewerGoogleId,
+          }),
       status:
         (party === "party1" ? contract.sig2SignedAt : contract.sig1SignedAt)
           ? "signed"
@@ -111,6 +157,7 @@ export async function POST(
       contractId: contract.id,
       party,
       signerName,
+      signerEmail,
       ipAddress: meta.ipAddress,
       userAgent: meta.userAgent,
       signedAt: now,
