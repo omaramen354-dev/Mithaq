@@ -4,7 +4,8 @@ import { db } from "@/db";
 import { contracts } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { normalize, buildContractContent } from "@/lib/contract-text";
-import { contractFingerprint } from "@/lib/fingerprint";
+import { contractFingerprint } from "@/lib/contract-hash";
+import { decodeShareToken } from "@/lib/share-token";
 
 export const runtime = "nodejs";
 
@@ -26,7 +27,8 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeShareToken(rawId);
   const session = await auth();
   if (!session?.user?.dbId)
     return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
@@ -40,7 +42,8 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeShareToken(rawId);
   const session = await auth();
   if (!session?.user?.dbId)
     return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
@@ -125,7 +128,8 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeShareToken(rawId);
   const session = await auth();
   if (!session?.user?.dbId)
     return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });

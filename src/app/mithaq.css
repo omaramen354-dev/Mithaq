@@ -3309,3 +3309,278 @@ html.mithaq-modal-open .main-wrapper { margin-inline-start: 0; }
   .paymgr-actions { flex-direction: column; width: 100%; }
   .paymgr-btn { width: 100%; justify-content: center; }
 }
+
+/* ============================================================
+   لوحة التوقيع الموحّدة + رابط المشاركة المشفّر
+   ============================================================ */
+.owner-sign { max-width: 860px; margin: 0 auto 16px; }
+
+.signpad-card { padding: 18px 22px; }
+.signpad-success { border-color: #bfe3cd; }
+.signpad-success .signpad-title { color: var(--green-2); }
+
+.signpad-head { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+.signpad-head b { font-size: 14.5px; color: var(--green); }
+.signpad-head p { margin: 2px 0 0; font-size: 12px; color: var(--muted); line-height: 1.7; }
+.signpad-ico { font-size: 22px; line-height: 1; }
+.signpad-title { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--green); }
+.signpad-title i { color: var(--gold); }
+.signpad-sub { color: var(--muted); font-size: 12.5px; margin: 6px 0 12px; line-height: 1.8; }
+.signpad-flags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+
+.sigpad-label {
+  font-size: 11.5px; font-weight: 800; color: var(--muted);
+  margin-bottom: 6px;
+}
+.sigpad-canvas {
+  width: 100%; display: block;
+  border: 1.5px dashed rgba(212, 168, 67, 0.55);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.9), rgba(252,250,242,0.9)),
+    repeating-linear-gradient(90deg, transparent 0 26px, rgba(29,74,62,0.04) 26px 27px);
+  touch-action: none;
+  cursor: crosshair;
+}
+.sigpad-tools { display: flex; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+.sigpad-tools .btn { padding: 7px 12px; font-size: 12px; }
+.sigpad-upload { position: relative; overflow: hidden; cursor: pointer; }
+.sigpad-upload input { position: absolute; inset: 0; opacity: 0; width: 1px; height: 1px; }
+.sigpad-hint {
+  display: flex; align-items: flex-start; gap: 6px;
+  margin: 9px 0 0; font-size: 11px; font-weight: 700; color: var(--text-2);
+  line-height: 1.7;
+}
+.sigpad-hint i { color: var(--gold-dark); margin-top: 2px; }
+.sigpad-error { color: #b91c1c; font-size: 12.5px; font-weight: 800; margin: 9px 0 0; }
+.signpad-ok { color: var(--green-2); font-size: 13px; font-weight: 800; margin-top: 10px; }
+
+.signpad-field-label {
+  display: block; font-size: 12px; font-weight: 800;
+  color: var(--muted); margin: 14px 0 5px;
+}
+.signpad-ack {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 11.5px; color: var(--muted);
+  background: rgba(212, 168, 67, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px; margin-top: 12px; cursor: pointer;
+  line-height: 1.7;
+}
+.signpad-ack input { margin-top: 3px; flex: 0 0 auto; }
+.signpad-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+/* رابط المشاركة — سطر واحد دائماً */
+.share-link-box {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px;
+  border: 1.5px dashed rgba(212, 168, 67, 0.55);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(212,168,67,0.09), rgba(212,168,67,0.03));
+  margin-top: 12px;
+}
+.share-link-box > i { color: var(--gold-dark); flex: 0 0 auto; }
+.share-link-box code {
+  flex: 1; min-width: 0;
+  direction: ltr; text-align: left;
+  font-size: 11.5px; font-weight: 800; color: var(--green);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: block;
+}
+.share-link-copy {
+  flex: 0 0 auto; font: inherit; font-size: 11.5px; font-weight: 900;
+  border: 0; border-radius: 9px; padding: 7px 12px; cursor: pointer;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #122e26;
+}
+.share-link-copy:hover { filter: brightness(1.03); }
+
+/* رسالة نجاح التوقيع */
+.sign-done-card {
+  max-width: 860px; padding: 20px 24px;
+  border-color: #bfe3cd; background: #f2fbf5;
+}
+.sign-done-title { color: var(--green-2); font-size: 15px; }
+.sign-done-sub { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+
+/* رابط النجاح داخل المودال — بلا التفاف */
+.success-block-row code {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0; display: block;
+}
+
+/* ============================================================
+   /dashboard — لوحة حساب العميل المستقلة
+   ============================================================ */
+.dash-page {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 26px clamp(16px, 3vw, 34px) 0;
+}
+
+.dash-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  border-radius: 24px;
+  padding: 26px 28px;
+  color: #fff;
+  background:
+    radial-gradient(600px 200px at 90% -30%, rgba(246, 217, 121, 0.28), transparent 65%),
+    linear-gradient(135deg, #071f1a 0%, #17392f 55%, #1d4a3e 100%);
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  box-shadow: 0 22px 50px -24px rgba(7, 31, 26, 0.6);
+}
+.dash-hero::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: -60px;
+  bottom: -90px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,168,67,0.18), transparent 65%);
+  pointer-events: none;
+}
+.dash-hero > * { position: relative; z-index: 1; }
+.dash-eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px;
+  color: var(--gold-light);
+  background: rgba(212, 168, 67, 0.12);
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  border-radius: 999px;
+  padding: 5px 12px;
+  margin-bottom: 10px;
+}
+.dash-hero h1 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-size: clamp(23px, 3.4vw, 32px);
+  font-weight: 900;
+  line-height: 1.3;
+}
+.dash-hero p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.8;
+}
+.dash-hero-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+.dash-hero-actions .btn { padding: 11px 18px; }
+
+.dash-contracts { padding-inline: 0; }
+
+/* بطاقة دعوة لوحة التحكم في الرئيسية */
+.home-dash-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 22px clamp(16px, 4vw, 44px) 0;
+  padding: 20px 24px;
+  border-radius: 20px;
+  background:
+    radial-gradient(420px 160px at 8% -20%, rgba(246, 217, 121, 0.3), transparent 70%),
+    linear-gradient(135deg, #0b2a22, #1d4a3e 70%);
+  border: 1px solid rgba(212, 168, 67, 0.4);
+  color: #fff;
+  box-shadow: 0 18px 44px -26px rgba(7, 31, 26, 0.7);
+}
+.home-dash-cta-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 900; color: var(--gold-light);
+  letter-spacing: 0.4px; margin-bottom: 6px;
+}
+.home-dash-cta b { display: block; font-size: 17px; font-weight: 900; color: #fff; }
+.home-dash-cta p {
+  margin: 5px 0 0; font-size: 12.5px; font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+.home-dash-cta-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+
+/* تحسين بطاقات النظرة العامة */
+.dash-page .overview-section { padding-inline: 0; }
+.dash-page .ov-card {
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 253, 246, 0.98), rgba(252, 250, 242, 0.96));
+  border: 1px solid rgba(212, 168, 67, 0.22);
+  box-shadow: 0 16px 36px -26px rgba(7, 31, 26, 0.45);
+}
+.dash-page .ov-card::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0; top: 0;
+  height: 4px;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, var(--gold), rgba(212,168,67,0.15));
+  opacity: 0.85;
+}
+.dash-page .ov-card.ov-sub::before {
+  background: linear-gradient(90deg, #1d4a3e, var(--gold));
+}
+.dash-page .overview-recent {
+  border-radius: 20px;
+  border: 1px solid rgba(212, 168, 67, 0.22);
+  box-shadow: 0 16px 36px -26px rgba(7, 31, 26, 0.4);
+}
+
+@media (max-width: 640px) {
+  .dash-page { padding-top: 16px; }
+  .dash-hero { padding: 20px; border-radius: 18px; }
+  .dash-hero-actions { width: 100%; }
+  .dash-hero-actions .btn { flex: 1; justify-content: center; }
+  .home-dash-cta { margin-inline: 16px; padding: 18px; }
+  .home-dash-cta-actions { width: 100%; }
+  .home-dash-cta-actions .btn { flex: 1; justify-content: center; }
+}
+
+/* ============================================================
+   توحيد القوائم المنسدلة الأصلية (select) — نفس هوية mq-trigger
+   ============================================================ */
+.form-select,
+.aur-plan-select,
+select.mq-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--card-bg);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23a8842c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 13px center;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: var(--font-thmanyah), sans-serif;
+  font-weight: 700;
+  padding: 11px 15px;
+  padding-inline-end: 38px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-select:hover,
+.aur-plan-select:hover:not(:disabled),
+select.mq-select:hover { border-color: rgba(212, 168, 67, 0.6); }
+.form-select:focus,
+.aur-plan-select:focus,
+select.mq-select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.16);
+}
+.aur-plan-select {
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 6px 9px;
+  padding-inline-end: 30px;
+  background-position: left 9px center;
+  border-radius: 10px;
+  max-width: 210px;
+}

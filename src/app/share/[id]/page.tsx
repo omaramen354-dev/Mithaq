@@ -12,6 +12,8 @@ import ShareSignPad from "@/components/signing/ShareSignPad";
 import Logo from "@/components/Logo";
 import { buildOfficialShareMessage, whatsappLink } from "@/lib/whatsapp";
 import { shareUrlFor } from "@/lib/fingerprint";
+import { decodeShareToken } from "@/lib/share-token";
+import { requestBaseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,8 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function SharePage({ params }: Props) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeShareToken(rawId);
 
   const rows = await db
     .select()
@@ -52,7 +55,7 @@ export default async function SharePage({ params }: Props) {
   });
 
   const { ref } = contractVerification(contract.id, contract.updatedAt, contract.status);
-  const base = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+  const base = await requestBaseUrl();
   const waHref = whatsappLink(
     buildOfficialShareMessage(contract, shareUrlFor(contract.shareToken, base))
   );

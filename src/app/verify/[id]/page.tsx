@@ -8,6 +8,8 @@ import { arDate } from "@/lib/format";
 import { isOwnerSuspended } from "@/lib/mithaq-guard";
 import SuspendedScreen from "@/components/SuspendedScreen";
 import Logo from "@/components/Logo";
+import { decodeShareToken, encodeShareToken } from "@/lib/share-token";
+import { contractFingerprint } from "@/lib/contract-hash";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,8 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function VerifyPage({ params }: Props) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeShareToken(rawId);
 
   const rows = await db
     .select({
@@ -52,7 +55,6 @@ export default async function VerifyPage({ params }: Props) {
   const guard = await isOwnerSuspended(c.id);
   if (guard.suspended) return <SuspendedScreen />;
 
-  const { contractFingerprint } = await import("@/lib/fingerprint");
   const current = contractFingerprint({
     id: c.id,
     type: c.type,
@@ -199,7 +201,10 @@ export default async function VerifyPage({ params }: Props) {
           </div>
 
           <div style={{ display: "flex", gap: 8, marginTop: 18, flexWrap: "wrap" }}>
-            <Link className="btn" href={`/share/${id}`}>
+            <Link
+              className="btn"
+              href={`/share/${encodeURIComponent(encodeShareToken(id))}`}
+            >
               عرض العقد كاملاً
             </Link>
           </div>

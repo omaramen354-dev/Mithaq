@@ -5,7 +5,8 @@ import { contracts } from "@/db/schema";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { normalize, buildContractContent } from "@/lib/contract-text";
 import { CONTRACT_TYPES } from "@/lib/contract-types";
-import { contractFingerprint, shareUrlFor } from "@/lib/fingerprint";
+import { shareUrlFor } from "@/lib/fingerprint";
+import { contractFingerprint } from "@/lib/contract-hash";
 import { randomUUID } from "crypto";
 
 export const runtime = "nodejs";
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
       .where(eq(contracts.id, match.id))
       .returning();
 
-    return NextResponse.json({ ok: true, contract: updated[0], shareUrl: shareUrlFor(updated[0].shareToken) });
+    return NextResponse.json({ ok: true, contract: updated[0], shareUrl: shareUrlFor(updated[0].shareToken, new URL(req.url).origin) });
   }
 
   /* لا مطابق — إنشاء عقد جديد مملوك للمستخدم مباشرة */
@@ -149,7 +150,7 @@ export async function POST(req: Request) {
   const row = inserted[0];
 
   return NextResponse.json(
-    { ok: true, contract: row, shareUrl: shareUrlFor(row.shareToken) },
+    { ok: true, contract: row, shareUrl: shareUrlFor(row.shareToken, new URL(req.url).origin) },
     { status: 201 }
   );
 }

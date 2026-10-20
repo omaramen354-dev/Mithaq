@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import type { Contract } from "@/db/schema";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
-import { contractVerification } from "@/lib/fingerprint";
+import { contractVerification, shareUrlFor } from "@/lib/fingerprint";
 import { buildOfficialShareMessage, whatsappLink } from "@/lib/whatsapp";
+import { encodeShareToken } from "@/lib/share-token";
 
 /* ============================================================
    ContractsTable — جدول العقود بتصميم v1 الأسطوري
@@ -72,9 +73,9 @@ export default function ContractsTable({
   }
 
   function waHref(c: Contract): string {
-    return whatsappLink(
-      buildOfficialShareMessage(c, `${baseUrl}/share/${c.shareToken}`)
-    );
+    const origin =
+      baseUrl || (typeof window !== "undefined" ? window.location.origin : "");
+    return whatsappLink(buildOfficialShareMessage(c, shareUrlFor(c.shareToken, origin)));
   }
 
   if (!contracts.length) {
@@ -159,7 +160,7 @@ export default function ContractsTable({
                   </Link>
                   <Link
                     className="action-icon"
-                    href={`/verify/${c.shareToken}`}
+                    href={`/verify/${encodeURIComponent(encodeShareToken(c.shareToken))}`}
                     title="التحقق من البصمة"
                   >
                     <i className="fas fa-shield-halved" />

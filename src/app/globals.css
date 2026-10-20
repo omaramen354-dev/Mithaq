@@ -329,6 +329,8 @@ h3 {
 .sheet-topband {
   height: 8px;
   background: linear-gradient(90deg, #071f1a, var(--green) 35%, #2e6d5c 55%, var(--gold) 100%);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 /* الترويسة: الشعار + اسم المنظومة + المرجع */
@@ -485,6 +487,17 @@ h3 {
 .sheet-foot {
   border-top: 1px dashed var(--line);
   background: rgba(244, 241, 225, 0.5);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* شريط زمردي فوق التذييل — يظهر دائماً في الطباعة ولو أُغلقت الخلفيات */
+.sheet-foot-band {
+  height: 5px;
+  background: linear-gradient(90deg, #071f1a, var(--green) 45%, #2e6d5c 70%, var(--gold) 100%);
+  border-top: 1px solid #071f1a;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 .sheet-foot-inner {
   display: flex;
@@ -560,9 +573,19 @@ h3 {
     margin: 14mm 13mm;
   }
   /* الترويسة الرسمية داخل الطباعة */
+  .sheet {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
   .sheet-topband {
     height: 6px;
     margin: -14mm -13mm 0;
+    background: #1d4a3e !important;
+    border: 0;
+  }
+  .sheet-foot-band {
+    height: 4px;
+    background: #1d4a3e !important;
   }
   .sheet-logo {
     width: 52px;

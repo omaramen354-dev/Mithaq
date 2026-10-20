@@ -5,7 +5,8 @@ import { contracts, users } from "@/db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { normalize, buildContractContent } from "@/lib/contract-text";
 import { CONTRACT_TYPES } from "@/lib/contract-types";
-import { contractFingerprint, shareUrlFor } from "@/lib/fingerprint";
+import { shareUrlFor } from "@/lib/fingerprint";
+import { contractFingerprint } from "@/lib/contract-hash";
 import { randomUUID } from "crypto";
 import { logEvent } from "@/lib/logger";
 import { PLAN_LIMITS } from "@/lib/plans";
@@ -204,7 +205,7 @@ export async function POST(req: NextRequest) {
     {
       ok: true,
       contract: row,
-      shareUrl: shareUrlFor(row.shareToken),
+      shareUrl: shareUrlFor(row.shareToken, req.nextUrl.origin),
     },
     { status: 201 }
   );

@@ -4,11 +4,12 @@ import { db } from "@/db";
 import { contracts, signatureEvents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { normalize, buildContractContent } from "@/lib/contract-text";
-import { contractFingerprint, verifyPathFor } from "@/lib/fingerprint";
+import { verifyPathFor, shareUrlFor } from "@/lib/fingerprint";
+import { contractFingerprint } from "@/lib/contract-hash";
 import { contractTypeName } from "@/lib/contract-types";
 import { notifyContractEvent } from "@/lib/telegram";
-import { shareUrlFor } from "@/lib/fingerprint";
 import { logEvent } from "@/lib/logger";
+import { decodeShareToken } from "@/lib/share-token";
 
 export const runtime = "nodejs";
 
@@ -42,7 +43,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeShareToken(rawId);
   let body: SignBody;
   try {
     body = (await req.json()) as SignBody;
@@ -103,15 +105,19 @@ export async function POST(
     .where(eq(contracts.id, contract.id))
     .returning();
 
-  /* سجل الإثبات: IP + جهاز + وقت */
-  await db.insert(signatureEvents).values({
-    contractId: contract.id,
-    party,
-    signerName,
-    ipAddress: meta.ipAddress,
-    userAgent: meta.userAgent,
-    signedAt: now,
-  });
+  /* سجل الإثبات: IP + جهاز + وقت — فشل السجل لا يُلغي التوقيع */
+  try {
+    await db.insert(signatureEvents).values({
+      contractId: contract.id,
+      party,
+      signerName,
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+      signedAt: now,
+    });
+  } catch {
+    /* الجدول قد يكون غير مرقّى بعد — التوقيع نفسه محفوظ */
+  }
 
   /* إعادة ختم النص والبصمة بعد التوقيع */
   const fresh = updated[0];
@@ -160,7 +166,7 @@ export async function POST(
   });
 
   /* إشعار تيليجرام (لا يفشل الطلب إذا فشل الإشعار) */
-  const base = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+  const base = req.nextUrl.origin.replace(/\/+$/, "");
   notifyContractEvent(
     {
       typeName: contractTypeName(fresh.type),

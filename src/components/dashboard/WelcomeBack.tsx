@@ -107,9 +107,7 @@ export default function WelcomeBack(props: WelcomeData) {
               className="welcome-cta"
               onClick={() => {
                 close();
-                document
-                  .getElementById("contracts")
-                  ?.scrollIntoView({ behavior: "smooth" });
+                window.location.assign("/dashboard#contracts");
               }}
             >
               <i className="fas fa-file-contract" />

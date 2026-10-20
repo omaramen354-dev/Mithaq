@@ -18,24 +18,31 @@ export type SubscriptionGuardResult =
 export async function isOwnerSuspended(
   contractId: string
 ): Promise<SubscriptionGuardResult> {
-  const rows = await db
-    .select({ ownerId: contracts.ownerId })
-    .from(contracts)
-    .where(eq(contracts.id, contractId))
-    .limit(1);
+  /* الحاجز لا يجوز أن يُسقط صفحة العقد: أي فشل استعلام (جدول
+     معاملات غير مرقّى بعد، انقطاع مؤقت) يُعامل كـ«غير مجمّد»
+     بدل تحويل الصفحة العامة إلى شاشة خطأ. */
+  try {
+    const rows = await db
+      .select({ ownerId: contracts.ownerId })
+      .from(contracts)
+      .where(eq(contracts.id, contractId))
+      .limit(1);
 
-  const contract = rows[0];
-  if (!contract?.ownerId) return { suspended: false };
+    const contract = rows[0];
+    if (!contract?.ownerId) return { suspended: false };
 
-  const txRows = await db
-    .select({ status: transactions.status })
-    .from(transactions)
-    .where(eq(transactions.userId, contract.ownerId))
-    .limit(500);
+    const txRows = await db
+      .select({ status: transactions.status })
+      .from(transactions)
+      .where(eq(transactions.userId, contract.ownerId))
+      .limit(500);
 
-  /* أي معاملة مجمّدة تصادر الاشتراك كاملاً — لا استثناءات */
-  if (txRows.some((t) => t.status === "suspended")) {
-    return { suspended: true };
+    /* أي معاملة مجمّدة تصادر الاشتراك كاملاً — لا استثناءات */
+    if (txRows.some((t) => t.status === "suspended")) {
+      return { suspended: true };
+    }
+    return { suspended: false };
+  } catch {
+    return { suspended: false };
   }
-  return { suspended: false };
 }

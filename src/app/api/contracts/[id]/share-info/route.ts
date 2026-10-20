@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { shareUrlFor, verifyPathFor, contractVerification } from "@/lib/fingerprint";
 import { buildOfficialShareMessage, whatsappLink } from "@/lib/whatsapp";
 import { telegramConfigured } from "@/lib/telegram";
+import { decodeShareToken } from "@/lib/share-token";
 
 export const runtime = "nodejs";
 
@@ -14,10 +15,11 @@ export const runtime = "nodejs";
    ============================================================ */
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeShareToken(rawId);
   const session = await auth();
   if (!session?.user?.dbId)
     return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
@@ -31,7 +33,7 @@ export async function GET(
   if (!contract)
     return NextResponse.json({ ok: false, message: "العقد غير موجود." }, { status: 404 });
 
-  const base = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+  const base = req.nextUrl.origin.replace(/\/+$/, "");
   const link = shareUrlFor(contract.shareToken, base);
   const { ref } = contractVerification(
     contract.id,

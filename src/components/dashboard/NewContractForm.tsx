@@ -361,6 +361,7 @@ export default function NewContractForm({
             <div>
               <label style={label}>نوع العقد *</label>
               <select
+                className="form-select"
                 value={form.type}
                 onChange={(e) => set("type", e.target.value)}
                 style={{ ...input, padding: 0 }}
@@ -377,6 +378,7 @@ export default function NewContractForm({
             <div>
               <label style={label}>وضع التوقيع</label>
               <select
+                className="form-select"
                 value={form.signingMode}
                 onChange={(e) => set("signingMode", e.target.value)}
                 style={{ ...input, padding: 0 }}

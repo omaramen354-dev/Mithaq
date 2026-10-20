@@ -1,47 +1,9 @@
-import { createHash } from "crypto";
+import { encodeShareToken } from "./share-token";
 
 /* ============================================================
-   بصمة العقد الرقمية (SHA-256) — أي تغيير حرف واحد يغيّرها بالكامل
-   تُختم عند الإنشاء/التوقيع وتُقارن في صفحة /verify لكشف التلاعب
+   fingerprint.ts — دوال العرض النقية (تعمل على الخادم والمتصفح)
+   لا تستورد crypto هنا إطلاقاً؛ بصمة SHA-256 في contract-hash.ts
    ============================================================ */
-
-export type FingerprintInput = {
-  id: string;
-  type: string;
-  party1Name: string;
-  party2Name: string;
-  amount?: string | null;
-  date: string | Date;
-  duration?: string | null;
-  paymentMethod?: string | null;
-  city?: string | null;
-  subject?: string | null;
-  notes?: string | null;
-  clauses?: string[];
-  content?: string;
-};
-
-export function contractFingerprint(c: FingerprintInput): string {
-  return createHash("sha256")
-    .update(
-      [
-        c.id || "",
-        c.type || "",
-        c.party1Name || "",
-        c.party2Name || "",
-        c.amount || "",
-        c.date instanceof Date ? c.date.toISOString() : c.date || "",
-        c.duration || "",
-        c.paymentMethod || "",
-        c.city || "",
-        c.subject || "",
-        c.notes || "",
-        (c.clauses || []).join("\n"),
-        c.content || "",
-      ].join("|")
-    )
-    .digest("hex");
-}
 
 /* مرجع التوثيق الحتمي (MEQ-XXXXX) + رمز تحقق قصير — ثابت لكل عقد */
 function hashString(str: string): number {
@@ -67,12 +29,18 @@ export function contractVerification(
   };
 }
 
-/* رابط المشاركة العام — من BASE_URL أو من الطلب نفسه */
+/* رابط المشاركة العام — مشفّر في مقطع واحد بلا أسطر */
 export function shareUrlFor(id: string, baseUrl?: string): string {
   const base = (baseUrl || process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
-  return base + "/share/" + encodeURIComponent(id);
+  return base + "/share/" + encodeURIComponent(encodeShareToken(id));
 }
 
 export function verifyPathFor(id: string): string {
-  return "/verify/" + encodeURIComponent(id);
+  return "/verify/" + encodeURIComponent(encodeShareToken(id));
+}
+
+/** رابط مطلق لصفحة التحقق إن توفّر base، وإلا مسار نسبي */
+export function verifyUrlFor(id: string, baseUrl?: string): string {
+  const base = (baseUrl || process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+  return base + verifyPathFor(id);
 }

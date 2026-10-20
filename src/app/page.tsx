@@ -11,12 +11,11 @@ import {
   Features,
   MithaqFooter,
 } from "@/components/dashboard/MithaqSections";
-import ContractsTable from "@/components/dashboard/ContractsTable";
 import ContractModal from "@/components/dashboard/ContractModal";
+import NewContractButton from "@/components/dashboard/NewContractButton";
 import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 import WelcomeBack from "@/components/dashboard/WelcomeBack";
-import AccountOverview from "@/components/dashboard/AccountOverview";
 
 export const dynamic = "force-dynamic";
 
@@ -99,15 +98,30 @@ export default async function Home() {
           />
         )}
 
-        {/* لوحة حساب العميل: انتهاء الاشتراك + الإحصائيات + آخر العقود */}
+        {/* دعوة للوحة الحساب المستقلة — لا تُعرض تفاصيل الحساب هنا */}
         {isUser && (
-          <AccountOverview
-            userName={session?.user?.name || "صديقنا"}
-            plan={me?.plan || "free"}
-            planExpiresAt={me?.planExpiresAt?.toISOString() || null}
-            contracts={rows}
-            memberSince={me?.createdAt?.toISOString() || null}
-          />
+          <section className="home-dash-cta reveal">
+            <div>
+              <span className="home-dash-cta-label">
+                <i className="fas fa-gauge-high" /> لوحة حسابك
+              </span>
+              <b>
+                {rows.length
+                  ? `لديك ${rows.length} عقد${signedCount ? ` — ${signedCount} موقّع بالكامل` : ""}`
+                  : "كل عقودك واشتراكك في مكان واحد"}
+              </b>
+              <p>
+                انتقل إلى صفحة لوحة التحكم المستقلة لإدارة العقود والاشتراك
+                والإحصائيات.
+              </p>
+            </div>
+            <div className="home-dash-cta-actions">
+              <NewContractButton />
+              <a className="btn btn-soft" href="/dashboard">
+                <i className="fas fa-arrow-left" /> فتح لوحة التحكم
+              </a>
+            </div>
+          </section>
         )}
 
         <StatsBar contracts={rows.length} />
@@ -125,6 +139,7 @@ export default async function Home() {
                 الإنشاء ويتولد نص العقد أمامك فوراً ببصمة SHA-256.
               </p>
             </div>
+            <NewContractButton />
           </div>
         </section>
 
@@ -135,19 +150,6 @@ export default async function Home() {
         <ContractTypes />
 
         <Features />
-
-        {/* عقود المستخدم المسجل — جدول العقود بالتصميم الأصلي */}
-        {isUser && (
-          <section className="section recent-section reveal" id="contracts">
-            <div className="recent-header">
-              <div>
-                <div className="section-label">عقودي</div>
-                <h2 className="section-title">آخر العقود المنشأة</h2>
-              </div>
-            </div>
-            <ContractsTable contracts={rows} />
-          </section>
-        )}
 
         <MithaqFooter />
       </div>

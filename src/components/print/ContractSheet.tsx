@@ -1,7 +1,7 @@
 import type { Contract } from "@/db/schema";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
-import { contractVerification } from "@/lib/fingerprint";
+import { contractVerification, verifyPathFor } from "@/lib/fingerprint";
 import QrCode from "@/components/QrCode";
 
 /* ============================================================
@@ -11,20 +11,23 @@ import QrCode from "@/components/QrCode";
    وفي صفحة التوقيع /sign/[id] لضمان تنسيق واحد لكل المخرجات.
    ============================================================ */
 
-export function verifyUrlFor(contract: Contract): string {
-  const base = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
-  return base + "/verify/" + encodeURIComponent(contract.shareToken);
+export function verifyUrlFor(contract: Contract, baseUrl?: string): string {
+  const base = (baseUrl || process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+  return base + verifyPathFor(contract.shareToken);
 }
 
 export default function ContractSheet({
   contract,
   clauses,
+  verifyUrl: verifyUrlProp,
 }: {
   contract: Contract;
   clauses: string[];
+  verifyUrl?: string;
 }) {
   const { ref } = contractVerification(contract.id, contract.updatedAt, contract.status);
-  const verifyUrl = verifyUrlFor(contract);
+  const verifyUrl = verifyUrlProp || verifyUrlFor(contract);
+  const hash = (contract.contentHash || "").toUpperCase();
 
   return (
     <article className="card sheet">
@@ -36,7 +39,7 @@ export default function ContractSheet({
         <div className="sheet-brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/mithaq-logo-transparent.svg"
+            src="/mithaq-logo-print.svg"
             alt="شعار ميثاق"
             className="sheet-logo"
           />
@@ -168,6 +171,7 @@ export default function ContractSheet({
 
       {/* ===== تذييل التحقق + رمز QR ===== */}
       <footer className="sheet-foot">
+        <div className="sheet-foot-band" aria-hidden />
         <div className="sheet-foot-inner">
           <div className="sheet-foot-qr">
             <QrCode value={verifyUrl} size={86} label="امسح للتحقق من العقد" />
@@ -179,7 +183,7 @@ export default function ContractSheet({
             <b>التحقق من سلامة الوثيقة</b>
             <span>أي تغيير في نص العقد يغيّر البصمة فوراً</span>
           </div>
-          <code>FP: {contract.contentHash.toUpperCase().slice(0, 16)}…</code>
+          <code>FP: {hash ? hash.slice(0, 16) + "…" : "—"}</code>
         </div>
       </footer>
     </article>

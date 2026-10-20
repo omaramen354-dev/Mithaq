@@ -6,8 +6,9 @@ import { auth } from "@/lib/auth";
 import { resolveClauses } from "@/lib/contract-text";
 import { contractTypeName } from "@/lib/contract-types";
 import { shareUrlFor } from "@/lib/fingerprint";
-import ContractSheet from "@/components/print/ContractSheet";
+import ContractSheet, { verifyUrlFor } from "@/components/print/ContractSheet";
 import OwnerSignFlow from "@/components/signing/OwnerSignFlow";
+import { requestBaseUrl } from "@/lib/base-url";
 import PrintButton from "@/components/print/PrintButton";
 import Logo from "@/components/Logo";
 
@@ -50,7 +51,8 @@ export default async function SignPage({ params }: Props) {
     date: contract.createdAt,
   });
 
-  const shareUrl = shareUrlFor(contract.shareToken);
+  const base = await requestBaseUrl();
+  const shareUrl = shareUrlFor(contract.shareToken, base);
 
   return (
     <main style={{ padding: 20 }}>
@@ -82,7 +84,7 @@ export default async function SignPage({ params }: Props) {
         </b>
         <span style={{ flex: 1 }} />
         <PrintButton />
-        <a className="btn btn-soft" href="/#contracts">
+        <a className="btn btn-soft" href="/dashboard#contracts">
           ← رجوع للعقود
         </a>
       </div>
@@ -107,7 +109,11 @@ export default async function SignPage({ params }: Props) {
 
       {/* ===== وثيقة العقد A4 (نفس تنسيق الطباعة) ===== */}
       <div id="mithaq-sheet" style={{ maxWidth: 860, margin: "0 auto" }}>
-        <ContractSheet contract={contract} clauses={clauses} />
+        <ContractSheet
+          contract={contract}
+          clauses={clauses}
+          verifyUrl={verifyUrlFor(contract, base)}
+        />
       </div>
     </main>
   );

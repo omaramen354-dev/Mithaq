@@ -5,7 +5,8 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { resolveClauses } from "@/lib/contract-text";
 import PrintButton from "@/components/print/PrintButton";
-import ContractSheet from "@/components/print/ContractSheet";
+import ContractSheet, { verifyUrlFor } from "@/components/print/ContractSheet";
+import { requestBaseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default async function PrintPage({ params }: Props) {
   const contract = rows[0];
   if (!contract) notFound();
 
+  const base = await requestBaseUrl();
   const clauses = resolveClauses({
     type: contract.type,
     party1Name: contract.party1Name,
@@ -59,7 +61,7 @@ export default async function PrintPage({ params }: Props) {
         }}
       >
         <PrintButton />
-        <a className="btn btn-soft" href="/#contracts">
+        <a className="btn btn-soft" href="/dashboard#contracts">
           ← رجوع للعقود
         </a>
         <small style={{ color: "var(--muted)" }}>
@@ -68,7 +70,11 @@ export default async function PrintPage({ params }: Props) {
       </div>
 
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
-        <ContractSheet contract={contract} clauses={clauses} />
+        <ContractSheet
+          contract={contract}
+          clauses={clauses}
+          verifyUrl={verifyUrlFor(contract, base)}
+        />
       </div>
     </main>
   );

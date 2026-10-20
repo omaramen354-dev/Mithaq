@@ -39,9 +39,18 @@ export default function MithaqSidebar({
     if (hash === "top") {
       window.location.hash = "";
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
+      return;
     }
+    const el = document.getElementById(hash);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+    /* على صفحة أخرى (مثل /dashboard) نعود للرئيسية عند القسم المطلوب */
+    else window.location.assign(`/#${hash}`);
+  };
+
+  const goDashboard = () => {
+    setOpen(false);
+    if (mode === "user") window.location.assign("/dashboard");
+    else go("top");
   };
 
   const openNewContract = () => {
@@ -95,9 +104,13 @@ export default function MithaqSidebar({
 
         <nav className="sidebar-nav">
           <div className="nav-section-title">الرئيسية</div>
+          <button className="nav-link" onClick={goDashboard}>
+            <i className="ico fas fa-gauge-high" />
+            <span>لوحة التحكم</span>
+          </button>
           <button className="nav-link active" onClick={() => go("top")}>
             <i className="ico fas fa-house" />
-            <span>لوحة التحكم</span>
+            <span>الرئيسية</span>
           </button>
           <button className="nav-link" onClick={openNewContract}>
             <i className="ico fas fa-file-circle-plus" />
@@ -110,7 +123,14 @@ export default function MithaqSidebar({
           <div className="nav-section-title" style={{ marginTop: 10 }}>
             إدارة
           </div>
-          <button className="nav-link" onClick={() => go("contracts")}>
+          <button
+            className="nav-link"
+            onClick={() => {
+              setOpen(false);
+              if (mode === "user") window.location.assign("/dashboard#contracts");
+              else go("types");
+            }}
+          >
             <i className="ico fas fa-file-contract" />
             <span>العقود</span>
             <span className="nav-badge">{contractsCount}</span>
