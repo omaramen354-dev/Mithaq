@@ -14,10 +14,19 @@ import { useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
 import { findPlan, priceLabel, priceLabelSyp } from "@/lib/plans";
 
-/* ===== بيانات شام كاش — عدّلها قبل النشر ===== */
-const SHAM_ACCOUNT = "0123456789"; // رقم حساب شام كاش المراد التحويل إليه
-const SHAM_NAME = "اسم المستفيد الكامل";
-const SUPPORT_WA = "9639XXXXXXXX";
+/* ===== بيانات شام كاش =====
+   تُضبط من متغيرات البيئة عند النشر بدل تعديل الكود:
+   NEXT_PUBLIC_SHAM_CASH_ACCOUNT  رقم الحساب
+   NEXT_PUBLIC_SHAM_CASH_NAME     اسم المستفيد كما يظهر في شام كاش
+   NEXT_PUBLIC_SUPPORT_WHATSAPP   رقم الدعم بصيغة دولية بلا +
+   لا تُدرج أرقاماً حقيقية داخل الكود (تظهر للعميل لكن تُسجَّل في Git). */
+const SHAM_ACCOUNT = (process.env.NEXT_PUBLIC_SHAM_CASH_ACCOUNT || "").trim();
+const SHAM_NAME = (process.env.NEXT_PUBLIC_SHAM_CASH_NAME || "").trim();
+const SUPPORT_WA = (process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "").trim();
+
+/** لا نسمح بإرسال طلب قبل ضبط وجهة التحويل فعلياً */
+const PAYMENT_CONFIGURED =
+  /^\d{6,}$/.test(SHAM_ACCOUNT) && SHAM_NAME.length >= 2;
 
 export default function CheckoutClient({
   planParam,
@@ -139,7 +148,9 @@ export default function CheckoutClient({
                   letterSpacing: 1,
                 }}
               >
-                {SHAM_ACCOUNT} — {SHAM_NAME}
+                {PAYMENT_CONFIGURED
+                  ? `${SHAM_ACCOUNT} — ${SHAM_NAME}`
+                  : "⚠️ بيانات الحساب غير مضبوطة بعد"}
               </div>
             </li>
             <li>بعد نجاح التحويل، أرسل طلبك بالحقول أدناه فقط — بدون أي رسالة واتساب إضافية.</li>
@@ -148,6 +159,45 @@ export default function CheckoutClient({
               الطلب.
             </li>
           </ol>
+
+          {/* تحذير صريح: التفعيل فوري قبل التحقق اليدوي */}
+          <div
+            style={{
+              marginBottom: 14,
+              padding: "11px 13px",
+              borderRadius: 12,
+              background: "#fff8e6",
+              border: "1.5px solid rgba(212,168,67,0.55)",
+              color: "#7a5a12",
+              fontSize: 12,
+              lineHeight: 1.9,
+              fontWeight: 700,
+            }}
+          >
+            <i className="fas fa-triangle-exclamation" />
+            {" "}
+            <b>تنبيه مهم:</b> تفعيل الباقة يتم فوراً قبل التحقق من الحوالة. سيراجع الفريق رقم
+            العملية يدوياً، وأي رقم غير مطابق أو مكرر يعرّض الحساب للتجميد وإبطال بصمة
+            عقوده. لا ترسل الطلب إلا بعد إتمام التحويل فعلياً.
+          </div>
+
+          {!PAYMENT_CONFIGURED && (
+            <div
+              style={{
+                marginBottom: 14,
+                padding: "11px 13px",
+                borderRadius: 12,
+                background: "#fdecec",
+                border: "1.5px solid #f5c2c2",
+                color: "#b91c1c",
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              <i className="fas fa-lock" /> الدفع غير متاح حالياً: لم تُضبط بيانات حساب شام
+              كاش في إعدادات المنصة. تواصل مع الدعم لإتمام الاشتراك.
+            </div>
+          )}
 
           {/* الجائزة: المزايا تفعّل فوراً — رسالة تأكيد */}
           {done && (
@@ -253,7 +303,12 @@ export default function CheckoutClient({
                 </div>
               )}
 
-              <button type="submit" className="btn" disabled={busy} style={{ width: "100%" }}>
+              <button
+                type="submit"
+                className="btn"
+                disabled={busy || !PAYMENT_CONFIGURED}
+                style={{ width: "100%" }}
+              >
                 {busy ? (
                   <>
                     <i className="fas fa-spinner fa-spin" />
@@ -274,15 +329,19 @@ export default function CheckoutClient({
             style={{ fontSize: 11, color: "var(--muted)", marginTop: 14, textAlign: "center" }}
           >
             عند وجود استفسار:{" "}
-            <a
-              className="btn-soft btn"
-              style={{ padding: "6px 12px", fontSize: 11 }}
-              href={`https://wa.me/${SUPPORT_WA}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <i className="fab fa-whatsapp" /> تواصل عبر الواتساب
-            </a>
+            {SUPPORT_WA ? (
+              <a
+                className="btn-soft btn"
+                style={{ padding: "6px 12px", fontSize: 11 }}
+                href={`https://wa.me/${SUPPORT_WA}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i className="fab fa-whatsapp" /> تواصل عبر الواتساب
+              </a>
+            ) : (
+              <span style={{ fontWeight: 700 }}>راسل إدارة المنصة</span>
+            )}
           </p>
         </div>
       </div>

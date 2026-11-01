@@ -16,8 +16,33 @@ import NewContractButton from "@/components/dashboard/NewContractButton";
 import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 import WelcomeBack from "@/components/dashboard/WelcomeBack";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+const HOME_TITLE =
+  "ميثاق | منصة العقود الذكية العربية — أنشئ عقدك ووقّعه إلكترونياً";
+const HOME_DESC =
+  "أنشئ عقداً عربياً جاهزاً في دقائق: إيجار، بيع، خدمات، عمل حر، شراكة، سرية، تصميم وبرمجة. عدّل البنود، وقّع إلكترونياً، شارك الرابط، واطبع PDF مع بصمة SHA-256 للتحقق.";
+
+export const metadata: Metadata = {
+  title: HOME_TITLE,
+  description: HOME_DESC,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "ميثاق — منصة العقود الذكية العربية",
+    description: HOME_DESC,
+    url: "/",
+    siteName: "ميثاق",
+    locale: "ar_AR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: HOME_TITLE,
+    description: HOME_DESC,
+  },
+};
 
 /* ============================================================
    منصة ميثاق — الواجهة الأسطورية الأصلية (v1)
@@ -60,6 +85,31 @@ export default async function Home() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                name: "ميثاق",
+                alternateName: "MITHAQ",
+                url: "https://miithaq.com",
+                logo: "https://miithaq.com/mithaq-logo-transparent.svg",
+                description:
+                  "منصة عربية لإنشاء العقود وتوقيعها إلكترونياً والتحقق منها ببصمة SHA-256.",
+              },
+              {
+                "@type": "WebSite",
+                name: "ميثاق",
+                url: "https://miithaq.com",
+                inLanguage: "ar",
+              },
+            ],
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       <RevealOnScroll />
       <MithaqSidebar
         mode={isUser ? "user" : "guest"}

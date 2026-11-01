@@ -3,13 +3,20 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { contracts, users } from "@/db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { normalize, buildContractContent } from "@/lib/contract-text";
+import {
+  buildContractContent,
+  clampText,
+  clampClauses,
+  isBodyTooLarge,
+  CONTRACT_LIMITS,
+} from "@/lib/contract-text";
 import { CONTRACT_TYPES } from "@/lib/contract-types";
 import { shareUrlFor } from "@/lib/fingerprint";
 import { contractFingerprint } from "@/lib/contract-hash";
 import { randomUUID } from "crypto";
 import { logEvent } from "@/lib/logger";
 import { PLAN_LIMITS } from "@/lib/plans";
+import { parseParty2Email } from "@/lib/contract-schema";
 
 export const runtime = "nodejs";
 
@@ -26,6 +33,7 @@ type CreateBody = {
   type?: string;
   party1?: string;
   party2?: string;
+  party2Email?: string;
   amount?: string;
   city?: string;
   country?: string;
@@ -40,11 +48,17 @@ type CreateBody = {
 function validate(body: CreateBody): { ok: true; data: CreateBody } | { ok: false; message: string } {
   if (!body.type || !CONTRACT_TYPES[body.type])
     return { ok: false, message: "نوع العقد غير صحيح." };
-  if (!body.party1 || !normalize(body.party1))
+  if (!clampText(body.party1, CONTRACT_LIMITS.partyName))
     return { ok: false, message: "الطرف الأول مطلوب." };
-  if (!body.party2 || !normalize(body.party2))
+  if (!clampText(body.party2, CONTRACT_LIMITS.partyName))
     return { ok: false, message: "الطرف الثاني مطلوب." };
-  return { ok: true, data: body };
+  /* بروتوكول الحجز المسبق: بريد الطرف الثاني إجباري في وضع الإرسال
+     عبر الرابط (send)، واختياري في التوقيع السريع على نفس الجهاز (quick) */
+  const p2 = parseParty2Email(body.party2Email, {
+    required: body.signingMode !== "quick",
+  });
+  if (!p2.ok) return { ok: false, message: p2.message };
+  return { ok: true, data: { ...body, party2Email: p2.email } };
 }
 
 export async function GET() {
@@ -126,6 +140,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (isBodyTooLarge(req))
+    return NextResponse.json(
+      { ok: false, message: "حجم الطلب كبير جداً — اختصر النصوص والبنود." },
+      { status: 413 }
+    );
+
   let body: CreateBody;
   try {
     body = (await req.json()) as CreateBody;
@@ -137,9 +157,7 @@ export async function POST(req: NextRequest) {
   if (!v.ok) return NextResponse.json({ ok: false, message: v.message }, { status: 422 });
 
   const d = v.data;
-  const clauses = Array.isArray(d.clauses)
-    ? d.clauses.map(normalize).filter(Boolean)
-    : [];
+  const clauses = clampClauses(d.clauses);
   const now = new Date();
 
   const contract = {
@@ -149,15 +167,16 @@ export async function POST(req: NextRequest) {
     type: d.type!,
     status: "draft" as const,
     signingMode: d.signingMode === "quick" ? "quick" : "send",
-    party1Name: normalize(d.party1),
-    party2Name: normalize(d.party2),
-    amount: normalize(d.amount),
-    city: normalize(d.city),
-    country: normalize(d.country),
-    subject: normalize(d.subject),
-    duration: normalize(d.duration),
-    paymentMethod: normalize(d.paymentMethod),
-    notes: normalize(d.notes),
+    party1Name: clampText(d.party1, CONTRACT_LIMITS.partyName),
+    party2Name: clampText(d.party2, CONTRACT_LIMITS.partyName),
+    party2Email: d.party2Email || null,
+    amount: clampText(d.amount, CONTRACT_LIMITS.amount),
+    city: clampText(d.city, CONTRACT_LIMITS.city),
+    country: clampText(d.country, CONTRACT_LIMITS.country),
+    subject: clampText(d.subject, CONTRACT_LIMITS.subject),
+    duration: clampText(d.duration, CONTRACT_LIMITS.duration),
+    paymentMethod: clampText(d.paymentMethod, CONTRACT_LIMITS.paymentMethod),
+    notes: clampText(d.notes, CONTRACT_LIMITS.notes),
     clauses,
     content: "",
     contentHash: "",

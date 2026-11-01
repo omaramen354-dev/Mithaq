@@ -16,6 +16,47 @@ export function normalize(value: unknown): string {
   return s.replace(/\s{2,}/g, " ").trim();
 }
 
+/* ============================================================
+   حدود الحقول — خط الدفاع الأول ضد تضخيم قاعدة البيانات
+   تُطبَّق على كل مسار كتابة (إنشاء / تعديل / استعادة / توقيع).
+   ============================================================ */
+export const CONTRACT_LIMITS = {
+  partyName: 120,
+  amount: 60,
+  city: 80,
+  country: 80,
+  subject: 300,
+  duration: 80,
+  paymentMethod: 80,
+  notes: 2000,
+  clause: 2000,
+  maxClauses: 40,
+  /** الحد الأقصى لحجم جسم الطلب (بايت) — يمنع رفع مسودات ضخمة */
+  maxBodyBytes: 250_000,
+} as const;
+
+/** قصّ نص بعد التطبيع إلى حد أقصى */
+export function clampText(value: unknown, max: number): string {
+  return normalize(value).slice(0, max);
+}
+
+/** قصّ مصفوفة البنود وحدود كل بند */
+export function clampClauses(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .slice(0, CONTRACT_LIMITS.maxClauses)
+    .map((c) => clampText(c, CONTRACT_LIMITS.clause))
+    .filter(Boolean);
+}
+
+/** فحص حجم الطلب من ترويسة Content-Length (إن وُجدت) */
+export function isBodyTooLarge(req: Request): boolean {
+  const raw = req.headers.get("content-length");
+  if (!raw) return false;
+  const size = Number(raw);
+  return Number.isFinite(size) && size > CONTRACT_LIMITS.maxBodyBytes;
+}
+
 export type ContractData = {
   type: string;
   party1Name: string;

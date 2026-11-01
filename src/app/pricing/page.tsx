@@ -4,11 +4,30 @@ import { paymentRequests } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import PricingClient from "./PricingClient";
 import type { Metadata } from "next";
+import { OG_IMAGE } from "@/lib/seo";
+
+const PRICING_DESC =
+  "باقات ميثاق: العقد الواحد، أساسي، موثّق، المستقل، المكاتب، والمراجعة القانونية — ادفع بـ USDT أو شام كاش، وتفعيل المزايا بعد تأكيد الدفع.";
 
 export const metadata: Metadata = {
   title: "الأسعار والباقات — ميثاق",
-  description:
-    "باقات ميثاق: العقد الواحد، أساسي، موثّق، المستقل، المكاتب، والمراجعة القانونية — ادفع بـ USDT أو شام كاش.",
+  description: PRICING_DESC,
+  alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "الأسعار والباقات — ميثاق",
+    description: PRICING_DESC,
+    url: "/pricing",
+    siteName: "ميثاق",
+    locale: "ar_AR",
+    type: "website",
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "الأسعار والباقات — ميثاق",
+    description: PRICING_DESC,
+    images: [OG_IMAGE.url],
+  },
 };
 
 export const dynamic = "force-dynamic";

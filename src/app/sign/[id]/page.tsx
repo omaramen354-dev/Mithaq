@@ -11,8 +11,14 @@ import OwnerSignFlow from "@/components/signing/OwnerSignFlow";
 import { requestBaseUrl } from "@/lib/base-url";
 import PrintButton from "@/components/print/PrintButton";
 import Logo from "@/components/Logo";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "توقيع العقد — ميثاق",
+  robots: { index: false, follow: false },
+};
 
 /* ============================================================
    /sign/[id] — صفحة التوقيع الخاصة بصاحب العقد

@@ -12,8 +12,15 @@ import AccountOverview from "@/components/dashboard/AccountOverview";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 import NewContractButton from "@/components/dashboard/NewContractButton";
 import { MithaqFooter } from "@/components/dashboard/MithaqSections";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "لوحة التحكم — ميثاق",
+  description: "إدارة عقودك واشتراكك وإحصائياتك في مكان واحد.",
+  robots: { index: false, follow: false },
+};
 
 /* ============================================================
    /dashboard — لوحة حساب العميل المستقلة

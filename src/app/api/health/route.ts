@@ -23,12 +23,14 @@ export async function GET() {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    /* تفاصيل الخطأ تُسجّل داخلياً فقط — لا تُعاد للعامة حتى لا تكشف
+       مضيف قاعدة البيانات أو تفاصيل الاتصال. */
+    console.error("[health] فشل الاتصال بقاعدة البيانات:", error);
     return NextResponse.json(
       {
         ok: false,
         status: "degraded",
         database: "unreachable",
-        error: (error as Error).message,
         timestamp: new Date().toISOString(),
       },
       { status: 503 }

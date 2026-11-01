@@ -12,6 +12,8 @@ export type GuestDraft = {
   signingMode: string;
   party1: string;
   party2: string;
+  /* بريد الطرف الثاني المحجوز (بروتوكول الحجز المسبق) */
+  party2Email?: string;
   amount: string;
   city: string;
   country: string;

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { contracts } from "@/db/schema";
+import { contracts, signatureEvents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { contractFingerprint } from "@/lib/contract-hash";
 import { decodeShareToken } from "@/lib/share-token";
+import { maskEmail } from "@/lib/format";
+import { isOwnerSuspended } from "@/lib/mithaq-guard";
 
 export const runtime = "nodejs";
 
@@ -34,6 +36,8 @@ export async function GET(
       createdAt: contracts.createdAt,
       sig1SignedAt: contracts.sig1SignedAt,
       sig2SignedAt: contracts.sig2SignedAt,
+      signingMode: contracts.signingMode,
+      party2Email: contracts.party2Email,
       content: contracts.content,
       clauses: contracts.clauses,
       contentHash: contracts.contentHash,
@@ -45,6 +49,22 @@ export async function GET(
   const c = rows[0];
   if (!c)
     return NextResponse.json({ ok: false, message: "العقد غير موجود." }, { status: 404 });
+
+  /* نفس حاجز الصفحات العامة: عقد صاحبه مجمّد مالياً لا يُتحقق منه
+     عبر الـ API أيضاً — وإلا صار المسار باباً خلفياً لتجاوز الحجب. */
+  const guard = await isOwnerSuspended(c.id);
+  if (guard.suspended)
+    return NextResponse.json(
+      { ok: false, message: "هذا العقد غير متاح للتحقق حالياً." },
+      { status: 403 }
+    );
+
+  /* سجل الإثبات — البريد مموّه في الاستجابة العامة */
+  const events = await db
+    .select()
+    .from(signatureEvents)
+    .where(eq(signatureEvents.contractId, c.id))
+    .orderBy(signatureEvents.signedAt);
 
   const current = contractFingerprint({
     id: c.id,
@@ -68,10 +88,18 @@ export async function GET(
     found: true,
     matched,
     status: c.status,
+    signingMode: c.signingMode === "quick" ? "quick" : "send",
+    party2EmailMasked: c.party2Email ? maskEmail(c.party2Email) : null,
     party1: c.party1Name,
     party2: c.party2Name,
     createdAt: c.createdAt,
     lastSignatureAt: c.sig2SignedAt || c.sig1SignedAt || null,
     fingerprint: c.contentHash,
+    signatureLog: events.map((ev) => ({
+      party: ev.party,
+      signerName: ev.signerName,
+      signerEmailMasked: ev.signerEmail ? maskEmail(ev.signerEmail) : null,
+      signedAt: ev.signedAt,
+    })),
   });
 }

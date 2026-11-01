@@ -17,7 +17,8 @@ export const dynamic = "force-dynamic";
    حماية:
    - إذا ضُبط CRON_SECRET يُطلب Authorization: Bearer <CRON_SECRET>
      (Vercel يرسلها تلقائياً مع كل استدعاء كرون) — مقارنة آمنة.
-   - إن لم يُضبط، يُقبل فقط طلب يحمل ترويسة vercel-cron من Vercel.
+   - في الإنتاج بدون CRON_SECRET: يُرفض الطلب بالكامل (fail closed).
+   - في التطوير المحلي فقط يُسمح بالاستدعاء اليدوي للاختبار.
    - الاستجابة لا تعرض أي بيانات مستخدمين (عدّاد فقط).
    ============================================================ */
 
@@ -34,10 +35,15 @@ function authorized(req: NextRequest): boolean {
     }
     return diff === 0;
   }
-  /* بدون سر: نقبل فقط طلبات Vercel Cron نفسها (ترويسة موقعة من Vercel)
-     — يمنع المتطفلين العشوائيين وفحص الروابط الآلي */
+  /* بدون سر في الإنتاج: نرفض كل الطلبات (fail closed).
+     Vercel Cron يرسل Authorization: Bearer <CRON_SECRET> تلقائياً
+     بمجرد ضبط المتغير في المشروع. الاعتماد على User-Agent كان قابلاً
+     للانتحال من أي عميل. */
+  if (process.env.NODE_ENV === "production") return false;
+
+  /* في التطوير المحلي نسمح بالاستدعاء اليدوي للاختبار فقط */
   const ua = req.headers.get("user-agent") || "";
-  return ua.includes("vercel-cron");
+  return ua.includes("vercel-cron") || ua.includes("curl");
 }
 
 export async function GET(req: NextRequest) {

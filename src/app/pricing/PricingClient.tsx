@@ -13,11 +13,17 @@ import Logo from "@/components/Logo";
 import { PAID_PLANS, priceLabel, priceLabelSyp, type Plan } from "@/lib/plans";
 import { whatsappLink } from "@/lib/whatsapp";
 
-/* ===== بيانات الدفع — عدّلها قبل النشر ===== */
-const WALLET = "TXYZ...REPLACE_WITH_YOUR_TRC20_WALLET";
-const SHAM_NAME = "<اسمك الكامل>";
-const SHAM_NUMBER = "09xxxxxxxx";
-const WHATSAPP = "9639XXXXXXXX";
+/* ===== بيانات الدفع =====
+   تُضبط من متغيرات البيئة قبل البناء بدل تعديل الكود:
+   NEXT_PUBLIC_USDT_TRC20_ADDRESS · NEXT_PUBLIC_SHAM_CASH_ACCOUNT
+   NEXT_PUBLIC_SHAM_CASH_NAME · NEXT_PUBLIC_SUPPORT_WHATSAPP
+   لا نعرض عنواناً وهمياً ولا نسمح بإرسال طلب قبل ضبط الوجهة. */
+const WALLET = (process.env.NEXT_PUBLIC_USDT_TRC20_ADDRESS || "").trim();
+const SHAM_NAME = (process.env.NEXT_PUBLIC_SHAM_CASH_NAME || "").trim();
+const SHAM_NUMBER = (process.env.NEXT_PUBLIC_SHAM_CASH_ACCOUNT || "").trim();
+const USDT_READY = /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(WALLET);
+const SHAM_READY = /^\d{6,}$/.test(SHAM_NUMBER) && SHAM_NAME.length >= 2;
+const ANY_METHOD_READY = USDT_READY || SHAM_READY;
 
 type MyReq = { id: string; plan: string; status: string; createdAt: string };
 type Pop = { plan: Plan } | null;
@@ -62,7 +68,7 @@ export default function PricingClient({
 
   function openPop(p: Plan) {
     setPop({ plan: p });
-    setMethod("usdt");
+    setMethod(USDT_READY ? "usdt" : "shamcash");
     setTxRef("");
     setSenderName("");
     setMsg(null);
@@ -86,6 +92,14 @@ export default function PricingClient({
 
   async function submit() {
     if (!pop || busy) return;
+    if (method === "usdt" && !USDT_READY) {
+      setMsg({ t: "الدفع بـ USDT غير متاح حالياً — اختر شام كاش أو تواصل مع الدعم.", ok: false });
+      return;
+    }
+    if (method === "shamcash" && !SHAM_READY) {
+      setMsg({ t: "الدفع عبر شام كاش غير متاح حالياً — تواصل مع الدعم.", ok: false });
+      return;
+    }
     setBusy(true);
     setMsg(null);
     try {
@@ -140,8 +154,8 @@ export default function PricingClient({
           اختر باقتك، ووثّق عقودك <span className="gold">بثقة</span>
         </h1>
         <p className="pricing-sub">
-          ادفع بـ USDT (TRC20) أو شام كاش — أرسل إثبات الدفع ويُفعّل فريقنا باقتك
-          على حسابك بعد المراجعة (عادة خلال ساعات قليلة).
+          ادفع عبر شام كاش وتُفعّل باقتك <b>فوراً</b> مع تحقق يدوي لاحق من الإيصال،
+          أو عبر USDT (TRC20) ويُفعّل فريقنا باقتك بعد تأكيد التحويل.
         </p>
         {!isLoggedIn && (
           <div className="pricing-guest-note">
@@ -201,14 +215,37 @@ export default function PricingClient({
                     <i className="fas fa-hourglass-half" /> طلبك قيد المراجعة
                   </span>
                 ) : isLoggedIn ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary plan-btn"
-                    onClick={() => openPop(p)}
-                  >
-                    <i className="fas fa-bolt" />
-                    اشترك الآن
-                  </button>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                    {SHAM_READY ? (
+                      <Link
+                        href={`/checkout?plan=${p.id}`}
+                        className="btn btn-primary plan-btn"
+                      >
+                        <i className="fas fa-bolt" />
+                        اشترك الآن — تفعيل فوري
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-outline plan-btn"
+                        disabled
+                        title="لم تُضبط بيانات شام كاش بعد"
+                      >
+                        <i className="fas fa-triangle-exclamation" />
+                        الدفع غير متاح حالياً
+                      </button>
+                    )}
+                    {USDT_READY && (
+                      <button
+                        type="button"
+                        className="btn btn-soft plan-btn"
+                        onClick={() => openPop(p)}
+                      >
+                        <i className="fab fa-bitcoin" />
+                        الدفع بـ USDT
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <Link href="/login" className="btn btn-outline plan-btn">
                     <i className="fas fa-right-to-bracket" />
@@ -295,17 +332,21 @@ export default function PricingClient({
                   type="button"
                   className={`paypop-method${method === "usdt" ? " active" : ""}`}
                   onClick={() => setMethod("usdt")}
+                  disabled={!USDT_READY}
+                  title={USDT_READY ? "الدفع بـ USDT" : "غير مضبوط بعد"}
                 >
                   <i className="fab fa-bitcoin" />
-                  USDT — TRC20
+                  USDT — TRC20{USDT_READY ? "" : " (غير متاح)"}
                 </button>
                 <button
                   type="button"
                   className={`paypop-method${method === "shamcash" ? " active" : ""}`}
                   onClick={() => setMethod("shamcash")}
+                  disabled={!SHAM_READY}
+                  title={SHAM_READY ? "الدفع عبر شام كاش" : "غير مضبوط بعد"}
                 >
                   <i className="fas fa-mobile-screen" />
-                  شام كاش
+                  شام كاش{SHAM_READY ? "" : " (غير متاح)"}
                 </button>
               </div>
 
@@ -313,34 +354,54 @@ export default function PricingClient({
                 <div className="paypop-box">
                   <div className="paypop-box-title">
                     <i className="fas fa-wallet" />
-                    أرسل {pop.plan.priceUsd} USDT على شبكة TRC20 فقط إلى:
+                    {USDT_READY
+                      ? `أرسل ${pop.plan.priceUsd} USDT على شبكة TRC20 فقط إلى:`
+                      : "الدفع بـ USDT غير مضبوط حالياً"}
                   </div>
-                  <div className="paypop-wallet">
-                    <code dir="ltr">{WALLET}</code>
-                    <button type="button" onClick={copyWallet}>
-                      <i className={`fas ${copied ? "fa-check" : "fa-copy"}`} />
-                      {copied ? "تم النسخ" : "نسخ"}
-                    </button>
-                  </div>
-                  <div className="paypop-warn">
-                    <i className="fas fa-triangle-exclamation" />
-                    تأكد أن الشبكة TRC20 — أي شبكة أخرى يعني فقدان المبلغ.
-                  </div>
+                  {USDT_READY ? (
+                    <>
+                      <div className="paypop-wallet">
+                        <code dir="ltr">{WALLET}</code>
+                        <button type="button" onClick={copyWallet}>
+                          <i className={`fas ${copied ? "fa-check" : "fa-copy"}`} />
+                          {copied ? "تم النسخ" : "نسخ"}
+                        </button>
+                      </div>
+                      <div className="paypop-warn">
+                        <i className="fas fa-triangle-exclamation" />
+                        تأكد أن الشبكة TRC20 — أي شبكة أخرى يعني فقدان المبلغ.
+                      </div>
+                    </>
+                  ) : (
+                    <div className="paypop-warn">
+                      <i className="fas fa-triangle-exclamation" />
+                      لم تُضبط محفظة USDT بعد. اختر شام كاش أو تواصل مع الدعم.
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="paypop-box">
                   <div className="paypop-box-title">
                     <i className="fas fa-mobile-screen" />
-                    حوّل {priceLabelSyp(pop.plan)} عبر شام كاش إلى:
+                    {SHAM_READY
+                      ? `حوّل ${priceLabelSyp(pop.plan)} عبر شام كاش إلى:`
+                      : "الدفع عبر شام كاش غير مضبوط حالياً"}
                   </div>
-                  <div className="paypop-sham">
-                    <div>
-                      <span>الاسم:</span> <b>{SHAM_NAME}</b>
+                  {SHAM_READY ? (
+                    <div className="paypop-sham">
+                      <div>
+                        <span>الاسم:</span> <b>{SHAM_NAME}</b>
+                      </div>
+                      <div>
+                        <span>الرقم:</span> <b dir="ltr">{SHAM_NUMBER}</b>
+                      </div>
                     </div>
-                    <div>
-                      <span>الرقم:</span> <b dir="ltr">{SHAM_NUMBER}</b>
+                  ) : (
+                    <div className="paypop-warn">
+                      <i className="fas fa-triangle-exclamation" />
+                      لم تُضبط بيانات شام كاش بعد. تواصل مع الدعم.
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -379,7 +440,11 @@ export default function PricingClient({
                 <button
                   type="button"
                   className="btn btn-primary"
-                  disabled={busy}
+                  disabled={
+                    busy ||
+                    (method === "usdt" ? !USDT_READY : !SHAM_READY) ||
+                    !ANY_METHOD_READY
+                  }
                   onClick={submit}
                 >
                   <i className={`fas ${busy ? "fa-spinner fa-spin" : "fa-paper-plane"}`} />
@@ -387,7 +452,10 @@ export default function PricingClient({
                 </button>
                 <a
                   className="btn btn-outline"
-                  href={whatsappLink(waText || "مرحباً، أريد الاشتراك في ميثاق")}
+                  href={whatsappLink(
+                    waText || "مرحباً، أريد الاشتراك في ميثاق",
+                    process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP
+                  )}
                   target="_blank"
                   rel="noreferrer"
                 >

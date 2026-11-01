@@ -138,18 +138,39 @@ export default function ShareSignPad({
     );
   }
 
-  /* ===== العقد مرتبط بحساب طرف ثانٍ آخر ===== */
+  /* ===== الحساب الحالي غير مخول — بطاقة تحذير حمراء + تبديل الحساب ===== */
   if (party2Mismatch) {
+    const cb = encodeURIComponent(`/share/${shareToken}`);
     return (
-      <section className="card signpad-card signpad-blocked">
-        <b className="signpad-title">
-          <i className="fas fa-triangle-exclamation" />
-          هذا العقد مرتبط بحساب طرف ثاني آخر
-        </b>
-        <p className="signpad-sub">
-          هذا العقد مرتبط بحساب <bdi>{boundParty2Email || "الطرف الثاني"}</bdi>
-          — لتوقيعه استخدم ذلك الحساب، أو تواصل مع صاحب العقد لربطه بحسابك
-          قبل التوقيع.
+      <section className="card signpad-card signpad-danger">
+        <div className="signpad-danger-head">
+          <span className="signpad-danger-ico">
+            <i className="fas fa-triangle-exclamation" />
+          </span>
+          <div>
+            <b>الحساب الحالي غير مخول لتوقيع هذا العقد</b>
+            <p>
+              هذا العقد محجوز للتوقيع بحساب <bdi>{boundParty2Email || "الطرف الثاني"}</bdi>{" "}
+              — حسابك الحالي <bdi>{viewerEmail || "غير معروف"}</bdi> لا يطابق
+              البريد المحجوز، لذلك أُخفيت لوحة التوقيع.
+            </p>
+          </div>
+        </div>
+        <div className="signpad-actions">
+          <a
+            className="btn"
+            href={`/api/auth/signin/google?callbackUrl=${cb}`}
+          >
+            <i className="fab fa-google" /> تبديل حساب Google
+          </a>
+          <a className="btn btn-soft" href={`/share/${shareToken}`}>
+            <i className="fas fa-rotate" /> إعادة تحميل الصفحة بعد التبديل
+          </a>
+        </div>
+        <p className="sigpad-hint">
+          <i className="fas fa-circle-info" />
+          سجّل الدخول بحساب {boundParty2Email || "المحجوز"} ثم ارجع إلى هذه
+          الصفحة لتوقيع العقد.
         </p>
       </section>
     );

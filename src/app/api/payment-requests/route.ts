@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { paymentRequests } from "@/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { findPlan } from "@/lib/plans";
 
 export const runtime = "nodejs";
@@ -56,6 +56,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { ok: false, message: "أدخل اسم المُرسل على شام كاش." },
       { status: 422 }
+    );
+  }
+
+  /* حد يومي بسيط: 5 طلبات كحد أقصى لكل مستخدم خلال 24 ساعة */
+  const dayAgo = new Date(Date.now() - 864e5);
+  const recent = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(paymentRequests)
+    .where(
+      and(
+        eq(paymentRequests.userId, session.user.dbId),
+        gte(paymentRequests.createdAt, dayAgo)
+      )
+    );
+  if ((recent[0]?.n || 0) >= 5) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "أرسلت طلبات كثيرة خلال 24 ساعة — انتظر المراجعة أو تواصل مع الدعم.",
+      },
+      { status: 429 }
     );
   }
 

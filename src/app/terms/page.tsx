@@ -1,9 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OG_IMAGE } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "الشروط والأحكام — ميثاق",
-  description: "شروط استخدام منصة ميثاق للعقود والتوثيق الإلكتروني",
+  description:
+    "شروط استخدام منصة ميثاق للعقود والتوثيق الإلكتروني: طبيعة الخدمة، مسؤولية المستخدم، الاشتراكات والدفع، وحدود المسؤولية.",
+  alternates: { canonical: "/terms" },
+  openGraph: {
+    title: "الشروط والأحكام — ميثاق",
+    description: "شروط استخدام منصة ميثاق للعقود والتوثيق الإلكتروني.",
+    url: "/terms",
+    siteName: "ميثاق",
+    locale: "ar_AR",
+    type: "article",
+    images: [OG_IMAGE],
+  },
 };
 
 /* ============================================================

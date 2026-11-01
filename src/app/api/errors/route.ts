@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { activityLogs } from "@/db/schema";
 import { desc, eq, and, inArray } from "drizzle-orm";
@@ -80,6 +81,19 @@ export async function POST(req: NextRequest) {
   const stack = isUser ? String(body.stack || "").slice(0, MAX_STACK) : "";
   const source = body.source === "server" ? "server" : "browser";
 
+  /* extra يصل من العميل — نرفض أي كائن يتجاوز 2KB حتى لا يُستخدم
+     لتضخيم جدول الأحداث بمحتوى كبير أو عميق. */
+  let extra: Record<string, unknown> = {};
+  if (body.extra && typeof body.extra === "object") {
+    try {
+      const serialized = JSON.stringify(body.extra);
+      if (serialized.length <= 2048) extra = body.extra as Record<string, unknown>;
+      else extra = { truncated: true, size: serialized.length };
+    } catch {
+      extra = { invalid: true };
+    }
+  }
+
   await logEvent({
     action: source === "server" ? "error_server" : "error_browser",
     entity: "error",
@@ -96,7 +110,7 @@ export async function POST(req: NextRequest) {
       col: body.col || null,
       component: String(body.component || "").slice(0, 100),
       userAgent: String(body.userAgent || req.headers.get("user-agent") || "").slice(0, 250),
-      extra: body.extra || {},
+      extra,
     },
   });
 
@@ -104,11 +118,7 @@ export async function POST(req: NextRequest) {
   return new NextResponse(null, { status: 204 });
 }
 
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.dbId || !session.user.isAdmin) return null;
-  return session;
-}
+const requireAdmin = requireAdminSession;
 
 export async function GET(req: NextRequest) {
   const session = await requireAdmin();

@@ -54,8 +54,17 @@ export async function POST(
 
   const party = body.party === "party2" ? "party2" : "party1";
   const dataUrl = normalize(body.signatureData || "");
-  if (!dataUrl.startsWith("data:image/png;base64,"))
+
+  /* توقيع PNG فقط، وبحد أقصى ~150KB. بدون هذه الحدود يمكن إرسال
+     Data URL ضخم فيُخزَّن ويُعاد في كل صفحات العقد (تضخيم تخزين). */
+  const MAX_SIGNATURE_CHARS = 200_000;
+  if (!dataUrl.startsWith("data:image/png;base64,iVBORw0KGgo"))
     return NextResponse.json({ ok: false, message: "التوقيع غير صحيح." }, { status: 422 });
+  if (dataUrl.length > MAX_SIGNATURE_CHARS)
+    return NextResponse.json(
+      { ok: false, message: "حجم التوقيع كبير جداً — أعد التوقيع بخط أخف." },
+      { status: 413 }
+    );
 
   const rows = await db
     .select()
@@ -102,12 +111,14 @@ export async function POST(
         { status: 403 }
       );
     }
+    /* مطابقة صارمة: البريد المحجوز في صلب العقد يجب أن يطابق بريد الجلسة */
     const bound = (contract.party2Email || "").toLowerCase() || null;
     if (bound && bound !== viewerEmail) {
       return NextResponse.json(
         {
           ok: false,
-          message: "هذا العقد مرتبط بحساب Google آخر للطرف الثاني.",
+          message:
+            "عذراً، هذا الرابط مخصص للتوثيق بحساب Google محدد مسبقاً من قِبل صاحب العقد، يرجى التبديل للحساب الصحيح",
         },
         { status: 403 }
       );
@@ -127,7 +138,8 @@ export async function POST(
   const meta = requestMeta(req);
   const now = new Date();
   const signerName =
-    normalize(body.name) || (party === "party1" ? contract.party1Name : contract.party2Name);
+    normalize(body.name).slice(0, 120) ||
+    (party === "party1" ? contract.party1Name : contract.party2Name);
 
   const updated = await db
     .update(contracts)

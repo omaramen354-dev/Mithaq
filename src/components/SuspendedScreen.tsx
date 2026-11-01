@@ -1,5 +1,7 @@
 import Logo from "@/components/Logo";
 
+const SUPPORT_WA = (process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "").trim();
+
 /* ============================================================
    SuspendedScreen — شاشة الإبطال الاحترافية
    تُعرض في المسارات العامة (/verify و /share و /print) لصالح
@@ -114,15 +116,17 @@ export default function SuspendedScreen() {
               <i className="fas fa-house" />
               العودة إلى المنصة
             </a>
-            <a
-              className="btn btn-wa"
-              href="https://wa.me/9639XXXXXXXX"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <i className="fab fa-whatsapp" />
-              تواصل مع الدعم
-            </a>
+            {SUPPORT_WA ? (
+              <a
+                className="btn btn-wa"
+                href={`https://wa.me/${SUPPORT_WA}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i className="fab fa-whatsapp" />
+                تواصل مع الدعم
+              </a>
+            ) : null}
           </div>
         </div>
 

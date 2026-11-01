@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { auth, signOut, adminEmails } from "@/lib/auth";
+import { isAdminUser } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { contracts, paymentRequests, users } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
@@ -27,7 +29,10 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const session = await auth();
-  const isAdmin = Boolean(session?.user?.isAdmin);
+  /* الصلاحية من قاعدة البيانات لا من JWT — إزالة الصلاحية تسري فوراً */
+  const isAdmin = session?.user?.dbId
+    ? await isAdminUser(session.user.dbId)
+    : false;
 
   if (!isAdmin) {
     return (
@@ -203,33 +208,43 @@ export default async function AdminPage() {
           ) : (
             <ul className="admin-list">
               {recentContracts.map((c) => (
-                <li key={c.id} className="admin-row">
-                  <div className="admin-row-main">
-                    <span className="admin-row-title">
-                      عقد {contractTypeName(c.type)}
-                    </span>
-                    <span className="admin-row-parties">
-                      {c.party1Name} ↔ {c.party2Name}
-                    </span>
-                  </div>
-                  <div className="admin-row-side">
-                    <span
-                      className={`admin-badge ${
-                        c.status === "signed"
-                          ? "b-signed"
+                <li key={c.id}>
+                  <Link
+                    className="admin-row"
+                    href={`/admin/contracts/${c.id}`}
+                    title="معاينة العقد"
+                  >
+                    <div className="admin-row-main">
+                      <span className="admin-row-title">
+                        عقد {contractTypeName(c.type)}
+                        <i
+                          className="fas fa-eye"
+                          style={{ fontSize: 11, marginInlineStart: 7, color: "var(--gold-dark)" }}
+                        />
+                      </span>
+                      <span className="admin-row-parties">
+                        {c.party1Name} ↔ {c.party2Name}
+                      </span>
+                    </div>
+                    <div className="admin-row-side">
+                      <span
+                        className={`admin-badge ${
+                          c.status === "signed"
+                            ? "b-signed"
+                            : c.status === "partially_signed"
+                              ? "b-partial"
+                              : "b-draft"
+                        }`}
+                      >
+                        {c.status === "signed"
+                          ? "موقّع ✓"
                           : c.status === "partially_signed"
-                            ? "b-partial"
-                            : "b-draft"
-                      }`}
-                    >
-                      {c.status === "signed"
-                        ? "موقّع ✓"
-                        : c.status === "partially_signed"
-                          ? "نصف موقّع"
-                          : "مسودة"}
-                    </span>
-                    <span className="admin-row-date">{arDate(c.createdAt)}</span>
-                  </div>
+                            ? "نصف موقّع"
+                            : "مسودة"}
+                      </span>
+                      <span className="admin-row-date">{arDate(c.createdAt)}</span>
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ul>

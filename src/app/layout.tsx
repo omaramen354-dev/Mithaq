@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "./mithaq.css";
+/* أيقونات Font Awesome محلياً — لا CDN خارجي ولا طلب طرف ثالث */
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import ThemeInit from "@/components/ThemeInit";
 import ThemeToggle from "@/components/ThemeToggle";
 import ErrorReporter from "@/components/ErrorReporter";
@@ -31,19 +33,57 @@ const thmanyahDisplay = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ميثاق – MITHAQ | عقودك بثقة وسهولة",
-  description:
-    "أنشئ عقدك، عدّل البنود، أضف توقيعاً رقمياً، شارك رابطاً عاماً، واطبع PDF — كل ذلك من مكان واحد.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_BASE_URL || "https://miithaq.com"
   ),
+  title: {
+    default: "ميثاق – MITHAQ | عقودك بثقة وسهولة",
+    template: "%s",
+  },
+  description:
+    "أنشئ عقدك، عدّل البنود، أضف توقيعاً رقمياً، شارك رابطاً عاماً، واطبع PDF — كل ذلك من مكان واحد. نماذج عقود عربية جاهزة: إيجار، بيع، خدمات، عمل حر، شراكة، سرية، وتصميم.",
+  applicationName: "ميثاق",
+  authors: [{ name: "ميثاق", url: "https://miithaq.com" }],
+  creator: "ميثاق",
+  publisher: "ميثاق",
+  category: "business",
+  keywords: [
+    "عقود إلكترونية",
+    "نماذج عقود بالعربي",
+    "عقد إيجار",
+    "عقد بيع",
+    "عقد خدمات",
+    "عقد عمل حر",
+    "اتفاقية سرية",
+    "توقيع إلكتروني",
+    "ميثاق",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     title: "ميثاق — منصة العقود الذكية العربية",
-    description: "أنشئ العقود ووقّعها رقمياً وتحقق منها",
+    description:
+      "أنشئ العقود ووقّعها رقمياً وتحقق منها — قوالب عربية جاهزة وبصمة SHA-256 ونسخة PDF.",
     siteName: "ميثاق",
     locale: "ar_AR",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "ميثاق — منصة العقود الذكية العربية",
+    description:
+      "أنشئ العقود ووقّعها رقمياً وتحقق منها — قوالب عربية جاهزة وبصمة SHA-256 ونسخة PDF.",
+  },
+  formatDetection: { telephone: false, email: false, address: false },
 };
 
 export default function RootLayout({
@@ -51,13 +91,6 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl">
-      <head>
-        {/* Font Awesome — أيقونات الهوية الأسطورية */}
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-        />
-      </head>
       <body className={`${thmanyahSans.variable} ${thmanyahDisplay.variable}`}>
         {/* يمنع وميض الصفحة الفاتحة عند الاستيقاظ في الوضع الليلي */}
         <ThemeInit />

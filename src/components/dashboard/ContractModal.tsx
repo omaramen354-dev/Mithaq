@@ -34,6 +34,7 @@ import {
   clearGuestDraft,
   type GuestDraft,
 } from "@/lib/guest-draft";
+import { parseParty2Email } from "@/lib/contract-schema";
 import ClausePickerModal from "./ClausePickerModal";
 import LoginGateModal from "./LoginGateModal";
 import SaveSuccessModal from "./SaveSuccessModal";
@@ -102,6 +103,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
   const [signingMode, setSigningMode] = useState("send");
   const [party1, setParty1] = useState("");
   const [party2, setParty2] = useState("");
+  const [party2Email, setParty2Email] = useState("");
   const [subject, setSubject] = useState("");
   const [notes, setNotes] = useState("");
   const [clauses, setClauses] = useState<string[]>([]);
@@ -204,6 +206,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
     setSigningMode("send");
     setParty1("");
     setParty2("");
+    setParty2Email("");
     setSubject("");
     setNotes("");
     setClauses([]);
@@ -234,6 +237,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
     setSigningMode(d.signingMode === "quick" ? "quick" : "send");
     setParty1(d.party1 || "");
     setParty2(d.party2 || "");
+    setParty2Email(d.party2Email || "");
     setSubject(d.subject || "");
     setNotes(d.notes || "");
     setClauses(d.clauses || []);
@@ -336,6 +340,23 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
       window.removeEventListener("mithaq:open-contract-modal", onOpen);
       window.removeEventListener("mithaq:pick-type", onPick);
     };
+  }, []);
+
+  /* ===== فتح القالب مباشرة من روابط صفحات الأدلة: /?type=design =====
+     زر «أنشئ عقد تصميم» في /contracts/design يصل هنا بهذا المعامل،
+     فتُفتح نافذة الإنشاء بنوع العقد الصحيح وبنوده الافتراضية.
+     نمسح المعامل بعد الفتح حتى لا تعود النافذة عند تحديث الصفحة. */
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("type");
+    if (!t || !CONTRACT_TYPES[t]) return;
+    setType(t);
+    setClauses(DEFAULT_CLAUSES[t] ? [...DEFAULT_CLAUSES[t]] : []);
+    setOpen(true);
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + window.location.hash
+    );
   }, []);
 
   /* ===== استعادة مسودة الضيف عند أول تحميل (مثل NewContractForm) ===== */
@@ -515,6 +536,7 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
       signingMode,
       party1: party1.trim(),
       party2: party2.trim(),
+      party2Email: party2Email.trim(),
       amount: amountValue,
       city: city.trim(),
       country: countryCode,
@@ -529,6 +551,10 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
   function basicValidation(): string {
     if (!party1.trim()) return "أدخل اسم الطرف الأول أولاً.";
     if (!party2.trim()) return "أدخل اسم الطرف الثاني أولاً.";
+    /* بروتوكول الحجز المسبق — تحقق Zod من صيغة بريد الطرف الثاني
+       (إجباري في الإرسال عبر الرابط، اختياري في التوقيع السريع) */
+    const p2 = parseParty2Email(party2Email, { required: signingMode !== "quick" });
+    if (!p2.ok) return p2.message;
     return "";
   }
 
@@ -810,6 +836,31 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
                     value={party2}
                     onChange={(e) => setParty2(e.target.value)}
                   />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="mqParty2Email">
+                    <i className="fas fa-envelope" /> بريد الطرف الثاني{" "}
+                    <span className="optional">
+                      {signingMode === "quick" ? "(اختياري)" : "(محجوز للتوقيع)"}
+                    </span>
+                  </label>
+                  <input
+                    id="mqParty2Email"
+                    type="email"
+                    className="form-input"
+                    dir="ltr"
+                    style={{ textAlign: "left" }}
+                    placeholder="example@gmail.com"
+                    required={signingMode !== "quick"}
+                    maxLength={160}
+                    value={party2Email}
+                    onChange={(e) => setParty2Email(e.target.value)}
+                  />
+                  <small className="mq-hint">
+                    <i className="fas fa-lock" /> {signingMode === "quick"
+                      ? "اختياري في التوقيع السريع — إن أدخلته يُحجز بحساب التوقيع."
+                      : "يُشترط دخول الطرف الثاني بنفس الحساب لتوقيع العقد — بروتوكول حجز البريد المسبق."}
+                  </small>
                 </div>
               </div>
 

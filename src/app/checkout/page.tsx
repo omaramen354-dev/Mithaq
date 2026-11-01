@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "إنهاء الدفع — ميثاق",
   description: "أكمل عملية الشراء عبر شام كاش وفعّل باقتك فوراً.",
+  robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";

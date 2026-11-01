@@ -193,12 +193,35 @@ export function Features() {
   );
 }
 
+/* أدلة أنواع العقود — روابط داخلية دائمة (بدون تحميل محتوى الأدلة للعميل) */
+const GUIDE_LINKS: { slug: string; name: string }[] = [
+  { slug: "lease", name: "عقد إيجار" },
+  { slug: "sale", name: "بيع وشراء" },
+  { slug: "services", name: "عقد خدمات" },
+  { slug: "freelance", name: "عمل حر" },
+  { slug: "pledge", name: "تعهد وإقرار" },
+  { slug: "supply", name: "عقد توريد" },
+  { slug: "partnership", name: "اتفاق شراكة" },
+  { slug: "nda", name: "اتفاقية سرية" },
+  { slug: "lease-commercial", name: "إيجار تجاري" },
+  { slug: "design", name: "تصميم وبرمجة" },
+  { slug: "rent-furnished", name: "إيجار مفروش" },
+];
+
 export function MithaqFooter() {
   return (
     <footer className="footer">
       <div>
         <span className="gold">مِــيــثَــاق</span> — منظومة العقود والتوثيق
         الإلكتروني
+      </div>
+      <div className="footer-guides">
+        <span>أدلة العقود:</span>
+        {GUIDE_LINKS.map((g) => (
+          <a key={g.slug} href={`/contracts/${g.slug}`}>
+            {g.name}
+          </a>
+        ))}
       </div>
       <div className="footer-links">
         <a href="/privacy">سياسة الخصوصية</a>

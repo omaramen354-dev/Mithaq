@@ -2,6 +2,16 @@
 
 type TgResult = { ok: boolean; description?: string };
 
+/** تهريب HTML — أسماء الأطراف والموقّعين يكتبها المستخدم، ولا يجوز
+    أن تُفسَّر كوسوم داخل رسالة تيليجرام (parse_mode: HTML). */
+function esc(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export function telegramConfigured(): boolean {
   return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
 }
@@ -41,34 +51,43 @@ export async function notifyContractEvent(
   actor?: { name?: string; party?: string }
 ): Promise<TgResult> {
   const now = new Date().toLocaleString("ar-SY");
+  const typeName = esc(info.typeName);
+  const ref = esc(info.ref);
+  const party1 = esc(info.party1Name);
+  const party2 = esc(info.party2Name);
+  const actorName = esc(actor?.name || "");
+  const actorParty = esc(actor?.party || "");
+  const shareUrl = esc(info.shareUrl);
+  const verifyUrl = esc(info.verifyUrl);
+
   let text: string;
   if (kind === "opened") {
     text = [
-      "🔔 *العميل فتح العقد الآن*",
+      "🔔 <b>العميل فتح العقد الآن</b>",
       "",
-      `📄 عقد: ${info.typeName} — Ref: ${info.ref}`,
-      `👤 الطرف الأول: ${info.party1Name}`,
-      `👥 الطرف الثاني: ${actor?.name || info.party2Name}`,
+      `📄 عقد: ${typeName} — Ref: ${ref}`,
+      `👤 الطرف الأول: ${party1}`,
+      `👥 الطرف الثاني: ${actorName || party2}`,
       `🕒 ${now}`,
       "",
-      `🔗 ${info.shareUrl}`,
+      `🔗 ${shareUrl}`,
     ].join("\n");
   } else if (kind === "signed") {
     text = [
-      "✅ *تم اكتمال توقيع العقد بنجاح*",
+      "✅ <b>تم اكتمال توقيع العقد بنجاح</b>",
       "",
-      `📄 عقد: ${info.typeName} — Ref: ${info.ref}`,
-      `✍️ وقّع: ${actor?.name || "الطرفان"} (${actor?.party || "—"})`,
+      `📄 عقد: ${typeName} — Ref: ${ref}`,
+      `✍️ وقّع: ${actorName || "الطرفان"} (${actorParty || "—"})`,
       `🕒 ${now}`,
       "",
-      `🔗 ${info.verifyUrl}`,
+      `🔗 ${verifyUrl}`,
     ].join("\n");
   } else {
     text = [
-      "✍️ *توقيع جزئي على العقد*",
+      "✍️ <b>توقيع جزئي على العقد</b>",
       "",
-      `📄 عقد: ${info.typeName} — Ref: ${info.ref}`,
-      `✍️ وقّع: ${actor?.name || "—"} (${actor?.party || "—"})`,
+      `📄 عقد: ${typeName} — Ref: ${ref}`,
+      `✍️ وقّع: ${actorName || "—"} (${actorParty || "—"})`,
       "⏳ بانتظار توقيع الطرف الآخر",
       `🕒 ${now}`,
     ].join("\n");

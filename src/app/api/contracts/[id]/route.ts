@@ -3,7 +3,15 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { contracts } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
-import { normalize, buildContractContent } from "@/lib/contract-text";
+import {
+  buildContractContent,
+  clampText,
+  clampClauses,
+  isBodyTooLarge,
+  CONTRACT_LIMITS,
+} from "@/lib/contract-text";
+import { CONTRACT_TYPES } from "@/lib/contract-types";
+import { parseParty2Email } from "@/lib/contract-schema";
 import { contractFingerprint } from "@/lib/contract-hash";
 import { decodeShareToken } from "@/lib/share-token";
 
@@ -58,6 +66,12 @@ export async function PUT(
       { status: 409 }
     );
 
+  if (isBodyTooLarge(req))
+    return NextResponse.json(
+      { ok: false, message: "حجم الطلب كبير جداً — اختصر النصوص والبنود." },
+      { status: 413 }
+    );
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();
@@ -65,23 +79,68 @@ export async function PUT(
     return NextResponse.json({ ok: false, message: "صيغة JSON غير صحيحة." }, { status: 400 });
   }
 
+  /* نوع العقد يجب أن يبقى ضمن الأنواع المعروفة */
+  const nextType =
+    typeof body.type === "string" && CONTRACT_TYPES[body.type]
+      ? body.type
+      : existing.type;
+
+  const nextSigningMode =
+    body.signingMode === "quick" || body.signingMode === "send"
+      ? body.signingMode
+      : existing.signingMode;
+
+  /* وضع الإرسال عبر الرابط يتطلب بريداً محجوزاً — وإلا صار أي حساب
+     Google قادراً على التوقيع كطرف ثانٍ. */
+  const emailResult = parseParty2Email(
+    body.party2Email !== undefined ? body.party2Email : existing.party2Email,
+    { required: nextSigningMode !== "quick" }
+  );
+  if (!emailResult.ok)
+    return NextResponse.json(
+      { ok: false, message: emailResult.message },
+      { status: 422 }
+    );
+
   const merged = {
-    type: (body.type as string) || existing.type,
-    party1Name: normalize(body.party1) || existing.party1Name,
-    party2Name: normalize(body.party2) || existing.party2Name,
-    amount: body.amount !== undefined ? normalize(body.amount) : existing.amount,
-    city: body.city !== undefined ? normalize(body.city) : existing.city,
-    country: body.country !== undefined ? normalize(body.country) : existing.country,
-    subject: body.subject !== undefined ? normalize(body.subject) : existing.subject,
-    duration: body.duration !== undefined ? normalize(body.duration) : existing.duration,
+    type: nextType,
+    party1Name:
+      clampText(body.party1, CONTRACT_LIMITS.partyName) || existing.party1Name,
+    party2Name:
+      clampText(body.party2, CONTRACT_LIMITS.partyName) || existing.party2Name,
+    party2Email: emailResult.email || null,
+    amount:
+      body.amount !== undefined
+        ? clampText(body.amount, CONTRACT_LIMITS.amount)
+        : existing.amount,
+    city:
+      body.city !== undefined
+        ? clampText(body.city, CONTRACT_LIMITS.city)
+        : existing.city,
+    country:
+      body.country !== undefined
+        ? clampText(body.country, CONTRACT_LIMITS.country)
+        : existing.country,
+    subject:
+      body.subject !== undefined
+        ? clampText(body.subject, CONTRACT_LIMITS.subject)
+        : existing.subject,
+    duration:
+      body.duration !== undefined
+        ? clampText(body.duration, CONTRACT_LIMITS.duration)
+        : existing.duration,
     paymentMethod:
       body.paymentMethod !== undefined
-        ? normalize(body.paymentMethod)
+        ? clampText(body.paymentMethod, CONTRACT_LIMITS.paymentMethod)
         : existing.paymentMethod,
-    notes: body.notes !== undefined ? normalize(body.notes) : existing.notes,
-    clauses: Array.isArray(body.clauses)
-      ? (body.clauses as string[]).map(normalize).filter(Boolean)
-      : existing.clauses,
+    notes:
+      body.notes !== undefined
+        ? clampText(body.notes, CONTRACT_LIMITS.notes)
+        : existing.notes,
+    clauses:
+      body.clauses !== undefined
+        ? clampClauses(body.clauses)
+        : existing.clauses,
   };
 
   const content = buildContractContent({
@@ -110,10 +169,7 @@ export async function PUT(
     .update(contracts)
     .set({
       ...merged,
-      signingMode:
-        body.signingMode === "quick" || body.signingMode === "send"
-          ? body.signingMode
-          : existing.signingMode,
+      signingMode: nextSigningMode,
       content,
       contentHash,
       updatedAt: new Date(),

@@ -3,9 +3,16 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { contracts } from "@/db/schema";
 import { and, desc, eq, isNull } from "drizzle-orm";
-import { normalize, buildContractContent } from "@/lib/contract-text";
+import {
+  buildContractContent,
+  clampText,
+  clampClauses,
+  isBodyTooLarge,
+  CONTRACT_LIMITS,
+} from "@/lib/contract-text";
 import { CONTRACT_TYPES } from "@/lib/contract-types";
 import { shareUrlFor } from "@/lib/fingerprint";
+import { parseParty2Email } from "@/lib/contract-schema";
 import { contractFingerprint } from "@/lib/contract-hash";
 import { randomUUID } from "crypto";
 
@@ -25,6 +32,7 @@ type RestoreBody = {
   type?: string;
   party1?: string;
   party2?: string;
+  party2Email?: string;
   amount?: string;
   city?: string;
   country?: string;
@@ -42,6 +50,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
   }
 
+  if (isBodyTooLarge(req))
+    return NextResponse.json(
+      { ok: false, message: "حجم المسودة كبير جداً — اختصر النصوص والبنود." },
+      { status: 413 }
+    );
+
   let body: RestoreBody;
   try {
     body = (await req.json()) as RestoreBody;
@@ -51,13 +65,21 @@ export async function POST(req: Request) {
 
   if (!body.type || !CONTRACT_TYPES[body.type])
     return NextResponse.json({ ok: false, message: "نوع العقد غير صحيح." }, { status: 422 });
-  if (!normalize(body.party1) || !normalize(body.party2))
+  if (
+    !clampText(body.party1, CONTRACT_LIMITS.partyName) ||
+    !clampText(body.party2, CONTRACT_LIMITS.partyName)
+  )
     return NextResponse.json({ ok: false, message: "بيانات الأطراف ناقصة." }, { status: 422 });
 
-  const clauses = Array.isArray(body.clauses)
-    ? body.clauses.map(normalize).filter(Boolean)
-    : [];
+  const clauses = clampClauses(body.clauses);
   const now = new Date();
+  /* حجز البريد: إجباري في وضع الإرسال عبر الرابط — اختياري في السريع */
+  const parsedParty2Email = parseParty2Email(body.party2Email, {
+    required: body.signingMode !== "quick",
+  });
+  if (!parsedParty2Email.ok) {
+    return NextResponse.json({ ok: false, message: parsedParty2Email.message }, { status: 422 });
+  }
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   /* البحث عن مسودة ضيف مطابقة أنشئت خلال آخر 24 ساعة */
@@ -67,8 +89,8 @@ export async function POST(req: Request) {
     .where(
       and(
         isNull(contracts.ownerId),
-        eq(contracts.party1Name, normalize(body.party1)),
-        eq(contracts.party2Name, normalize(body.party2)),
+        eq(contracts.party1Name, clampText(body.party1, CONTRACT_LIMITS.partyName)),
+        eq(contracts.party2Name, clampText(body.party2, CONTRACT_LIMITS.partyName)),
         eq(contracts.type, body.type)
       )
     )
@@ -84,14 +106,15 @@ export async function POST(req: Request) {
       .update(contracts)
       .set({
         ownerId: session.user.dbId,
-        amount: normalize(body.amount),
-        city: normalize(body.city),
-        country: normalize(body.country),
-        subject: normalize(body.subject),
-        duration: normalize(body.duration),
-        paymentMethod: normalize(body.paymentMethod),
-        notes: normalize(body.notes),
+        amount: clampText(body.amount, CONTRACT_LIMITS.amount),
+        city: clampText(body.city, CONTRACT_LIMITS.city),
+        country: clampText(body.country, CONTRACT_LIMITS.country),
+        subject: clampText(body.subject, CONTRACT_LIMITS.subject),
+        duration: clampText(body.duration, CONTRACT_LIMITS.duration),
+        paymentMethod: clampText(body.paymentMethod, CONTRACT_LIMITS.paymentMethod),
+        notes: clampText(body.notes, CONTRACT_LIMITS.notes),
         clauses,
+        ...(parsedParty2Email.email ? { party2Email: parsedParty2Email.email } : {}),
         signingMode: body.signingMode === "quick" ? "quick" : "send",
         updatedAt: now,
       })
@@ -108,15 +131,17 @@ export async function POST(req: Request) {
     type: body.type,
     status: "draft" as const,
     signingMode: body.signingMode === "quick" ? "quick" : "send",
-    party1Name: normalize(body.party1),
-    party2Name: normalize(body.party2),
-    amount: normalize(body.amount),
-    city: normalize(body.city),
-    country: normalize(body.country),
-    subject: normalize(body.subject),
-    duration: normalize(body.duration),
-    paymentMethod: normalize(body.paymentMethod),
-    notes: normalize(body.notes),
+    party1Name: clampText(body.party1, CONTRACT_LIMITS.partyName),
+    party2Name: clampText(body.party2, CONTRACT_LIMITS.partyName),
+    /* حجز بريد الطرف الثاني إن وُجد صالحًا في المسودة */
+    party2Email: parsedParty2Email.email || null,
+    amount: clampText(body.amount, CONTRACT_LIMITS.amount),
+    city: clampText(body.city, CONTRACT_LIMITS.city),
+    country: clampText(body.country, CONTRACT_LIMITS.country),
+    subject: clampText(body.subject, CONTRACT_LIMITS.subject),
+    duration: clampText(body.duration, CONTRACT_LIMITS.duration),
+    paymentMethod: clampText(body.paymentMethod, CONTRACT_LIMITS.paymentMethod),
+    notes: clampText(body.notes, CONTRACT_LIMITS.notes),
     clauses,
     content: "",
     contentHash: "",

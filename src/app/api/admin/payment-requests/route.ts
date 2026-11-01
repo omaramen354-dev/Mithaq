@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { paymentRequests, users } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -16,11 +16,7 @@ export const runtime = "nodejs";
    لا يوجد أي مسار يفعّل الباقة مباشرة من الواجهة العامة.
    ============================================================ */
 
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.dbId || !session.user.isAdmin) return null;
-  return session;
-}
+const requireAdmin = requireAdminSession;
 
 export async function GET() {
   const session = await requireAdmin();

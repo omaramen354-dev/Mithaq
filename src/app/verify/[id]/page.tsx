@@ -1,17 +1,23 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/db";
-import { contracts } from "@/db/schema";
+import { contracts, signatureEvents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
-import { arDate } from "@/lib/format";
+import { arDate, arDateTime, maskEmail } from "@/lib/format";
 import { isOwnerSuspended } from "@/lib/mithaq-guard";
 import SuspendedScreen from "@/components/SuspendedScreen";
 import Logo from "@/components/Logo";
 import { decodeShareToken, encodeShareToken } from "@/lib/share-token";
 import { contractFingerprint } from "@/lib/contract-hash";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "التحقق من العقد — ميثاق",
+  robots: { index: false, follow: false },
+};
 
 /* ============================================================
    /verify/[id] — صفحة التحقق العامة من بصمة العقد (SHA-256)
@@ -40,6 +46,8 @@ export default async function VerifyPage({ params }: Props) {
       createdAt: contracts.createdAt,
       sig1SignedAt: contracts.sig1SignedAt,
       sig2SignedAt: contracts.sig2SignedAt,
+      signingMode: contracts.signingMode,
+      party2Email: contracts.party2Email,
       content: contracts.content,
       clauses: contracts.clauses,
       contentHash: contracts.contentHash,
@@ -50,6 +58,18 @@ export default async function VerifyPage({ params }: Props) {
 
   const c = rows[0];
   if (!c) notFound();
+
+  /* سجل الإثبات: كل توقيع مع حسابه ووقته — البريد مموّه للعموم */
+  const events = await db
+    .select()
+    .from(signatureEvents)
+    .where(eq(signatureEvents.contractId, c.id))
+    .orderBy(signatureEvents.signedAt);
+
+  const signingModeLabel =
+    c.signingMode === "quick"
+      ? "توقيع سريع على نفس الجهاز"
+      : "إرسال للطرف الثاني عبر الرابط + دخول بحساب Google";
 
   /* فحص الحجب — صاحب العقد مجمّد؟ نُحجب كل شيء فوراً قبل أي حساب */
   const guard = await isOwnerSuspended(c.id);
@@ -153,8 +173,19 @@ export default async function VerifyPage({ params }: Props) {
                       ? "توقيع جزئي"
                       : "قيد التوقيع",
                 ],
+                ["وسيلة التوقيع المعتمدة", signingModeLabel],
+                [
+                  "البريد المحجوز للطرف الثاني",
+                  c.party2Email ? (
+                    <bdi dir="ltr" style={{ fontWeight: 700 }}>
+                      {maskEmail(c.party2Email)}
+                    </bdi>
+                  ) : (
+                    "غير محجوز"
+                  ),
+                ],
               ].map(([k, v]) => (
-                <tr key={k} style={{ borderBottom: "1px solid var(--line)" }}>
+                <tr key={String(k)} style={{ borderBottom: "1px solid var(--line)" }}>
                   <th
                     style={{
                       textAlign: "right",
@@ -171,6 +202,75 @@ export default async function VerifyPage({ params }: Props) {
               ))}
             </tbody>
           </table>
+
+          {/* ===== سجل التوقيع (سجل الإثبات) ===== */}
+          {events.length > 0 && (
+            <div style={{ marginTop: 18 }}>
+              <small
+                style={{
+                  display: "block",
+                  color: "var(--muted)",
+                  fontWeight: 800,
+                  fontSize: 11,
+                  marginBottom: 6,
+                }}
+              >
+                <i className="fas fa-clipboard-check" /> سجل التوقيع — لكل توقيع الحساب والوقت
+                (البريد مموّه لحماية الخصوصية)
+              </small>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: 12,
+                  border: "1px solid var(--line)",
+                  borderRadius: 10,
+                  overflow: "hidden",
+                }}
+              >
+                <thead>
+                  <tr style={{ background: "#f7f5ec" }}>
+                    {['الطرف', 'الاسم المُدوَّن', 'الحساب الموثّق', 'وقت التوقيع'].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          padding: "7px 8px",
+                          textAlign: "right",
+                          fontSize: 10,
+                          color: "var(--muted)",
+                          borderBottom: "1px solid var(--line)",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.map((ev) => (
+                    <tr key={ev.id} style={{ borderBottom: "1px solid var(--line)" }}>
+                      <td style={{ padding: "7px 8px", fontWeight: 700 }}>
+                        {ev.party === "party1" ? "الطرف الأول" : "الطرف الثاني"}
+                      </td>
+                      <td style={{ padding: "7px 8px", fontWeight: 700 }}>{ev.signerName}</td>
+                      <td style={{ padding: "7px 8px" }}>
+                        {ev.signerEmail ? (
+                          <bdi dir="ltr" style={{ fontWeight: 700 }}>
+                            {maskEmail(ev.signerEmail)}
+                          </bdi>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td style={{ padding: "7px 8px", fontWeight: 700 }}>
+                        {arDateTime(ev.signedAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           <div
             style={{

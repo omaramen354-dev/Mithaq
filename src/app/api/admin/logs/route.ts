@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { activityLogs } from "@/db/schema";
 import { desc, eq, and } from "drizzle-orm";
@@ -13,11 +13,7 @@ export const dynamic = "force-dynamic";
    يعيد الأحدث أولاً
    ============================================================ */
 
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.dbId || !session.user.isAdmin) return null;
-  return session;
-}
+const requireAdmin = requireAdminSession;
 
 const ENTITIES = ["contract", "user", "payment", "auth", "system"] as const;
 

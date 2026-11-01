@@ -941,6 +941,16 @@ h1, h2, h3, h4, h5, .btn {
   line-height: 2;
 }
 .footer .gold { color: var(--gold); font-weight: 800; }
+.footer-guides {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 4px 12px; max-width: 760px; margin: 8px auto 6px;
+  font-size: 11.5px;
+}
+.footer-guides > span { color: rgba(244, 241, 225, 0.55); font-weight: 700; }
+.footer-guides a {
+  color: rgba(244, 241, 225, 0.8); text-decoration: none; font-weight: 700;
+}
+.footer-guides a:hover { color: var(--gold-2); }
 .footer-links {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   margin: 4px 0;
@@ -1930,6 +1940,8 @@ h1, h2, h3, h4, h5, .btn {
   border-bottom: 1px dashed var(--line);
 }
 .admin-row:last-child { border-bottom: none; }
+a.admin-row { text-decoration: none; color: inherit; border-radius: 10px; transition: background 0.18s ease; }
+a.admin-row:hover { background: rgba(29, 74, 62, 0.06); }
 .admin-row-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .admin-row-title { font-size: 14px; font-weight: 800; color: var(--text); }
 .admin-row-parties { font-size: 12px; color: var(--text-2); font-weight: 600; }
@@ -3599,3 +3611,217 @@ select.mq-select:focus {
 .signpad-login .signpad-title i { color: var(--gold-dark); }
 .signpad-head b b { color: var(--green); }
 .signpad-head b { line-height: 1.8; }
+
+/* ===== بطاقة التحذير الحمراء: الحساب غير مخول للتوقيع ===== */
+.signpad-danger {
+  border-color: rgba(185, 28, 28, 0.45) !important;
+  background: linear-gradient(180deg, #fdecec, #fff7f7) !important;
+  box-shadow: 0 14px 32px -22px rgba(185, 28, 28, 0.55);
+}
+.signpad-danger-head { display: flex; gap: 12px; align-items: flex-start; }
+.signpad-danger-ico {
+  flex: 0 0 auto;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(185, 28, 28, 0.12);
+  border: 1.5px solid rgba(185, 28, 28, 0.4);
+  color: #b91c1c; font-size: 17px;
+}
+.signpad-danger-head b {
+  display: block; font-size: 15px; font-weight: 900; color: #b91c1c;
+}
+.signpad-danger-head p {
+  margin: 4px 0 0; font-size: 12.5px; font-weight: 600;
+  color: #7f1d1d; line-height: 1.8;
+}
+.signpad-danger-head bdi {
+  direction: ltr; unicode-bidi: embed;
+  background: rgba(185, 28, 28, 0.08);
+  border: 1px solid rgba(185, 28, 28, 0.25);
+  border-radius: 7px; padding: 1px 6px;
+  font-weight: 800;
+}
+@media (max-width: 640px) {
+  .signpad-danger-head { flex-direction: column; gap: 8px; }
+}
+
+/* ===== بيان وسيلة التوقيع في ورقة العقد ===== */
+.sheet-signing-mode {
+  margin: 14px 0 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--line);
+  background: #f7f5ec;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.sheet-signing-mode i { color: var(--gold); margin-left: 6px; }
+.sheet-signing-mode b { color: #0e5c46; margin: 0 4px; }
+
+/* ============================================================
+   صفحات أدلة العقود — /contracts و /contracts/[slug]
+   صفحات هبوط مستقلة لكل نوع عقد، بهوية ميثاق الزمردية
+   ============================================================ */
+.guide-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+.guide-top {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(7, 31, 26, 0.97);
+  border-bottom: 1px solid rgba(212, 168, 67, 0.32);
+}
+.guide-top-inner {
+  max-width: 1100px; margin: 0 auto; padding: 10px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap;
+}
+.guide-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.guide-brand img { height: 44px; width: auto; display: block; }
+.guide-brand b {
+  display: block; font-size: 18px; line-height: 1.2;
+  letter-spacing: 1px; color: var(--gold-2);
+}
+.guide-brand small {
+  display: block; font-size: 11px; font-weight: 700;
+  color: rgba(255, 255, 255, 0.68);
+}
+.guide-nav { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.guide-nav a:not(.btn) {
+  color: rgba(255, 255, 255, 0.86); text-decoration: none;
+  font-size: 13px; font-weight: 700;
+}
+.guide-nav a:not(.btn):hover { color: var(--gold-2); }
+.guide-hero {
+  position: relative; overflow: hidden; color: #fff;
+  background: linear-gradient(145deg, #071f1a 0%, #1d4a3e 55%, #23604f 100%);
+  padding: 52px 20px 58px;
+}
+.guide-hero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Cg fill='none' stroke='%23D4A843' stroke-width='1'%3E%3Cpolygon points='45,3 84,25 84,65 45,87 6,65 6,25'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 90px 90px;
+}
+.guide-hero-inner { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; }
+.guide-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 13px; border-radius: 999px;
+  border: 1px solid rgba(212, 168, 67, 0.5);
+  color: var(--gold-2); font-size: 11.5px; font-weight: 800;
+}
+.guide-hero h1 {
+  font-size: clamp(25px, 4vw, 41px); line-height: 1.38;
+  margin: 16px 0 12px; font-weight: 900; max-width: 860px;
+}
+.guide-lead {
+  font-size: 15.5px; line-height: 1.95; font-weight: 600;
+  color: rgba(255, 255, 255, 0.83); max-width: 780px; margin: 0 0 22px;
+}
+.guide-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.guide-actions .btn { text-decoration: none; }
+.guide-actions .guide-ghost {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 18px; border-radius: 10px; text-decoration: none;
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  color: #fff; font-weight: 800; font-size: 13px;
+}
+.guide-actions .guide-ghost:hover { border-color: var(--gold-2); color: var(--gold-2); }
+.guide-chips {
+  list-style: none; display: flex; flex-wrap: wrap;
+  gap: 8px; padding: 0; margin: 22px 0 0;
+}
+.guide-chips li {
+  font-size: 11.5px; font-weight: 700; padding: 5px 11px;
+  border-radius: 999px; color: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.guide-body { flex: 1; width: 100%; max-width: 980px; margin: 0 auto; padding: 38px 20px 24px; }
+.guide-intro p { font-size: 14.5px; line-height: 2; color: var(--ink); margin-bottom: 14px; }
+.guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; margin: 26px 0; }
+.guide-card {
+  background: var(--card-bg); border: 1.5px solid var(--line);
+  border-radius: 18px; padding: 20px 22px; box-shadow: var(--shadow-sm);
+}
+.guide-card h2, .guide-section-title {
+  font-size: 17px; font-weight: 900; color: var(--green-2);
+  margin-bottom: 12px; line-height: 1.6;
+}
+.guide-card h2 i, .guide-section-title i { color: var(--gold); margin-inline-end: 6px; }
+.guide-list { padding-inline-start: 18px; margin: 0; }
+.guide-list li { font-size: 13.5px; line-height: 1.95; color: var(--ink); margin-bottom: 7px; }
+.guide-list li::marker { color: var(--gold); font-weight: 900; }
+.guide-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 10px 0 30px; }
+.guide-step {
+  background: var(--card-bg); border: 1.5px solid var(--line);
+  border-radius: 16px; padding: 18px; position: relative;
+}
+.guide-step .n {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: grid; place-items: center; margin-bottom: 9px;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: var(--gold-2); font-size: 13px; font-weight: 900;
+}
+.guide-step b { display: block; font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+.guide-step p { font-size: 12.5px; line-height: 1.9; color: var(--text-2); margin: 0; }
+.guide-faq { margin: 10px 0 30px; }
+.guide-faq details {
+  background: var(--card-bg); border: 1.5px solid var(--line);
+  border-radius: 14px; padding: 13px 16px; margin-bottom: 10px;
+}
+.guide-faq summary {
+  cursor: pointer; font-size: 13.5px; font-weight: 800;
+  color: var(--ink); list-style: none;
+}
+.guide-faq summary::-webkit-details-marker { display: none; }
+.guide-faq summary::before {
+  content: "+"; display: inline-block; width: 20px;
+  color: var(--gold-dark); font-weight: 900;
+}
+.guide-faq details[open] summary::before { content: "−"; }
+.guide-faq p { font-size: 13px; line-height: 2; color: var(--text-2); margin: 8px 0 0; }
+.guide-related { display: flex; flex-wrap: wrap; gap: 9px; margin: 6px 0 24px; }
+.guide-related a {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: 999px; text-decoration: none;
+  background: var(--card-bg); border: 1.5px solid var(--line);
+  color: var(--green-2); font-size: 12.5px; font-weight: 800;
+}
+.guide-related a:hover { border-color: var(--gold); color: var(--gold-dark); }
+.guide-cta-band {
+  margin: 8px 0 6px; padding: 22px 24px; border-radius: 20px;
+  background: linear-gradient(135deg, #071f1a, #1d4a3e); color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap;
+}
+.guide-cta-band b { display: block; font-size: 17px; margin-bottom: 4px; }
+.guide-cta-band span { font-size: 12.5px; color: rgba(255, 255, 255, 0.78); }
+.guide-cta-band .btn { text-decoration: none; }
+.guide-hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; margin: 26px 0; }
+.guide-hub-card {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--card-bg); border: 1.5px solid var(--line);
+  border-radius: 18px; padding: 18px 20px; text-decoration: none;
+  box-shadow: var(--shadow-sm); transition: transform 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.guide-hub-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+.guide-hub-card .ico {
+  flex: 0 0 auto; width: 44px; height: 44px; border-radius: 14px;
+  display: grid; place-items: center; font-size: 18px;
+  background: rgba(212, 168, 67, 0.14); color: var(--gold-dark);
+}
+.guide-hub-card b { display: block; font-size: 15px; color: var(--ink); margin-bottom: 3px; }
+.guide-hub-card p { font-size: 12.5px; line-height: 1.85; color: var(--text-2); margin: 0; }
+.guide-foot { background: #071f1a; color: rgba(255, 255, 255, 0.78); padding: 30px 20px; }
+.guide-foot-inner { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; font-size: 12px; }
+.guide-foot .gold { color: var(--gold-2); }
+.guide-foot-links { display: flex; flex-wrap: wrap; gap: 7px 16px; }
+.guide-foot-links a, .guide-foot-legal a { color: rgba(255, 255, 255, 0.75); text-decoration: none; font-weight: 700; }
+.guide-foot-links a:hover, .guide-foot-legal a:hover { color: var(--gold-2); }
+.guide-foot-legal { display: flex; gap: 9px; align-items: center; }
+@media (max-width: 640px) {
+  .guide-hero { padding: 36px 16px 42px; }
+  .guide-top-inner { padding: 9px 14px; }
+  .guide-nav { gap: 11px; }
+  .guide-nav .btn { padding: 8px 12px; font-size: 12px; }
+  .guide-body { padding: 26px 16px 18px; }
+}

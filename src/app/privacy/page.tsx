@@ -1,9 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OG_IMAGE } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "سياسة الخصوصية — ميثاق",
-  description: "كيف تجمع منصة ميثاق بياناتك وتحميها",
+  description:
+    "كيف تجمع منصة ميثاق بياناتك وتحميها: بيانات الحساب، محتوى العقود، سجل التوقيع، ولا بيع للبيانات.",
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: "سياسة الخصوصية — ميثاق",
+    description: "كيف تجمع منصة ميثاق بياناتك وتحميها.",
+    url: "/privacy",
+    siteName: "ميثاق",
+    locale: "ar_AR",
+    type: "article",
+    images: [OG_IMAGE],
+  },
 };
 
 /* ============================================================

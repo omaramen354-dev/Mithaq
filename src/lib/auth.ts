@@ -85,10 +85,9 @@ async function syncUser(profile: {
     return { dbId: updated[0].id, isAdmin: updated[0].isAdmin };
   }
 
-  /* أول مستخدم في قاعدة نظيفة يصبح مشرفاً تلقائياً (ما لم تُحدَّد ADMIN_EMAILS) */
-  const anyUser = await db.select({ id: users.id }).from(users).limit(1);
-  const firstUser = anyUser.length === 0 && admins.length === 0;
-
+  /* لا ترقية تلقائية لأول مستخدم: المشرفية تُمنح حصراً عبر
+     ADMIN_EMAILS (أو يدوياً في قاعدة البيانات). الترقية التلقائية
+     كانت تمنح أول من يسجّل في قاعدة فارغة سيطرة كاملة على المنصة. */
   const inserted = await db
     .insert(users)
     .values({
@@ -96,7 +95,7 @@ async function syncUser(profile: {
       email,
       name: profile.name || "مستخدم ميثاق",
       picture: profile.picture || "",
-      isAdmin: isAdminFlag || firstUser,
+      isAdmin: isAdminFlag,
     })
     .returning();
   return { dbId: inserted[0].id, isAdmin: inserted[0].isAdmin };

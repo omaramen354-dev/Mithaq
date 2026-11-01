@@ -64,7 +64,11 @@ export default function WelcomeBack(props: WelcomeData) {
       <div className="welcome-avatar">
         {props.picture ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={props.picture} alt="" referrerPolicy="no-referrer" />
+          <img
+            src={props.picture}
+            alt={`صورة ${props.name || "حساب ميثاق"}`}
+            referrerPolicy="no-referrer"
+          />
         ) : (
           <i className="fas fa-user" />
         )}

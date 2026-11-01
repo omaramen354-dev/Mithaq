@@ -12,6 +12,7 @@ import {
   clearGuestDraft,
   type GuestDraft,
 } from "@/lib/guest-draft";
+import { parseParty2Email } from "@/lib/contract-schema";
 import ClausePickerModal from "./ClausePickerModal";
 import LoginGateModal from "./LoginGateModal";
 import SaveSuccessModal from "./SaveSuccessModal";
@@ -51,6 +52,7 @@ export type FormState = {
   signingMode: string;
   party1: string;
   party2: string;
+  party2Email: string;
   amount: string;
   city: string;
   country: string;
@@ -65,6 +67,7 @@ const EMPTY_FORM: FormState = {
   signingMode: "send",
   party1: "",
   party2: "",
+  party2Email: "",
   amount: "",
   city: "",
   country: "",
@@ -80,6 +83,7 @@ function formFromDraft(d: GuestDraft): FormState {
     signingMode: d.signingMode || "send",
     party1: d.party1 || "",
     party2: d.party2 || "",
+    party2Email: d.party2Email || "",
     amount: d.amount || "",
     city: d.city || "",
     country: d.country || "",
@@ -214,6 +218,7 @@ export default function NewContractForm({
       signingMode: form.signingMode,
       party1: form.party1.trim(),
       party2: form.party2.trim(),
+      party2Email: form.party2Email.trim(),
       amount: form.amount.trim(),
       city: form.city.trim(),
       country: form.country.trim(),
@@ -228,6 +233,12 @@ export default function NewContractForm({
   function basicValidation(): string {
     if (!form.party1.trim()) return "أدخل اسم الطرف الأول أولاً.";
     if (!form.party2.trim()) return "أدخل اسم الطرف الثاني أولاً.";
+    /* حجز بريد الطرف الثاني — تحقق Zod صارم قبل الحفظ
+       (إجباري في وضع الإرسال عبر الرابط، اختياري في التوقيع السريع) */
+    const p2 = parseParty2Email(form.party2Email, {
+      required: form.signingMode !== "quick",
+    });
+    if (!p2.ok) return p2.message;
     return "";
   }
 
@@ -412,6 +423,28 @@ export default function NewContractForm({
                 onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
               />
+            </div>
+            <div>
+              <label style={label}>
+                بريد الطرف الثاني{form.signingMode === "quick" ? "" : " *"}
+              </label>
+              <input
+                type="email"
+                value={form.party2Email}
+                onChange={(e) => set("party2Email", e.target.value)}
+                maxLength={160}
+                placeholder="example@gmail.com"
+                required={form.signingMode !== "quick"}
+                dir="ltr"
+                style={{ ...input, textAlign: "left" }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--gold)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--line)")}
+              />
+              <small style={{ fontSize: 10.5, color: "var(--muted)", fontWeight: 700 }}>
+                {form.signingMode === "quick"
+                  ? "اختياري في التوقيع السريع — إن أدخلته يُحجز للتوقيع ولا يوقّع أحد غيره."
+                  : "يُحجز هذا الحساب للتوقيع — لا يوقّع أحد غيره."}
+              </small>
             </div>
           </div>
 

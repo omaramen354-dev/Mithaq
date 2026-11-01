@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { paymentRequests, transactions, users } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { findPlan, MONTH_DAYS } from "@/lib/plans";
 import { logEvent } from "@/lib/logger";
 
@@ -18,11 +18,7 @@ export const runtime = "nodejs";
    فقط، ولا يمكن لأي مسار عام أن يحول الحالة الموثقة ← مجمدة.
    ============================================================ */
 
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.dbId || !session.user.isAdmin) return null;
-  return session;
-}
+const requireAdmin = requireAdminSession;
 
 async function fetchTx(id: string) {
   const rows = await db
@@ -165,11 +161,19 @@ export async function POST(req: NextRequest) {
     const expires = plan.unit === "month" ? new Date(now.getTime() + MONTH_DAYS * 864e5) : null;
     const isOnce = plan.unit === "once";
 
+    /* نُحدّث طلبات الدفع المعلّقة لهذا المستخدم فقط — لا نلمس
+       الطلبات المرفوضة أو القديمة المدفوعة (كان التحديث سابقاً
+       يشمل كل صفوف المستخدم بلا استثناء). */
     await db.batch([
       db
         .update(paymentRequests)
         .set({ status: "paid", updatedAt: now })
-        .where(eq(paymentRequests.userId, tx.userId)),
+        .where(
+          and(
+            eq(paymentRequests.userId, tx.userId),
+            inArray(paymentRequests.status, ["pending", "manual_review"])
+          )
+        ),
       db
         .update(users)
         .set({

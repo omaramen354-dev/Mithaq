@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { transactions, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { findPlan, MONTH_DAYS } from "@/lib/plans";
 import { logEvent } from "@/lib/logger";
 
@@ -51,8 +51,33 @@ export async function POST(req: NextRequest) {
   }
 
   const plan = findPlan(planId);
-  if (!plan || plan.service) {
+  if (!plan || plan.service || plan.priceUsd <= 0) {
     return NextResponse.json({ ok: false, message: "الباقة غير موجودة أو غير صالحة." }, { status: 422 });
+  }
+
+  /* ===== حد إرسال يومي لكل مستخدم =====
+     التفعيل الفوري مقصود (لا بوابات دفع في سوريا) والتحقق يدوي
+     لاحقاً، لكن ذلك لا يمنع إغراق جدول المعاملات برقم وهمي بعد رقم.
+     ثلاثة طلبات في اليوم تكفي عملياً، وما بعدها يحتاج تواصل الدعم. */
+  const dayAgo = new Date(Date.now() - 864e5);
+  const recentRows = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.userId, session.user.dbId),
+        gte(transactions.createdAt, dayAgo)
+      )
+    );
+  if ((recentRows[0]?.n || 0) >= 3) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          "أرسلت 3 طلبات خلال آخر 24 ساعة — انتظر مراجعة الحوالات أو تواصل مع الدعم عبر واتساب.",
+      },
+      { status: 429 }
+    );
   }
 
   /* التحقق البسيط من صحة رقم العملية (أرقام فقط، 6-20 خانة) */
@@ -117,6 +142,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+
   await logEvent({
     action: "checkout_submitted",
     entity: "payment",
@@ -124,12 +152,19 @@ export async function POST(req: NextRequest) {
     actorId: session.user.dbId,
     actorName: session.user.name || "",
     actorEmail: session.user.email || "",
-    detail: `طلب شحن شام كاش رقم ${txNumber} — باقة ${plan.title} — تفعيل فوري تلقائي (unverified)`,
-    meta: { plan: plan.id, txRef: txNumber, amount: plan.priceUsd },
+    detail: `طلب شحن شام كاش رقم ${txNumber} — باقة ${plan.title} — تفعيل فوري بانتظار مراجعة الحوالة`,
+    meta: {
+      plan: plan.id,
+      txRef: txNumber,
+      amount: plan.priceUsd,
+      phone,
+      ip,
+      userAgent: (req.headers.get("user-agent") || "").slice(0, 200),
+    },
   });
 
   return NextResponse.json({
     ok: true,
-    message: `تم تفعيل باقة ${plan.title} فوراً — مزاياك الكاملة جاهزة الآن!`,
+    message: `تم تفعيل باقة ${plan.title} فوراً — مزاياك الكاملة جاهزة الآن. سيراجع الفريق الحوالة، وإذا لم تُطابق رقم العملية يُجمَّد الحساب.`,
   });
 }

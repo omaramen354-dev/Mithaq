@@ -15,8 +15,14 @@ import { shareUrlFor } from "@/lib/fingerprint";
 import { decodeShareToken } from "@/lib/share-token";
 import { requestBaseUrl } from "@/lib/base-url";
 import { auth } from "@/lib/auth";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "مشاركة العقد — ميثاق",
+  robots: { index: false, follow: false },
+};
 
 /* ============================================================
    /share/[id] — الصفحة العامة التي يفتحها الطرف الثاني من

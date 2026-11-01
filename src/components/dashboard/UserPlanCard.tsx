@@ -59,7 +59,11 @@ export default function UserPlanCard({
         <div className="upc-avatar">
           {userPicture ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={userPicture} alt="" referrerPolicy="no-referrer" />
+            <img
+              src={userPicture}
+              alt={`صورة ${userName || "مستخدم ميثاق"}`}
+              referrerPolicy="no-referrer"
+            />
           ) : (
             (userName || "م").trim().charAt(0) || "م"
           )}

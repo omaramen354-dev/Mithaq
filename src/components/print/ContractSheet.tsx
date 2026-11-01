@@ -130,6 +130,19 @@ export default function ContractSheet({
           الالتزام به كاملًا ودون تحفظ، ووقّعا عليه بإرادتهما الحرة.
         </p>
 
+        {/* ===== وسيلة التوقيع — بيان صريح لا لبس فيه ===== */}
+        <p className="sheet-signing-mode">
+          <i className="fas fa-fingerprint" /> وسيلة التوقيع المعتمدة في هذا العقد:
+          <b>
+            {contract.signingMode === "quick"
+              ? "توقيع سريع على نفس الجهاز أمام الطرفين"
+              : "إرسال للطرف الثاني عبر رابط خاص، وتوقيعه بحساب Google المحجوز مسبقاً (" +
+                (contract.party2Email || "غير محدَّد") +
+                ")"}
+          </b>
+          — وقد وُثّق كل توقيع بحساب المُوقِّع ووقته وبيانات جهازه في سجل الإثبات بالمنصة.
+        </p>
+
         {/* ===== التوقيعات ===== */}
         <div className="grid2 sheet-sign">
           <div className="box sig-box">

@@ -3,8 +3,12 @@ import { contractVerification } from "./fingerprint";
 
 /* رسالة المشاركة الرسمية عبر واتساب — اسم العقد + رابط التوقيع + مرجع التوثيق */
 
-export function whatsappLink(text: string): string {
-  return "https://wa.me/?text=" + encodeURIComponent(text);
+export function whatsappLink(text: string, phone?: string): string {
+  /* بلا رقم: يختار المستخدم جهة الاتصال (مناسب لمشاركة العقد).
+     مع رقم: تفتح محادثة الدعم مباشرة. */
+  const digits = String(phone || "").replace(/\D/g, "");
+  const target = digits ? digits : "";
+  return `https://wa.me/${target}?text=` + encodeURIComponent(text);
 }
 
 export function buildOfficialShareMessage(

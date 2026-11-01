@@ -26,10 +26,20 @@ export const authConfig = {
         return true;
       }
 
-      /* الرئيسية / وصفحة الأسعار /pricing عامة للضيوف والمسجلين —
-         الضيف يرى الباقات ويُطلب منه الدخول عند الاشتراك فقط */
-      if (request.nextUrl.pathname === "/") return true;
-      if (request.nextUrl.pathname === "/pricing") return true;
+      /* صفحات عامة للفهرسة والضيوف: الرئيسية، الأسعار، أدلة العقود،
+         والصفحتان القانونيتان. حمايتها كانت تُرجع جوجل إلى /login
+         فتمنع فهرستها — والوصول لبيانات المستخدم يبقى محمياً في الصفحات
+         والـ APIs الخاصة نفسها */
+      const path = request.nextUrl.pathname;
+      if (
+        path === "/" ||
+        path === "/pricing" ||
+        path === "/privacy" ||
+        path === "/terms" ||
+        path === "/contracts" ||
+        path.startsWith("/contracts/")
+      )
+        return true;
 
       /* بقية الصفحات التطبيقية (مثل /print) للمسجلين فقط —
          مع حفظ المسار المطلوب في callbackUrl للعودة بعد الدخول */

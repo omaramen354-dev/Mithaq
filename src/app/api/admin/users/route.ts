@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { users, contracts } from "@/db/schema";
 import { desc, ilike, or, sql, eq, and } from "drizzle-orm";
 import { findPlan } from "@/lib/plans";
+import { logEvent } from "@/lib/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,11 +20,7 @@ export const dynamic = "force-dynamic";
    القاعدة: session.user.isAdmin هو بوابة الحماية الوحيدة هنا.
    ============================================================ */
 
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.dbId || !session.user.isAdmin) return null;
-  return session;
-}
+const requireAdmin = requireAdminSession;
 
 export async function GET(req: NextRequest) {
   const session = await requireAdmin();
@@ -121,9 +118,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const actor = {
+    actorId: session.user.dbId!,
+    actorName: session.user.name || "",
+    actorEmail: session.user.email || "",
+  };
+
   if (body.action === "toggle_admin") {
     const next = !target.isAdmin;
     await db.update(users).set({ isAdmin: next }).where(eq(users.id, userId));
+    await logEvent({
+      action: next ? "admin_granted" : "admin_revoked",
+      entity: "user",
+      entityId: target.id,
+      ...actor,
+      detail: next
+        ? `ترقية ${target.name} (${target.email}) إلى مشرف`
+        : `إزالة صلاحية المشرف من ${target.name} (${target.email})`,
+      meta: { targetEmail: target.email },
+    });
     return NextResponse.json({
       ok: true,
       message: next ? `تمت ترقية ${target.name} إلى مشرف.` : `أُزيلت صلاحية المشرف من ${target.name}.`,
@@ -135,6 +148,14 @@ export async function POST(req: NextRequest) {
       .update(users)
       .set({ plan: "free", planExpiresAt: null })
       .where(eq(users.id, userId));
+    await logEvent({
+      action: "plan_changed",
+      entity: "user",
+      entityId: target.id,
+      ...actor,
+      detail: `إعادة ${target.name} إلى الباقة المجانية يدوياً`,
+      meta: { from: target.plan, to: "free" },
+    });
     return NextResponse.json({ ok: true, message: `أُعيد ${target.name} إلى الباقة المجانية.` });
   }
 
@@ -159,6 +180,15 @@ export async function POST(req: NextRequest) {
         isSingleUsed: plan.id === "single" ? false : undefined,
       })
       .where(eq(users.id, userId));
+
+    await logEvent({
+      action: "plan_changed",
+      entity: "user",
+      entityId: target.id,
+      ...actor,
+      detail: `تغيير باقة ${target.name} من ${target.plan} إلى ${plan.id} يدوياً`,
+      meta: { from: target.plan, to: plan.id, expires: expires?.toISOString() || null },
+    });
 
     return NextResponse.json({
       ok: true,
