@@ -199,7 +199,7 @@ export default function CheckoutClient({
             </div>
           )}
 
-          {/* الجائزة: المزايا تفعّل فوراً — رسالة تأكيد */}
+          {/* رسالة تأكيد التفعيل الفوري */}
           {done && (
             <div
               style={{
@@ -213,8 +213,8 @@ export default function CheckoutClient({
                 fontSize: 13,
               }}
             >
-              <i className="fas fa-circle-check" /> تم تفعيل باقتك فوراً — يتم
-              تلقائياً بعد نقلك ثوانٍ إلى لوحة التحكم...
+              <i className="fas fa-circle-check" /> تم تفعيل باقتك فوراً —
+              سيتم نقلك تلقائياً إلى لوحة التحكم خلال لحظات...
             </div>
           )}
 

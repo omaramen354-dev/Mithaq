@@ -4,7 +4,7 @@ import { contracts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { resolveClauses } from "@/lib/contract-text";
 import { contractTypeName } from "@/lib/contract-types";
-import { arDate } from "@/lib/format";
+import { arDate, maskEmail } from "@/lib/format";
 import { isOwnerSuspended } from "@/lib/mithaq-guard";
 import SuspendedScreen from "@/components/SuspendedScreen";
 import { contractVerification } from "@/lib/fingerprint";
@@ -214,9 +214,9 @@ export default async function SharePage({ params }: Props) {
               ) : (
                 <span style={{ color: "var(--muted)", fontSize: 12 }}>لم يوقع بعد</span>
               )}
-              {contract.party2Email ? (
+              {contract.sig2SignedAt && contract.party2Email ? (
                 <small style={{ display: "block", color: "var(--muted)", fontSize: 10 }}>
-                  وُقّع من حساب Google: {contract.party2Email}
+                  وُقّع من حساب Google: {maskEmail(contract.party2Email)}
                 </small>
               ) : null}
             </div>
@@ -250,7 +250,7 @@ export default async function SharePage({ params }: Props) {
         viewerEmail={viewerEmail}
         isOwnerViewer={isOwnerViewer}
         party2Mismatch={party2Mismatch}
-        boundParty2Email={boundParty2Email}
+        boundParty2Email={boundParty2Email ? maskEmail(boundParty2Email) : null}
       />
     </main>
   );

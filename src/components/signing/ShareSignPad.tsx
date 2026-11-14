@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SignaturePad, { type SignaturePadHandle } from "./SignaturePad";
+import { maskEmail } from "@/lib/format";
 
 /* ============================================================
    ShareSignPad — لوحة توقيع الطرف الثاني داخل صفحة /share/[id]
@@ -141,6 +142,11 @@ export default function ShareSignPad({
   /* ===== الحساب الحالي غير مخول — بطاقة تحذير حمراء + تبديل الحساب ===== */
   if (party2Mismatch) {
     const cb = encodeURIComponent(`/share/${shareToken}`);
+    const maskedBound = boundParty2Email
+      ? boundParty2Email.includes("*")
+        ? boundParty2Email
+        : maskEmail(boundParty2Email)
+      : "الطرف الثاني";
     return (
       <section className="card signpad-card signpad-danger">
         <div className="signpad-danger-head">
@@ -150,7 +156,7 @@ export default function ShareSignPad({
           <div>
             <b>الحساب الحالي غير مخول لتوقيع هذا العقد</b>
             <p>
-              هذا العقد محجوز للتوقيع بحساب <bdi>{boundParty2Email || "الطرف الثاني"}</bdi>{" "}
+              هذا العقد محجوز للتوقيع بحساب <bdi>{maskedBound}</bdi>{" "}
               — حسابك الحالي <bdi>{viewerEmail || "غير معروف"}</bdi> لا يطابق
               البريد المحجوز، لذلك أُخفيت لوحة التوقيع.
             </p>
@@ -169,7 +175,7 @@ export default function ShareSignPad({
         </div>
         <p className="sigpad-hint">
           <i className="fas fa-circle-info" />
-          سجّل الدخول بحساب {boundParty2Email || "المحجوز"} ثم ارجع إلى هذه
+          سجّل الدخول بحساب {maskedBound} ثم ارجع إلى هذه
           الصفحة لتوقيع العقد.
         </p>
       </section>
@@ -232,7 +238,7 @@ export default function ShareSignPad({
         >
           {busy ? "جاري الإرسال…" : "توقيع وإرسال"}
         </button>
-        <a className="btn btn-wa" href={waHref} target="_blank" rel="noopener">
+        <a className="btn btn-wa" href={waHref} target="_blank" rel="noopener noreferrer">
           💬 مشاركة عبر واتساب
         </a>
       </div>

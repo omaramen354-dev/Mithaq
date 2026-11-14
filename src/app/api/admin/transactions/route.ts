@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { requireAdminSession } from "@/lib/admin-guard";
+import { isUuid } from "@/lib/contract-schema";
 import { db } from "@/db";
 import { paymentRequests, transactions, users } from "@/db/schema";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { findPlan, MONTH_DAYS } from "@/lib/plans";
 import { logEvent } from "@/lib/logger";
+import { readBoundedJson } from "@/lib/contract-text";
+import { noStoreJson } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 
 /* ============================================================
    /api/admin/transactions — إدارة معاملات شام كاش (للمشرفين)
-   POST: القرار الإداري:
-     - verify:   تأكيد الحوالة (unverified  ← verified)
-     - suspend:  تجميد الحساب وإبطال الهاش (أي حالة ← suspended)
-     - unsuspend: رفع الحظر وإعادة الحساب للعمل (سعلاً من الغلط)
-   القاعدة الذهبية: جميع التحويلات المتاحة هنا تُحتفل من المشرف
-   فقط، ولا يمكن لأي مسار عام أن يحول الحالة الموثقة ← مجمدة.
+   - verify:    تأكيد الحوالة وتفعيل الباقة
+   - suspend:   تجميد الحساب + إبطال الباقة و paidOnce و isSingleUsed
+   - unsuspend: رفع الحظر وإعادة الحالة لغير موثقة للمراجعة
    ============================================================ */
 
 const requireAdmin = requireAdminSession;
@@ -37,7 +37,7 @@ type Body = {
 export async function GET() {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
   const rows = await db
     .select({
@@ -57,7 +57,7 @@ export async function GET() {
     .orderBy(desc(transactions.createdAt))
     .limit(100);
 
-  return NextResponse.json({
+  return noStoreJson({
     ok: true,
     rows: rows.map((r) => ({
       ...r,
@@ -70,34 +70,33 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
 
-  let body: Body;
-  try {
-    body = (await req.json()) as Body;
-  } catch {
-    return NextResponse.json({ ok: false, message: "صيغة JSON غير صحيحة." }, { status: 400 });
+  const parsed = await readBoundedJson<Body>(req, 16_384);
+  if (!parsed.ok) {
+    return noStoreJson({ ok: false, message: parsed.message }, { status: parsed.status });
   }
+  const body = parsed.data;
 
-  const id = (body.id || "").trim();
+  const id = String(body.id || "").trim();
   const action = body.action;
-  if (!id || (action !== "verify" && action !== "suspend" && action !== "unsuspend")) {
-    return NextResponse.json({ ok: false, message: "بيانات القرار ناقصة." }, { status: 422 });
+  if (!isUuid(id) || (action !== "verify" && action !== "suspend" && action !== "unsuspend")) {
+    return noStoreJson({ ok: false, message: "بيانات القرار غير صالحة." }, { status: 422 });
   }
 
   const tx = await fetchTx(id);
   if (!tx) {
-    return NextResponse.json({ ok: false, message: "المعاملة غير موجودة." }, { status: 404 });
+    return noStoreJson({ ok: false, message: "المعاملة غير موجودة." }, { status: 404 });
   }
   if (tx.status === "suspended" && action !== "unsuspend") {
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, message: "المعاملة مجمّدة سابقاً — راجع السجل قبل أي قرار." },
       { status: 409 }
     );
   }
   if (tx.status === "verified" && action === "verify") {
-    return NextResponse.json({ ok: false, message: "هذه المعاملة موثقة سابقاً." }, { status: 409 });
+    return noStoreJson({ ok: false, message: "هذه المعاملة موثقة سابقاً." }, { status: 409 });
   }
 
   const now = new Date();
@@ -107,18 +106,22 @@ export async function POST(req: NextRequest) {
     actorEmail: session.user.email || "",
   };
 
-  /* ===== تجميد الحساب وإبطال الهاش ===== */
+  /* ===== تجميد الحساب وإبطال المزايا و paidOnce فوراً ===== */
   if (action === "suspend") {
     await db
       .update(transactions)
       .set({ status: "suspended", reviewedAt: now, reviewedBy: session.user.dbId, updatedAt: now })
       .where(eq(transactions.id, id));
 
-    /* صدور الحالة المجمدة يعني تجميد المزايا كاملة فوراً */
     if (tx.userId) {
       await db
         .update(users)
-        .set({ plan: "free", planExpiresAt: null })
+        .set({
+          plan: "free",
+          planExpiresAt: null,
+          paidOnce: false,
+          isSingleUsed: false,
+        })
         .where(eq(users.id, tx.userId));
     }
 
@@ -131,7 +134,7 @@ export async function POST(req: NextRequest) {
       meta: { txRef: tx.transactionNumber, plan: tx.planName, targetUser: tx.userId },
     });
 
-    return NextResponse.json({ ok: true, message: "تم تجميد الحساب وإبطال الهاش." });
+    return noStoreJson({ ok: true, message: "تم تجميد الحساب وإبطال الهاش." });
   }
 
   /* ===== تأكيد الحوالة يدوياً ===== */
@@ -143,7 +146,6 @@ export async function POST(req: NextRequest) {
 
     const plan = findPlan(tx.planName) || findPlan(tx.planName.toLowerCase());
     if (!plan || plan.service || !tx.userId) {
-      // لا يمكن تعيين باقة موثوقة — يبقى صالحاً كإثبات دفعة فقط
       await logEvent({
         action: "transaction_verified_no_plan",
         entity: "payment",
@@ -152,7 +154,7 @@ export async function POST(req: NextRequest) {
         detail: `تأكيد الحوالة — رقم العملية ${tx.transactionNumber} — لم نجد باقة مطابقة (${tx.planName})`,
         meta: { plan: tx.planName, targetUser: tx.userId },
       });
-      return NextResponse.json({
+      return noStoreJson({
         ok: true,
         message: "تم التأكيد — لم نعثر على باقة مقابلة (سُجّل الإثبات فقط).",
       });
@@ -161,9 +163,6 @@ export async function POST(req: NextRequest) {
     const expires = plan.unit === "month" ? new Date(now.getTime() + MONTH_DAYS * 864e5) : null;
     const isOnce = plan.unit === "once";
 
-    /* نُحدّث طلبات الدفع المعلّقة لهذا المستخدم فقط — لا نلمس
-       الطلبات المرفوضة أو القديمة المدفوعة (كان التحديث سابقاً
-       يشمل كل صفوف المستخدم بلا استثناء). */
     await db.batch([
       db
         .update(paymentRequests)
@@ -194,10 +193,10 @@ export async function POST(req: NextRequest) {
       meta: { plan: plan.id, targetUser: tx.userId },
     });
 
-    return NextResponse.json({ ok: true, message: `تم التأكيد وتفعيل باقة ${plan.title}.` });
+    return noStoreJson({ ok: true, message: `تم التأكيد وتفعيل باقة ${plan.title}.` });
   }
 
-  /* ===== رفع الحظر (unsuspend) — إعادة الحالة إلى unverified ===== */
+  /* ===== رفع الحظر (unsuspend) ===== */
   await db
     .update(transactions)
     .set({ status: "unverified", reviewedAt: now, reviewedBy: session.user.dbId, updatedAt: now })
@@ -212,5 +211,5 @@ export async function POST(req: NextRequest) {
     meta: { txRef: tx.transactionNumber },
   });
 
-  return NextResponse.json({ ok: true, message: "تم رفع الحظر — المعاملة عادت غير موثقة." });
+  return noStoreJson({ ok: true, message: "تم رفع الحظر — المعاملة عادت غير موثقة." });
 }

@@ -1,19 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { requireAdminSession } from "@/lib/admin-guard";
+import { isUuid } from "@/lib/contract-schema";
 import { db } from "@/db";
 import { paymentRequests, users } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { findPlan, MONTH_DAYS } from "@/lib/plans";
 import { logEvent } from "@/lib/logger";
+import { readBoundedJson } from "@/lib/contract-text";
+import { noStoreJson } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 
 /* ============================================================
    /api/admin/payment-requests — إدارة طلبات الدفع (للمشرفين)
-   GET: قائمة الطلبات (الأحدث أولاً)
-   POST: قرار المشرف — paid (تأكيد + تفعيل الباقة) | rejected
-   القاعدة الذهبية: التفعيل يحدث فقط من تأكيد المشرف هنا —
-   لا يوجد أي مسار يفعّل الباقة مباشرة من الواجهة العامة.
    ============================================================ */
 
 const requireAdmin = requireAdminSession;
@@ -21,14 +20,14 @@ const requireAdmin = requireAdminSession;
 export async function GET() {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
   const rows = await db
     .select()
     .from(paymentRequests)
     .orderBy(desc(paymentRequests.createdAt))
     .limit(50);
-  return NextResponse.json({ ok: true, requests: rows });
+  return noStoreJson({ ok: true, requests: rows });
 }
 
 type Body = { id?: string; action?: "paid" | "rejected"; note?: string };
@@ -36,19 +35,18 @@ type Body = { id?: string; action?: "paid" | "rejected"; note?: string };
 export async function POST(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
 
-  let body: Body;
-  try {
-    body = (await req.json()) as Body;
-  } catch {
-    return NextResponse.json({ ok: false, message: "صيغة JSON غير صحيحة." }, { status: 400 });
+  const parsed = await readBoundedJson<Body>(req, 16_384);
+  if (!parsed.ok) {
+    return noStoreJson({ ok: false, message: parsed.message }, { status: parsed.status });
   }
+  const body = parsed.data;
 
-  const id = (body.id || "").trim();
-  if (!id || (body.action !== "paid" && body.action !== "rejected")) {
-    return NextResponse.json({ ok: false, message: "بيانات القرار ناقصة." }, { status: 422 });
+  const id = String(body.id || "").trim();
+  if (!isUuid(id) || (body.action !== "paid" && body.action !== "rejected")) {
+    return noStoreJson({ ok: false, message: "بيانات القرار غير صالحة." }, { status: 422 });
   }
 
   const rows = await db
@@ -58,10 +56,10 @@ export async function POST(req: NextRequest) {
     .limit(1);
   const reqRow = rows[0];
   if (!reqRow) {
-    return NextResponse.json({ ok: false, message: "الطلب غير موجود." }, { status: 404 });
+    return noStoreJson({ ok: false, message: "الطلب غير موجود." }, { status: 404 });
   }
   if (reqRow.status === "paid" || reqRow.status === "rejected") {
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, message: "هذا الطلب عولج سابقاً." },
       { status: 409 }
     );
@@ -84,25 +82,23 @@ export async function POST(req: NextRequest) {
       meta: { plan: reqRow.plan, method: reqRow.method, txRef: reqRow.txRef },
     });
 
-    return NextResponse.json({ ok: true, message: "تم رفض الطلب." });
+    return noStoreJson({ ok: true, message: "تم رفض الطلب." });
   }
 
-  /* ===== تأكيد الدفع + تفعيل الباقة ===== */
   const plan = findPlan(reqRow.plan);
   if (!plan || plan.service) {
-    /* خدمة (مراجعة قانونية) — تُسجَّل مدفوعة دون تفعيل اشتراك */
     await db
       .update(paymentRequests)
       .set({ status: "paid", updatedAt: new Date() })
       .where(eq(paymentRequests.id, id));
-    return NextResponse.json({
+    return noStoreJson({
       ok: true,
       message: "سُجّلت الخدمة كمدفوعة — تابع تنفيذ المراجعة مع العميل.",
     });
   }
 
   if (!reqRow.userId) {
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, message: "الطلب غير مرتبط بحساب مستخدم." },
       { status: 409 }
     );
@@ -110,10 +106,8 @@ export async function POST(req: NextRequest) {
 
   const now = new Date();
   const expires = plan.unit === "month" ? new Date(now.getTime() + MONTH_DAYS * 864e5) : null;
-
-  /* ملاحظة: محرّك neon-http لا يدعم db.transaction() (يرمي استثناء دائماً)،
-     نستخدم db.batch() الذي ينفّذ التحديثين في معاملة واحدة عبر HTTP */
   const isOnce = plan.unit === "once";
+
   await db.batch([
     db
       .update(paymentRequests)
@@ -141,7 +135,7 @@ export async function POST(req: NextRequest) {
     meta: { plan: plan.id, method: reqRow.method, txRef: reqRow.txRef, targetUser: reqRow.userId },
   });
 
-  return NextResponse.json({
+  return noStoreJson({
     ok: true,
     message: `تم التأكيد وتفعيل باقة ${plan.title} على حساب العميل.`,
   });

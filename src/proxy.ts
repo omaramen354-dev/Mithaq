@@ -36,6 +36,6 @@ export const config = {
      - المسار الرئيسي / يمر من الـ proxy لكن authorized يعيده true
        للضيوف والمسجلين (عام) — انظر authConfig.callbacks.authorized
     */
-    "/((?!api|share|verify|robots\\.txt|sitemap\\.xml|opengraph-image|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|ico|webp)$).*)",
+    "/((?!api|share|verify|robots\\.txt|sitemap\\.xml|opengraph-image|_next/static|_next/image|icons/|favicon\\.ico|[^/]+\\.(?:png|jpg|jpeg|svg|ico|webp)$).*)",
   ],
 };

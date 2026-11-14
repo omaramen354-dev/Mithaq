@@ -3,7 +3,7 @@ import { auth, signOut, adminEmails } from "@/lib/auth";
 import { isAdminUser } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { contracts, paymentRequests, users } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, ne, sql } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
@@ -85,7 +85,7 @@ export default async function AdminPage() {
     db
       .select({ n: sql<number>`count(*)::int` })
       .from(users)
-      .where(eq(users.plan, "premium")),
+      .where(ne(users.plan, "free")),
     db
       .select()
       .from(contracts)

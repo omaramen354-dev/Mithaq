@@ -1,23 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { requireAdminSession } from "@/lib/admin-guard";
+import { isUuid } from "@/lib/contract-schema";
 import { db } from "@/db";
 import { users, contracts } from "@/db/schema";
 import { desc, ilike, or, sql, eq, and } from "drizzle-orm";
 import { findPlan } from "@/lib/plans";
 import { logEvent } from "@/lib/logger";
+import { readBoundedJson } from "@/lib/contract-text";
+import { noStoreJson } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /* ============================================================
    /api/admin/users — إدارة المستخدمين (للمشرفين فقط)
-   GET  : قائمة المستخدمين مع بحث (اسم/بريد) وفلترة بالباقة
-          + عدد عقود كل مستخدم
-   POST : إجراءات المشرف:
-          - set_plan   : تغيير الباقة (ترقية/تخفيض) مع مدة الصلاحية
-          - toggle_admin: ترقية مستخدم إلى مشرف أو إزالة الترقية
-          - clear_plan : إعادة الحساب إلى المجاني (free)
-   القاعدة: session.user.isAdmin هو بوابة الحماية الوحيدة هنا.
    ============================================================ */
 
 const requireAdmin = requireAdminSession;
@@ -25,11 +21,11 @@ const requireAdmin = requireAdminSession;
 export async function GET(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
 
-  const q = (req.nextUrl.searchParams.get("q") || "").trim();
-  const plan = (req.nextUrl.searchParams.get("plan") || "").trim();
+  const q = (req.nextUrl.searchParams.get("q") || "").trim().slice(0, 120);
+  const plan = (req.nextUrl.searchParams.get("plan") || "").trim().slice(0, 40);
 
   const filters = [];
   if (q) {
@@ -69,7 +65,7 @@ export async function GET(req: NextRequest) {
     .orderBy(desc(users.createdAt))
     .limit(200);
 
-  return NextResponse.json({
+  return noStoreJson({
     ok: true,
     users: rows.map((u) => ({
       ...u,
@@ -89,30 +85,28 @@ type Body = {
 export async function POST(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
 
-  let body: Body;
-  try {
-    body = (await req.json()) as Body;
-  } catch {
-    return NextResponse.json({ ok: false, message: "صيغة JSON غير صحيحة." }, { status: 400 });
+  const parsed = await readBoundedJson<Body>(req, 16_384);
+  if (!parsed.ok) {
+    return noStoreJson({ ok: false, message: parsed.message }, { status: parsed.status });
   }
+  const body = parsed.data;
 
-  const userId = (body.userId || "").trim();
-  if (!userId) {
-    return NextResponse.json({ ok: false, message: "معرّف المستخدم مفقود." }, { status: 422 });
+  const userId = String(body.userId || "").trim();
+  if (!isUuid(userId)) {
+    return noStoreJson({ ok: false, message: "معرّف المستخدم غير صالح." }, { status: 422 });
   }
 
   const targetRows = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   const target = targetRows[0];
   if (!target) {
-    return NextResponse.json({ ok: false, message: "المستخدم غير موجود." }, { status: 404 });
+    return noStoreJson({ ok: false, message: "المستخدم غير موجود." }, { status: 404 });
   }
 
-  /* حماية: المشرف لا يعدّل صلاحياته نفسه (يمنع قفل اللوحة بالخطأ) */
   if (body.action === "toggle_admin" && target.id === session.user.dbId) {
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, message: "لا يمكنك تعديل صلاحيتك كمشرف من هنا." },
       { status: 409 }
     );
@@ -137,7 +131,7 @@ export async function POST(req: NextRequest) {
         : `إزالة صلاحية المشرف من ${target.name} (${target.email})`,
       meta: { targetEmail: target.email },
     });
-    return NextResponse.json({
+    return noStoreJson({
       ok: true,
       message: next ? `تمت ترقية ${target.name} إلى مشرف.` : `أُزيلت صلاحية المشرف من ${target.name}.`,
     });
@@ -146,7 +140,7 @@ export async function POST(req: NextRequest) {
   if (body.action === "clear_plan") {
     await db
       .update(users)
-      .set({ plan: "free", planExpiresAt: null })
+      .set({ plan: "free", planExpiresAt: null, paidOnce: false, isSingleUsed: false })
       .where(eq(users.id, userId));
     await logEvent({
       action: "plan_changed",
@@ -156,13 +150,13 @@ export async function POST(req: NextRequest) {
       detail: `إعادة ${target.name} إلى الباقة المجانية يدوياً`,
       meta: { from: target.plan, to: "free" },
     });
-    return NextResponse.json({ ok: true, message: `أُعيد ${target.name} إلى الباقة المجانية.` });
+    return noStoreJson({ ok: true, message: `أُعيد ${target.name} إلى الباقة المجانية.` });
   }
 
   if (body.action === "set_plan") {
-    const plan = findPlan((body.plan || "").trim());
+    const plan = findPlan(String(body.plan || "").trim());
     if (!plan || plan.id === "free" || plan.service) {
-      return NextResponse.json(
+      return noStoreJson(
         { ok: false, message: "اختر باقة صالحة (غير المجانية وغير الخدمات)." },
         { status: 422 }
       );
@@ -190,11 +184,11 @@ export async function POST(req: NextRequest) {
       meta: { from: target.plan, to: plan.id, expires: expires?.toISOString() || null },
     });
 
-    return NextResponse.json({
+    return noStoreJson({
       ok: true,
       message: `تم تفعيل باقة ${plan.title} لـ ${target.name}.`,
     });
   }
 
-  return NextResponse.json({ ok: false, message: "إجراء غير معروف." }, { status: 422 });
+  return noStoreJson({ ok: false, message: "إجراء غير معروف." }, { status: 422 });
 }

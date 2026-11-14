@@ -3,6 +3,9 @@ import { db } from "@/db";
 import { contracts } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { isUuid } from "@/lib/contract-schema";
+import { isOwnerSuspended } from "@/lib/mithaq-guard";
+import SuspendedScreen from "@/components/SuspendedScreen";
 import { resolveClauses } from "@/lib/contract-text";
 import { contractTypeName } from "@/lib/contract-types";
 import { shareUrlFor } from "@/lib/fingerprint";
@@ -35,6 +38,7 @@ export default async function SignPage({ params }: Props) {
   if (!session?.user?.dbId) redirect("/login");
 
   const { id } = await params;
+  if (!isUuid(id)) notFound();
 
   const rows = await db
     .select()
@@ -43,6 +47,10 @@ export default async function SignPage({ params }: Props) {
     .limit(1);
   const contract = rows[0];
   if (!contract) notFound();
+
+  /* فحص الحجب المالي — لا يُسمح بتوقيع عقود الحساب المجمّد */
+  const guard = await isOwnerSuspended(contract.id);
+  if (guard.suspended) return <SuspendedScreen />;
 
   const clauses = resolveClauses({
     type: contract.type,

@@ -113,10 +113,14 @@ export default function LoginPage() {
           className="btn"
           style={{ width: "100%", justifyContent: "center", padding: "13px 18px" }}
           onClick={() => {
-            /* العودة إلى الصفحة التي أتى منها المستخدم (مثل /pricing) */
-            const cb =
+            /* العودة إلى الصفحة الداخلية فقط — منع Open Redirect */
+            const raw =
               new URLSearchParams(window.location.search).get("callbackUrl") || "/";
-            signIn("google", { callbackUrl: cb });
+            const safeCb =
+              raw.startsWith("/") && !raw.startsWith("//") && !raw.includes("\\")
+                ? raw
+                : "/";
+            signIn("google", { callbackUrl: safeCb });
           }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>

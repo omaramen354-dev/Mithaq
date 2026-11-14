@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { contracts } from "@/db/schema";
@@ -7,6 +7,7 @@ import { shareUrlFor, verifyPathFor, contractVerification } from "@/lib/fingerpr
 import { buildOfficialShareMessage, whatsappLink } from "@/lib/whatsapp";
 import { telegramConfigured } from "@/lib/telegram";
 import { decodeShareToken } from "@/lib/share-token";
+import { noStoreJson } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 
@@ -22,7 +23,7 @@ export async function GET(
   const id = decodeShareToken(rawId);
   const session = await auth();
   if (!session?.user?.dbId)
-    return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
+    return noStoreJson({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
 
   const rows = await db
     .select()
@@ -31,7 +32,7 @@ export async function GET(
     .limit(1);
   const contract = rows[0];
   if (!contract)
-    return NextResponse.json({ ok: false, message: "العقد غير موجود." }, { status: 404 });
+    return noStoreJson({ ok: false, message: "العقد غير موجود." }, { status: 404 });
 
   const base = req.nextUrl.origin.replace(/\/+$/, "");
   const link = shareUrlFor(contract.shareToken, base);
@@ -41,8 +42,9 @@ export async function GET(
     contract.status
   );
 
-  return NextResponse.json({
+  return noStoreJson({
     ok: true,
+    ref,
     link,
     verifyLink: base + verifyPathFor(contract.shareToken),
     whatsappUrl: whatsappLink(buildOfficialShareMessage(contract, link)),

@@ -39,10 +39,11 @@ const PLAN_NAMES: Record<string, string> = {
 
 type PlanFilter = "all" | "paid" | "free" | "admin" | "expired";
 
-/* هل انتهى اشتراك شهري لهذا المستخدم؟ (المستقل/المكاتب بعد تاريخ الانتهاء) */
+/* هل انتهى اشتراك شهري لهذا المستخدم؟ */
 function isExpired(u: AdminUser): boolean {
   return (
-    (u.plan === "freelancer" || u.plan === "office") &&
+    u.plan !== "free" &&
+    u.plan !== "single" &&
     !!u.planExpiresAt &&
     new Date(u.planExpiresAt).getTime() < Date.now()
   );
