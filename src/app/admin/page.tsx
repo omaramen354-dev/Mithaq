@@ -12,6 +12,7 @@ import PaymentsManager from "./PaymentsManager";
 import UsersManager from "./UsersManager";
 import LogsManager from "./LogsManager";
 import ErrorsManager from "./ErrorsManager";
+import TelegramTestButton from "./TelegramTestButton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -139,6 +140,7 @@ export default async function AdminPage() {
             </div>
           </div>
           <div className="admin-header-actions">
+            <TelegramTestButton />
             <a className="btn btn-outline" href="/">
               <i className="fas fa-house" />
               المنصة
