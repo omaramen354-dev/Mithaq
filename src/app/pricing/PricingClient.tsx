@@ -10,7 +10,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import { PAID_PLANS, priceLabel, priceLabelSyp, type Plan } from "@/lib/plans";
+import { PAID_PLANS, findPlan, priceLabel, priceLabelSyp, type Plan } from "@/lib/plans";
 import { whatsappLink } from "@/lib/whatsapp";
 
 /* ===== بيانات الدفع =====
@@ -108,10 +108,17 @@ export default function PricingClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: pop.plan.id, method, txRef, senderName }),
       });
-      const j = (await res.json()) as { ok: boolean; message?: string };
+      const j = (await res.json()) as {
+        ok: boolean;
+        autoVerified?: boolean;
+        message?: string;
+      };
       if (res.ok && j.ok) {
         setMsg({ t: j.message || "تم إرسال طلبك بنجاح.", ok: true });
-        setTimeout(() => window.location.reload(), 1600);
+        setTimeout(() => {
+          if (j.autoVerified) window.location.assign("/dashboard");
+          else window.location.reload();
+        }, 1700);
       } else {
         setMsg({ t: j.message || "تعذر إرسال الطلب — حاول مجدداً.", ok: false });
       }
@@ -216,38 +223,54 @@ export default function PricingClient({
                   </span>
                 ) : isLoggedIn ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                    {SHAM_READY ? (
-                      <Link
-                        href={`/checkout?plan=${p.id}`}
-                        className="btn btn-primary plan-btn"
-                      >
-                        <i className="fas fa-bolt" />
-                        اشترك الآن — تفعيل فوري
-                      </Link>
-                    ) : (
+                    {!ANY_METHOD_READY ? (
                       <button
                         type="button"
                         className="btn btn-outline plan-btn"
                         disabled
-                        title="لم تُضبط بيانات شام كاش بعد"
+                        title="لم تُضبط بيانات الدفع بعد"
                       >
                         <i className="fas fa-triangle-exclamation" />
                         الدفع غير متاح حالياً
                       </button>
-                    )}
-                    {USDT_READY && (
+                    ) : p.service ? (
                       <button
                         type="button"
-                        className="btn btn-soft plan-btn"
+                        className="btn btn-primary plan-btn"
                         onClick={() => openPop(p)}
                       >
-                        <i className="fab fa-bitcoin" />
-                        الدفع بـ USDT
+                        <i className="fas fa-scale-balanced" />
+                        اطلب المراجعة الآن
                       </button>
+                    ) : (
+                      <>
+                        {SHAM_READY && (
+                          <Link
+                            href={`/checkout?plan=${p.id}`}
+                            className="btn btn-primary plan-btn"
+                          >
+                            <i className="fas fa-bolt" />
+                            اشترك بشام كاش — تفعيل فوري
+                          </Link>
+                        )}
+                        {USDT_READY && (
+                          <button
+                            type="button"
+                            className={`btn ${SHAM_READY ? "btn-soft" : "btn-primary"} plan-btn`}
+                            onClick={() => openPop(p)}
+                          >
+                            <i className="fab fa-bitcoin" />
+                            الدفع بـ USDT (TRC20)
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 ) : (
-                  <Link href="/login" className="btn btn-outline plan-btn">
+                  <Link
+                    href="/login?callbackUrl=%2Fpricing"
+                    className="btn btn-outline plan-btn"
+                  >
                     <i className="fas fa-right-to-bracket" />
                     سجّل الدخول للاشتراك
                   </Link>
@@ -268,7 +291,7 @@ export default function PricingClient({
           <ul>
             {myRequests.map((r) => (
               <li key={r.id}>
-                <span className="myreq-plan">{r.plan}</span>
+                <span className="myreq-plan">{findPlan(r.plan)?.title || r.plan}</span>
                 <span className={`myreq-state s-${r.status}`}>
                   {STATUS_LABEL[r.status] || r.status}
                 </span>
@@ -288,10 +311,10 @@ export default function PricingClient({
           كيف تتم عملية الدفع؟
         </h2>
         <ol className="pricing-steps">
-          <li>اختر باقتك واضغط «اشترك الآن».</li>
+          <li>اختر باقتك واضغط «اشترك بشام كاش» أو «الدفع بـ USDT».</li>
           <li>حوّل المبلغ إلى محفظة USDT (شبكة TRC20 فقط) أو عبر شام كاش.</li>
           <li>أرسل رقم العملية (TXID) أو رقم إيصال شام كاش في النافذة.</li>
-          <li>يراجع فريق ميثاق الطلب ويُفعّل باقتك في حسابك — عادة خلال ساعات.</li>
+          <li>في شام كاش تتفعّل باقتك فوراً مع مراجعة لاحقة للحوالة، وفي USDT تُفعّل فور تأكيد الحوالة.</li>
         </ol>
         <p className="pricing-note">
           <i className="fas fa-shield-halved" />
@@ -368,8 +391,8 @@ export default function PricingClient({
                         </button>
                       </div>
                       <div className="paypop-warn">
-                        <i className="fas fa-triangle-exclamation" />
-                        تأكد أن الشبكة TRC20 — أي شبكة أخرى يعني فقدان المبلغ.
+                        <i className="fas fa-bolt" />
+                        تأكد أن الشبكة TRC20 — عند لصق رقم العملية (TXID) يتحقق النظام من البلوكشين ويُفعّل باقتك تلقائياً خلال ثوانٍ.
                       </div>
                     </>
                   ) : (

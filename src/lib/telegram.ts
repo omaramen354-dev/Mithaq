@@ -100,7 +100,7 @@ export async function notifyContractEvent(
  * يتيح للمشرف المتابعة الفورية أو المراجعة المسائية الكاملة من /admin.
  */
 export async function notifyPaymentEvent(info: {
-  source: "checkout_instant" | "payment_request";
+  source: "checkout_instant" | "payment_request" | "usdt_auto_verified";
   planTitle: string;
   planId: string;
   amountUsd: number;
@@ -114,9 +114,11 @@ export async function notifyPaymentEvent(info: {
 }): Promise<TgResult> {
   const now = new Date().toLocaleString("ar-SY");
   const header =
-    info.source === "checkout_instant"
-      ? "💳 <b>عملية شحن شام كاش جديدة (تفعيل فوري بانتظار مراجعتك)</b>"
-      : "🧾 <b>طلب دفع جديد بانتظار المراجعة</b>";
+    info.source === "usdt_auto_verified"
+      ? "⚡ <b>دفعة USDT موثّقة تلقائياً من بلوكشين TRON!</b>"
+      : info.source === "checkout_instant"
+        ? "💳 <b>عملية شحن شام كاش جديدة (تفعيل فوري بانتظار مراجعتك)</b>"
+        : "🧾 <b>طلب دفع جديد بانتظار المراجعة</b>";
 
   const lines = [
     header,

@@ -6,13 +6,22 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { normalize, readBoundedJson } from "@/lib/contract-text";
 import { noStoreJson } from "@/lib/client-ip";
+import { isUserSuspended } from "@/lib/mithaq-guard";
+import {
+  hasActiveOfficePlan,
+  MAX_OFFICE_NAME,
+  validateOfficeLogoDataUrl,
+} from "@/lib/branding";
 
 export const runtime = "nodejs";
 
 /* ============================================================
    /api/me — بروفايل المستخدم المسجّل
-   GET: بيانات الحساب | PATCH: تحديث الهاتف/العنوان/التفضيلات
-   مع تحقق Zod صارم وقائمة بيضاء لحقول preferences (منع التضخيم وحقن المفاتيح)
+   GET: بيانات الحساب
+   PATCH: تحديث الهاتف/العنوان/التفضيلات + شعار المكتب المخصّص
+   - حارس صارم على الخادم: تعديل officeName أو officeLogo محصور
+     حصراً بأصحاب باقة المكاتب ($49/شهر) النشطة (أو المشرفين)،
+     ويرفض أي محاولة من باقة أدنى بـ 403 Forbidden.
    ============================================================ */
 
 type Prefs = {
@@ -20,6 +29,8 @@ type Prefs = {
   emailNotifications: boolean;
   contractReminders: boolean;
   language: string;
+  officeName?: string;
+  officeLogo?: string;
 };
 
 const DEFAULT_PREFS: Prefs = {
@@ -38,6 +49,8 @@ const patchBodySchema = z.object({
       emailNotifications: z.boolean().optional(),
       contractReminders: z.boolean().optional(),
       language: z.enum(["ar", "en"]).optional(),
+      officeName: z.string().max(MAX_OFFICE_NAME).optional(),
+      officeLogo: z.string().max(220_000).optional(),
     })
     .strict()
     .optional(),
@@ -78,7 +91,8 @@ export async function PATCH(req: NextRequest) {
   if (!session?.user?.dbId)
     return noStoreJson({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
 
-  const parsedBody = await readBoundedJson(req, 16_384);
+  /* نسمح حتى 240KB فقط عند رفع شعار المكتب (PNG/JPG بحد 150KB ثنائي) */
+  const parsedBody = await readBoundedJson(req, 240_000);
   if (!parsedBody.ok) {
     return noStoreJson(
       { ok: false, message: parsedBody.message },
@@ -95,15 +109,59 @@ export async function PATCH(req: NextRequest) {
   }
   const body = validated.data;
 
-  /* جلب التفضيلات الحالية ودمج الحقول المسموح بها فقط */
+  const touchingBranding =
+    body.preferences?.officeLogo !== undefined ||
+    body.preferences?.officeName !== undefined;
+
   let mergedPrefs: Prefs = DEFAULT_PREFS;
   if (body.preferences) {
-    const current = await db
-      .select({ preferences: users.preferences })
+    const currentRows = await db
+      .select({
+        plan: users.plan,
+        planExpiresAt: users.planExpiresAt,
+        isAdmin: users.isAdmin,
+        preferences: users.preferences,
+      })
       .from(users)
       .where(eq(users.id, session.user.dbId))
       .limit(1);
-    const cur = current[0]?.preferences || DEFAULT_PREFS;
+
+    const row = currentRows[0];
+    if (!row) {
+      return noStoreJson({ ok: false, message: "الحساب غير موجود." }, { status: 404 });
+    }
+
+    /* حارس صارم على الخادم: لا أحد يفعّل شعار مكتب إلا بباقة المكاتب ($49/شهر) النشطة */
+    if (touchingBranding) {
+      const suspended = !row.isAdmin && (await isUserSuspended(session.user.dbId));
+      if (suspended || !hasActiveOfficePlan(row)) {
+        return noStoreJson(
+          {
+            ok: false,
+            code: "office_plan_required",
+            message:
+              "شعار واسم المكتب المخصّص متاح حصراً لأصحاب باقة «المكاتب والشركات» ($49/شهر) النشطة.",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    let nextOfficeLogo = row.preferences?.officeLogo || "";
+    if (body.preferences.officeLogo !== undefined) {
+      const check = validateOfficeLogoDataUrl(body.preferences.officeLogo);
+      if (!check.ok) {
+        return noStoreJson({ ok: false, message: check.message }, { status: 422 });
+      }
+      nextOfficeLogo = check.value;
+    }
+
+    const nextOfficeName =
+      body.preferences.officeName !== undefined
+        ? normalize(body.preferences.officeName).slice(0, MAX_OFFICE_NAME)
+        : row.preferences?.officeName || "";
+
+    const cur = row.preferences || DEFAULT_PREFS;
     mergedPrefs = {
       darkMode:
         body.preferences.darkMode !== undefined
@@ -123,6 +181,8 @@ export async function PATCH(req: NextRequest) {
           : cur.language === "en"
             ? "en"
             : "ar",
+      ...(nextOfficeName ? { officeName: nextOfficeName } : {}),
+      ...(nextOfficeLogo ? { officeLogo: nextOfficeLogo } : {}),
     };
   }
 

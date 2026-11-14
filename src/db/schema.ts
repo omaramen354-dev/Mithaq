@@ -40,6 +40,8 @@ export const users = pgTable(
         emailNotifications: boolean;
         contractReminders: boolean;
         language: string;
+        officeName?: string;
+        officeLogo?: string;
       }>()
       .notNull()
       .default({

@@ -235,7 +235,10 @@ export default function CheckoutClient({
               تحتاج إلى تسجيل الدخول عبر Google أولاً حتى تتمكن من حفظ العملية
               وتفعيل المزايا فوراً.
               <div style={{ marginTop: 8 }}>
-                <a className="btn" href="/login">
+                <a
+                  className="btn"
+                  href={`/login?callbackUrl=${encodeURIComponent(`/checkout?plan=${plan.id}`)}`}
+                >
                   تسجيل الدخول
                 </a>
               </div>

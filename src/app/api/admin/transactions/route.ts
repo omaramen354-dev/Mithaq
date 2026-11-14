@@ -160,7 +160,27 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const expires = plan.unit === "month" ? new Date(now.getTime() + MONTH_DAYS * 864e5) : null;
+    const [targetUser] = await db
+      .select({
+        plan: users.plan,
+        planExpiresAt: users.planExpiresAt,
+        isSingleUsed: users.isSingleUsed,
+      })
+      .from(users)
+      .where(eq(users.id, tx.userId))
+      .limit(1);
+
+    const alreadyActiveSamePlan = targetUser?.plan === plan.id;
+    const existingFutureExpiry =
+      targetUser?.planExpiresAt && targetUser.planExpiresAt.getTime() > now.getTime()
+        ? targetUser.planExpiresAt
+        : null;
+    const expires =
+      plan.unit === "month"
+        ? alreadyActiveSamePlan && existingFutureExpiry
+          ? existingFutureExpiry
+          : new Date(now.getTime() + MONTH_DAYS * 864e5)
+        : null;
     const isOnce = plan.unit === "once";
 
     await db.batch([
@@ -179,7 +199,14 @@ export async function POST(req: NextRequest) {
           plan: plan.id,
           planExpiresAt: expires,
           paidOnce: isOnce ? true : undefined,
-          isSingleUsed: plan.id === "single" ? false : undefined,
+          /* إذا كانت الباقة single مفعّلة مسبقاً عبر الشراء الفوري فلا نُصفّر
+             isSingleUsed حتى لا يحصل العميل على عقد ثانٍ مجاناً عند التدقيق المسائي */
+          isSingleUsed:
+            plan.id === "single"
+              ? alreadyActiveSamePlan
+                ? Boolean(targetUser?.isSingleUsed)
+                : false
+              : undefined,
         })
         .where(eq(users.id, tx.userId)),
     ]);

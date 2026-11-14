@@ -290,28 +290,75 @@ export default async function VerifyPage({ params }: Props) {
           <div
             style={{
               marginTop: 16,
-              padding: "12px 14px",
+              padding: "14px 16px",
               borderRadius: 12,
-              border: "1.5px dashed " + (matched ? "#157347" : hasHash ? "#b91c1c" : "#8a7f5e"),
+              border: "1.5px solid " + (matched ? "#157347" : hasHash ? "#b91c1c" : "#8a7f5e"),
               background: matched ? "#f2fbf5" : hasHash ? "#fdf2f2" : "#f7f5ec",
             }}
           >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 6,
+                marginBottom: 8,
+                paddingBottom: 8,
+                borderBottom: "1px dashed rgba(15, 61, 46, 0.16)",
+              }}
+            >
+              <strong style={{ fontSize: 12.5, color: "#0b3d2e" }}>
+                شهادة التوثيق الرقمي
+              </strong>
+              <strong dir="ltr" style={{ fontSize: 11.5, color: "#0b3d2e" }}>
+                Certificate of Completion · SHA-256
+              </strong>
+            </div>
+            <div
+              dir="ltr"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 8,
+                fontSize: 11,
+                color: "#365046",
+                marginBottom: 10,
+              }}
+            >
+              <div>
+                <div style={{ color: "var(--muted)", fontSize: 10 }}>Verification Status</div>
+                <b style={{ color: matched ? "#157347" : hasHash ? "#b91c1c" : "#8a7f5e" }}>
+                  {matched ? "VALID · Integrity Verified" : hasHash ? "MISMATCH · Tampered" : "Pending Hash"}
+                </b>
+              </div>
+              <div>
+                <div style={{ color: "var(--muted)", fontSize: 10 }}>Signature State</div>
+                <b>
+                  {c.status === "signed"
+                    ? "Completed (2/2 Parties)"
+                    : c.status === "partially_signed"
+                      ? "Partially Signed (1/2)"
+                      : "Pending Signature"}
+                </b>
+              </div>
+            </div>
             <small style={{ display: "block", color: "var(--muted)", fontWeight: 700, marginBottom: 4 }}>
-              بصمة المحتوى الرقمية (SHA-256)
+              بصمة المحتوى الرقمية الكاملة — Full SHA-256 Digest
             </small>
             <code
               style={{
                 direction: "ltr",
                 display: "block",
-                fontSize: 12,
+                fontSize: 11.5,
                 fontWeight: 800,
                 wordBreak: "break-all",
                 color: matched ? "#157347" : hasHash ? "#b91c1c" : "#8a7f5e",
               }}
             >
               {c.contentHash
-                ? c.contentHash.slice(0, 16).toUpperCase() + "…"
-                : "غير مسجّلة لهذا العقد"}
+                ? c.contentHash.toUpperCase()
+                : "غير مسجّلة لهذا العقد — Pending"}
             </code>
           </div>
 

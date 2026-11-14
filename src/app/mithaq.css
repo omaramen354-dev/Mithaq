@@ -3825,3 +3825,416 @@ select.mq-select:focus {
   .guide-nav .btn { padding: 8px 12px; font-size: 12px; }
   .guide-body { padding: 26px 16px 18px; }
 }
+
+/* ============================================================
+   ترقية مركز قيادة الإدارة /admin — جاهزية الإطلاق + نبض النمو
+   + درج عقود المستخدم + مستكشف العقود الشامل
+   ============================================================ */
+.admin-readiness-bar {
+  max-width: 1160px; margin: 18px auto 0;
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  padding: 11px 16px; border-radius: 14px;
+  background: rgba(7, 31, 26, 0.45);
+  border: 1px solid rgba(212, 168, 67, 0.28);
+  backdrop-filter: blur(8px);
+}
+.arb-head {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: rgba(255, 255, 255, 0.92); font-size: 12.5px; font-weight: 800;
+}
+.arb-head i { color: var(--gold); }
+.arb-head b { color: var(--gold-light); }
+.arb-pills { display: flex; flex-wrap: wrap; gap: 7px; }
+.arb-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 800;
+  border: 1px solid transparent;
+  transition: transform 0.18s ease;
+}
+.arb-pill:hover { transform: translateY(-1px); }
+.arb-pill.ok {
+  background: rgba(39, 174, 96, 0.18);
+  border-color: rgba(111, 224, 158, 0.36);
+  color: #dcffea;
+}
+.arb-pill.ok .arb-st { color: #6fe09e; }
+.arb-pill.miss {
+  background: rgba(231, 76, 60, 0.18);
+  border-color: rgba(255, 138, 128, 0.36);
+  color: #ffe2df;
+}
+.arb-pill.miss .arb-st { color: #ff8a80; }
+
+.admin-stat-sub {
+  font-size: 10.5px; font-weight: 700; color: var(--text-2);
+  margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.admin-stat.alert {
+  border-color: rgba(192, 57, 43, 0.45);
+  background: linear-gradient(180deg, rgba(192, 57, 43, 0.08), var(--card-bg) 72%);
+}
+.admin-stat.alert .admin-stat-icon {
+  background: rgba(192, 57, 43, 0.14); color: #c0392b;
+}
+
+.admin-launch-banner {
+  max-width: 1116px; margin: 16px auto 0; padding: 13px 18px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(212, 168, 67, 0.14), rgba(29, 74, 62, 0.06));
+  border: 1.5px solid rgba(212, 168, 67, 0.55);
+  display: flex; align-items: center; gap: 13px;
+  font-size: 12.5px; line-height: 1.8; color: var(--text);
+}
+.alb-icon {
+  width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 16px;
+  background: rgba(212, 168, 67, 0.22); color: var(--gold-dark);
+}
+
+/* مخطط نبض النمو 14 يوماً */
+.pulse-legend {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 11.5px; font-weight: 800; color: var(--text-2);
+}
+.pulse-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.pulse-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.pulse-dot.contracts { background: linear-gradient(180deg, var(--green), #2c7a64); }
+.pulse-dot.users { background: linear-gradient(180deg, var(--gold-dark), var(--gold-light)); }
+.admin-pulse-chart {
+  display: grid; grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 8px; align-items: end;
+  height: 138px; padding: 18px 6px 4px;
+  border-top: 1px dashed var(--line);
+}
+.pulse-col {
+  height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end; gap: 6px;
+}
+.pulse-bars {
+  width: 100%; flex: 1;
+  display: flex; align-items: flex-end; justify-content: center; gap: 3px;
+}
+.pulse-bar {
+  position: relative; width: 42%; min-width: 7px; max-width: 16px;
+  border-radius: 5px 5px 2px 2px;
+  transition: height 0.45s ease;
+}
+.pulse-bar.contracts { background: linear-gradient(180deg, #1d4a3e, #37836e); }
+.pulse-bar.users { background: linear-gradient(180deg, #b88a28, #e6c36b); }
+.pulse-bar em {
+  position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+  font-style: normal; font-size: 9.5px; font-weight: 900; color: var(--text-2);
+}
+.pulse-day { font-size: 9.5px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+
+/* تحسينات إدارة المستخدمين ودرج العقود */
+.admin-csv-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 10px;
+  border: 1.5px solid var(--line); background: var(--card-bg);
+  color: var(--green); font: inherit; font-size: 11.5px; font-weight: 800;
+  cursor: pointer; transition: all 0.18s ease;
+}
+.admin-csv-btn:hover:not(:disabled) {
+  border-color: var(--gold); color: var(--gold-dark);
+  background: rgba(212, 168, 67, 0.08);
+}
+.admin-csv-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.admin-orphan-note {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 14px; margin-bottom: 12px; border-radius: 12px;
+  background: rgba(212, 168, 67, 0.1);
+  border: 1px solid rgba(212, 168, 67, 0.45);
+  font-size: 12px; font-weight: 700; color: var(--text);
+}
+.admin-orphan-note i { color: var(--gold-dark); flex-shrink: 0; }
+
+.admin-user-item { border-bottom: 1px dashed var(--line); }
+.admin-user-item:last-child { border-bottom: none; }
+.admin-user-item .admin-user-row { border-bottom: none; }
+.admin-user-item.is-admin { background: rgba(212, 168, 67, 0.045); border-radius: 12px; }
+
+.b-suspended { background: rgba(192, 57, 43, 0.15); color: #c0392b; margin-inline-start: 6px; }
+.b-hot { background: rgba(230, 126, 34, 0.16); color: #b95807; margin-inline-start: 6px; }
+
+.aur-contracts-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--line); background: rgba(29, 74, 62, 0.06);
+  color: var(--green); font: inherit; font-size: 11.5px; font-weight: 800;
+  cursor: pointer; transition: all 0.18s ease;
+}
+.aur-contracts-btn:hover {
+  border-color: var(--gold); background: rgba(212, 168, 67, 0.14); color: var(--gold-dark);
+}
+.aur-contracts-btn small { font-weight: 600; color: var(--text-2); }
+
+.admin-user-drawer {
+  margin: 0 8px 12px; padding: 10px 14px; border-radius: 12px;
+  background: rgba(29, 74, 62, 0.04); border: 1px solid var(--line);
+}
+.aud-empty { font-size: 12px; font-weight: 700; color: var(--text-2); padding: 6px 2px; }
+.aud-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.aud-row { border-bottom: 1px dashed var(--line); padding-bottom: 6px; }
+.aud-row:last-child { border-bottom: none; padding-bottom: 0; }
+.aud-link {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; text-decoration: none; color: inherit;
+  padding: 5px 7px; border-radius: 9px; transition: background 0.15s ease;
+}
+.aud-link:hover { background: rgba(212, 168, 67, 0.1); }
+.aud-title { font-size: 12.5px; font-weight: 800; color: var(--text); }
+.aud-meta { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: 11px; color: var(--text-2); }
+
+/* مستكشف العقود الشامل */
+.admin-contracts-tools {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.admin-contract-item {
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px dashed var(--line);
+}
+.admin-contract-item:last-child { border-bottom: none; }
+.admin-contract-link { flex: 1; border-bottom: none !important; }
+.admin-contract-owner {
+  font-size: 11px; font-weight: 700; color: var(--text-2); margin-top: 2px;
+}
+.admin-contract-owner i { color: var(--gold-dark); margin-inline-end: 4px; }
+.owner-orphan { color: #b95807; }
+.admin-del-btn {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px;
+  border: 1px solid rgba(192, 57, 43, 0.25); background: rgba(192, 57, 43, 0.06);
+  color: #c0392b; cursor: pointer; display: grid; place-items: center;
+  font-size: 12px; transition: all 0.18s ease;
+}
+.admin-del-btn:hover:not(:disabled) { background: #c0392b; color: #fff; border-color: #c0392b; }
+.admin-del-btn:disabled { opacity: 0.45; cursor: wait; }
+
+[data-theme="dark"] .admin-page {
+  background:
+    radial-gradient(1200px 500px at 85% -10%, rgba(212, 168, 67, 0.08), transparent 60%),
+    var(--page-bg);
+}
+[data-theme="dark"] .admin-user-drawer { background: rgba(255, 255, 255, 0.03); }
+[data-theme="dark"] .aur-contracts-btn { background: rgba(212, 168, 67, 0.08); color: var(--gold-light); }
+[data-theme="dark"] .b-hot { color: #f6b26b; }
+
+@media (max-width: 900px) {
+  .admin-stats { grid-template-columns: repeat(2, 1fr); }
+  .admin-grid { grid-template-columns: 1fr; }
+  .admin-pulse-chart { gap: 4px; height: 115px; }
+  .pulse-day { font-size: 8.5px; }
+}
+
+/* ============================================================
+   شهادة التوثيق والإتمام ثنائية اللغة (AR / EN Certificate of Completion)
+   + بطاقة شعار المكتب المخصّص ($49/شهر) + زر تذكير واتساب
+   ============================================================ */
+.sheet-cert {
+  margin: 0 28px 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(15, 61, 46, 0.22);
+  background: linear-gradient(180deg, #faf8f1 0%, #f4f7f5 100%);
+  break-inside: avoid;
+}
+.sheet-cert-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed rgba(15, 61, 46, 0.2);
+}
+.sheet-cert-head strong {
+  display: block;
+  font-size: 12.5px;
+  color: #0b3d2e;
+  font-weight: 900;
+}
+.sheet-cert-head span {
+  display: block;
+  font-size: 10.5px;
+  color: #5b6b64;
+  margin-top: 2px;
+}
+.sheet-cert-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+}
+.sheet-cert-grid small {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #6b7b74;
+  margin-bottom: 2px;
+}
+.sheet-cert-grid b {
+  display: block;
+  font-size: 11.5px;
+  color: #16332a;
+  font-weight: 800;
+}
+.sheet-cert-hash {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #0f5132;
+  background: rgba(15, 81, 50, 0.06);
+  padding: 6px 8px;
+  border-radius: 7px;
+  word-break: break-all;
+}
+
+/* بطاقة شعار المكتب المخصّص في لوحة العميل (/dashboard) */
+.office-brand-card {
+  margin: 0 auto 28px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+.office-brand-locked {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, rgba(11, 61, 46, 0.04), rgba(212, 168, 67, 0.1));
+  border-color: rgba(212, 168, 67, 0.36);
+}
+.office-brand-lock-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #0b3d2e, #1a5c46);
+  color: #e6c978;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.office-brand-lock-body {
+  flex: 1 1 320px;
+}
+.office-brand-lock-body h3,
+.office-brand-head h3 {
+  margin: 6px 0 4px;
+  font-size: 16.5px;
+  font-weight: 900;
+  color: var(--green);
+}
+.office-brand-lock-body p,
+.office-brand-head p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+.office-brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  background: rgba(212, 168, 67, 0.18);
+  color: #8a6416;
+}
+.office-brand-pill.active {
+  background: rgba(21, 115, 71, 0.14);
+  color: #0f5132;
+}
+.office-brand-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.office-brand-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 6px;
+  display: grid;
+  place-items: center;
+}
+.office-brand-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.office-brand-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.office-brand-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+.office-brand-field input[type="text"],
+.office-brand-field input[type="file"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: var(--page-bg);
+  color: var(--text);
+  font-size: 13px;
+}
+.office-brand-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.office-brand-msg.ok {
+  background: rgba(21, 115, 71, 0.1);
+  color: #0f5132;
+}
+.office-brand-msg.err {
+  background: rgba(185, 28, 28, 0.1);
+  color: #991b1b;
+}
+.office-brand-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.action-icon.wa-action:hover {
+  background: #25d366;
+  color: #fff;
+  border-color: #25d366;
+}
+[data-theme="dark"] .office-brand-pill { color: var(--gold-light); }
+[data-theme="dark"] .office-brand-pill.active { color: #7ae0ae; }
+@media (max-width: 680px) {
+  .sheet-cert { margin: 0 14px 14px; }
+  .sheet-cert-grid,
+  .office-brand-form { grid-template-columns: 1fr; }
+}
+
+

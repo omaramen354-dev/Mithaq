@@ -12,6 +12,7 @@ import { shareUrlFor } from "@/lib/fingerprint";
 import ContractSheet, { verifyUrlFor } from "@/components/print/ContractSheet";
 import OwnerSignFlow from "@/components/signing/OwnerSignFlow";
 import { requestBaseUrl } from "@/lib/base-url";
+import { getActiveOwnerBranding } from "@/lib/branding";
 import PrintButton from "@/components/print/PrintButton";
 import Logo from "@/components/Logo";
 import type { Metadata } from "next";
@@ -65,7 +66,10 @@ export default async function SignPage({ params }: Props) {
     date: contract.createdAt,
   });
 
-  const base = await requestBaseUrl();
+  const [base, branding] = await Promise.all([
+    requestBaseUrl(),
+    getActiveOwnerBranding(contract.ownerId),
+  ]);
   const shareUrl = shareUrlFor(contract.shareToken, base);
 
   return (
@@ -128,6 +132,7 @@ export default async function SignPage({ params }: Props) {
           contract={contract}
           clauses={clauses}
           verifyUrl={verifyUrlFor(contract, base)}
+          branding={branding}
         />
       </div>
     </main>
