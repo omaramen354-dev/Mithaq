@@ -25,7 +25,7 @@ export default function Error({
         keepalive: true,
         body: JSON.stringify({
           source: "browser",
-          message: `[Boundary] ${error.message}`,
+          message: `[Boundary] ${error.message}${error.digest ? ` [digest:${error.digest}]` : ""}`,
           stack: error.stack || "",
           component: "error-boundary",
           url: window.location.href,
