@@ -2,14 +2,29 @@ import type { Contract } from "@/db/schema";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
 import { contractVerification, verifyPathFor } from "@/lib/fingerprint";
+import type { OfficeBranding } from "@/lib/branding";
 import QrCode from "@/components/QrCode";
 
 /* ============================================================
    ContractSheet — ورقة العقد A4 الموحّدة
-   نفس تنسيق /print/[id]: شريط زمردي علوي + شعار ميثاق الشفاف +
-   مرجع التوثيق + رمز QR التحقق — تُستخدم في صفحة الطباعة
-   وفي صفحة التوقيع /sign/[id] لضمان تنسيق واحد لكل المخرجات.
+   نفس تنسيق /print/[id]: شريط زمردي علوي + شعار ميثاق (أو شعار
+   المكتب المخصّص حصراً لباقة المكاتب $49) + شهادة إتمام ثنائية
+   اللغة (AR/EN) + مرجع التوثيق + رمز QR التحقق.
    ============================================================ */
+
+const TYPE_EN: Record<string, string> = {
+  lease: "Residential Lease Agreement",
+  sale: "Sale & Purchase Agreement",
+  services: "Services Agreement",
+  freelance: "Freelance Work Agreement",
+  pledge: "Legal Pledge & Undertaking",
+  supply: "Supply Agreement",
+  partnership: "Partnership Agreement",
+  nda: "Non-Disclosure Agreement (NDA)",
+  lease_commercial: "Commercial Lease Agreement",
+  design: "Design & Development Agreement",
+  rent_furnished: "Furnished Property Lease Agreement",
+};
 
 export function verifyUrlFor(contract: Contract, baseUrl?: string): string {
   const base = (baseUrl || process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
@@ -20,32 +35,49 @@ export default function ContractSheet({
   contract,
   clauses,
   verifyUrl: verifyUrlProp,
+  branding,
 }: {
   contract: Contract;
   clauses: string[];
   verifyUrl?: string;
+  branding?: OfficeBranding | null;
 }) {
   const { ref } = contractVerification(contract.id, contract.updatedAt, contract.status);
   const verifyUrl = verifyUrlProp || verifyUrlFor(contract);
   const hash = (contract.contentHash || "").toUpperCase();
+  const hasCustomBrand = Boolean(branding && (branding.officeLogo || branding.officeName));
+  const enStatus =
+    contract.status === "signed"
+      ? "Completed & Signed by Both Parties"
+      : contract.status === "partially_signed"
+        ? "Partially Signed (Awaiting Counterparty)"
+        : "Pending Signature";
+  const enDate = contract.createdAt
+    ? new Date(contract.createdAt).toISOString().slice(0, 10)
+    : "—";
 
   return (
     <article className="card sheet">
       {/* ===== الشريط الزمردي العلوي ===== */}
       <div className="sheet-topband" aria-hidden />
 
-      {/* ===== الترويسة الرسمية ===== */}
+      {/* ===== الترويسة الرسمية (شعار المكتب المخصّص لباقة $49 أو شعار ميثاق) ===== */}
       <header className="sheet-head">
         <div className="sheet-brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/mithaq-logo-print.svg"
-            alt="شعار ميثاق"
+            src={hasCustomBrand && branding?.officeLogo ? branding.officeLogo : "/mithaq-logo-print.svg"}
+            alt={hasCustomBrand && branding?.officeName ? branding.officeName : "شعار ميثاق"}
             className="sheet-logo"
+            style={hasCustomBrand ? { objectFit: "contain", borderRadius: 8 } : undefined}
           />
           <div className="sheet-brand-text">
-            <b>مِــيــثَــاق</b>
-            <span>منظومة العقود والتوثيق الإلكتروني</span>
+            <b>{hasCustomBrand && branding?.officeName ? branding.officeName : "مِــيــثَــاق"}</b>
+            <span>
+              {hasCustomBrand
+                ? "وثيقة رسمية موثّقة عبر منظومة ميثاق"
+                : "منظومة العقود والتوثيق الإلكتروني"}
+            </span>
           </div>
         </div>
         <div className="sheet-ref">
@@ -182,6 +214,56 @@ export default function ContractSheet({
           </div>
         </div>
       </div>
+
+      {/* ===== شهادة التوثيق والإتمام ثنائية اللغة (AR / EN Certificate of Completion) ===== */}
+      <section className="sheet-cert" aria-label="شهادة التوثيق والإتمام — Certificate of Completion">
+        <div className="sheet-cert-head">
+          <div>
+            <strong>شهادة التوثيق والإتمام الرقمي</strong>
+            <span>موثّقة عبر منصة ميثاق ببصمة تشفيرية SHA-256</span>
+          </div>
+          <div dir="ltr" style={{ textAlign: "left" }}>
+            <strong>Certificate of Completion</strong>
+            <span>Cryptographically Sealed by Mithaq (SHA-256)</span>
+          </div>
+        </div>
+        <div className="sheet-cert-grid">
+          <div>
+            <small>Document Reference · المرجع</small>
+            <b dir="ltr">{ref}</b>
+          </div>
+          <div>
+            <small>Agreement Type · النوع</small>
+            <b>
+              {contractTypeName(contract.type)} ·{" "}
+              <bdi dir="ltr">{TYPE_EN[contract.type] || "Electronic Contract"}</bdi>
+            </b>
+          </div>
+          <div>
+            <small>Status · حالة التوقيع</small>
+            <b>
+              {contract.status === "signed"
+                ? "موقّع ومكتمل ✓"
+                : contract.status === "partially_signed"
+                  ? "توقيع جزئي"
+                  : "قيد التوقيع"}{" "}
+              · <bdi dir="ltr">{enStatus}</bdi>
+            </b>
+          </div>
+          <div>
+            <small>Issue Date · تاريخ التحرير</small>
+            <b>
+              {arDate(contract.createdAt)} · <bdi dir="ltr">{enDate}</bdi>
+            </b>
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <small>SHA-256 Tamper-Evident Digest · البصمة الرقمية الكاملة</small>
+            <code dir="ltr" className="sheet-cert-hash">
+              {hash || "PENDING-HASH"}
+            </code>
+          </div>
+        </div>
+      </section>
 
       {/* ===== تذييل التحقق + رمز QR ===== */}
       <footer className="sheet-foot">

@@ -10,6 +10,7 @@ import { resolveClauses } from "@/lib/contract-text";
 import PrintButton from "@/components/print/PrintButton";
 import ContractSheet, { verifyUrlFor } from "@/components/print/ContractSheet";
 import { requestBaseUrl } from "@/lib/base-url";
+import { getActiveOwnerBranding } from "@/lib/branding";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,10 @@ export default async function PrintPage({ params }: Props) {
   const guard = await isOwnerSuspended(contract.id);
   if (guard.suspended) return <SuspendedScreen />;
 
-  const base = await requestBaseUrl();
+  const [base, branding] = await Promise.all([
+    requestBaseUrl(),
+    getActiveOwnerBranding(contract.ownerId),
+  ]);
   const clauses = resolveClauses({
     type: contract.type,
     party1Name: contract.party1Name,
@@ -82,6 +86,7 @@ export default async function PrintPage({ params }: Props) {
           contract={contract}
           clauses={clauses}
           verifyUrl={verifyUrlFor(contract, base)}
+          branding={branding}
         />
       </div>
     </main>

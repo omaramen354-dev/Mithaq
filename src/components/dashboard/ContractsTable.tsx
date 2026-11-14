@@ -7,7 +7,11 @@ import type { Contract } from "@/db/schema";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
 import { contractVerification, shareUrlFor } from "@/lib/fingerprint";
-import { buildOfficialShareMessage, whatsappLink } from "@/lib/whatsapp";
+import {
+  buildOfficialShareMessage,
+  buildWhatsAppReminderMessage,
+  whatsappLink,
+} from "@/lib/whatsapp";
 import { encodeShareToken } from "@/lib/share-token";
 
 /* ============================================================
@@ -75,7 +79,33 @@ export default function ContractsTable({
   function waHref(c: Contract): string {
     const origin =
       baseUrl || (typeof window !== "undefined" ? window.location.origin : "");
-    return whatsappLink(buildOfficialShareMessage(c, shareUrlFor(c.shareToken, origin)));
+    const link = shareUrlFor(c.shareToken, origin);
+    const msg =
+      c.status === "signed"
+        ? buildOfficialShareMessage(c, link)
+        : buildWhatsAppReminderMessage(c, link);
+    return whatsappLink(msg);
+  }
+
+  function handleDuplicate(c: Contract) {
+    window.dispatchEvent(
+      new CustomEvent("mithaq:duplicate-contract", {
+        detail: {
+          type: c.type,
+          signingMode: c.signingMode || "send",
+          party1: c.party1Name || "",
+          party2: "",
+          party2Email: "",
+          amount: c.amount || "",
+          city: c.city || "",
+          duration: c.duration || "",
+          paymentMethod: c.paymentMethod || "",
+          subject: c.subject || "",
+          notes: c.notes || "",
+          clauses: Array.isArray(c.clauses) ? c.clauses : [],
+        },
+      })
+    );
   }
 
   if (!contracts.length) {
@@ -89,8 +119,20 @@ export default function ContractsTable({
           لا توجد عقود بعد
         </p>
         <p style={{ color: "var(--text-2)", fontSize: 13, marginTop: 6 }}>
-          ابدأ بإنشاء أول عقد لك الآن — منصة ميثاق جاهزة لخدمتك
+          ابدأ بإنشاء أول عقد لك الآن — أو اطّلع على عقد موقّع نموذجي قبل البدء
         </p>
+        <div style={{ marginTop: 14, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => window.dispatchEvent(new CustomEvent("mithaq:open-contract-modal"))}
+          >
+            <i className="fas fa-plus" /> إنشاء أول عقد مجاناً
+          </button>
+          <Link className="btn btn-soft btn-sm" href="/sample">
+            <i className="fas fa-eye" /> معاينة عقد موقّع نموذجي
+          </Link>
+        </div>
       </div>
     );
   }
@@ -143,14 +185,26 @@ export default function ContractsTable({
                     <i className="fas fa-paper-plane" />
                   </Link>
                   <a
-                    className="action-icon"
+                    className="action-icon wa-action"
                     href={waHref(c)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="مشاركة عبر واتساب"
+                    title={
+                      c.status === "signed"
+                        ? "مشاركة العقد الموقّع عبر واتساب"
+                        : "إرسال دعوة / تذكير بالتوقيع عبر واتساب"
+                    }
                   >
                     <i className="fab fa-whatsapp" />
                   </a>
+                  <button
+                    className="action-icon"
+                    type="button"
+                    onClick={() => handleDuplicate(c)}
+                    title="تكرار العقد لعميل جديد (بنفس البنود والقيمة)"
+                  >
+                    <i className="fas fa-copy" />
+                  </button>
                   <Link
                     className="action-icon"
                     href={`/print/${c.id}`}

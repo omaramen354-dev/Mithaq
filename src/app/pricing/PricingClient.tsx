@@ -108,10 +108,17 @@ export default function PricingClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: pop.plan.id, method, txRef, senderName }),
       });
-      const j = (await res.json()) as { ok: boolean; message?: string };
+      const j = (await res.json()) as {
+        ok: boolean;
+        autoVerified?: boolean;
+        message?: string;
+      };
       if (res.ok && j.ok) {
         setMsg({ t: j.message || "تم إرسال طلبك بنجاح.", ok: true });
-        setTimeout(() => window.location.reload(), 1600);
+        setTimeout(() => {
+          if (j.autoVerified) window.location.assign("/dashboard");
+          else window.location.reload();
+        }, 1700);
       } else {
         setMsg({ t: j.message || "تعذر إرسال الطلب — حاول مجدداً.", ok: false });
       }
@@ -384,8 +391,8 @@ export default function PricingClient({
                         </button>
                       </div>
                       <div className="paypop-warn">
-                        <i className="fas fa-triangle-exclamation" />
-                        تأكد أن الشبكة TRC20 — أي شبكة أخرى يعني فقدان المبلغ.
+                        <i className="fas fa-bolt" />
+                        تأكد أن الشبكة TRC20 — عند لصق رقم العملية (TXID) يتحقق النظام من البلوكشين ويُفعّل باقتك تلقائياً خلال ثوانٍ.
                       </div>
                     </>
                   ) : (

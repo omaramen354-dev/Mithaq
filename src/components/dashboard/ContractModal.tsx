@@ -334,11 +334,20 @@ export default function ContractModal({ mode }: { mode: DashboardMode }) {
         setOpen(true);
       }
     };
+    const onDuplicate = (e: Event) => {
+      const d = (e as CustomEvent<GuestDraft>).detail;
+      if (!d) return;
+      fillFromDraft(d);
+      setNotice("📋 تم نسخ بيانات وبنود العقد السابق — أدخل اسم الطرف الثاني الجديد واحفظ.");
+      setOpen(true);
+    };
     window.addEventListener("mithaq:open-contract-modal", onOpen);
     window.addEventListener("mithaq:pick-type", onPick);
+    window.addEventListener("mithaq:duplicate-contract", onDuplicate);
     return () => {
       window.removeEventListener("mithaq:open-contract-modal", onOpen);
       window.removeEventListener("mithaq:pick-type", onPick);
+      window.removeEventListener("mithaq:duplicate-contract", onDuplicate);
     };
   }, []);
 

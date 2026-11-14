@@ -9,9 +9,11 @@ import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 import ContractModal from "@/components/dashboard/ContractModal";
 import ContractsTable from "@/components/dashboard/ContractsTable";
 import AccountOverview from "@/components/dashboard/AccountOverview";
+import OfficeBrandingCard from "@/components/dashboard/OfficeBrandingCard";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 import NewContractButton from "@/components/dashboard/NewContractButton";
 import { MithaqFooter } from "@/components/dashboard/MithaqSections";
+import { hasActiveOfficePlan } from "@/lib/branding";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -44,11 +46,14 @@ export default async function DashboardPage() {
       plan: users.plan,
       planExpiresAt: users.planExpiresAt,
       createdAt: users.createdAt,
+      isAdmin: users.isAdmin,
+      preferences: users.preferences,
     })
     .from(users)
     .where(eq(users.id, dbId))
     .limit(1);
   const me = meRows[0];
+  const canCustomizeBranding = me ? hasActiveOfficePlan(me) : false;
 
   const signedCount = rows.filter((c) => c.status === "signed").length;
 
@@ -100,6 +105,12 @@ export default async function DashboardPage() {
             planExpiresAt={me?.planExpiresAt?.toISOString() || null}
             contracts={rows}
             memberSince={me?.createdAt?.toISOString() || null}
+          />
+
+          <OfficeBrandingCard
+            canCustomize={canCustomizeBranding}
+            initialOfficeName={me?.preferences?.officeName || ""}
+            initialOfficeLogo={me?.preferences?.officeLogo || ""}
           />
 
           <section className="section dash-contracts reveal" id="contracts">

@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
+
 /* ============================================================
-   MithaqHeroButtons — إجراءات الهيرو (v4)
-   أُزيل منها منتقي أنواع العقود بطلب المستخدم — اختيار النوع
-   صار من السايدبار أو من قسم القوالب في الصفحة.
+   MithaqHeroButtons — إجراءات الهيرو (v5)
+   زر إنشاء عقد جديد + استعراض القوالب + معاينة عقد موقّع حي (/sample)
    ============================================================ */
 
 export default function MithaqHeroButtons() {
@@ -17,6 +18,10 @@ export default function MithaqHeroButtons() {
         <i className="fas fa-file-circle-plus" />
         إنشاء عقد جديد
       </button>
+      <Link className="btn btn-outline" href="/sample">
+        <i className="fas fa-file-signature" />
+        معاينة عقد موقّع
+      </Link>
       <button
         className="btn btn-outline"
         onClick={() =>

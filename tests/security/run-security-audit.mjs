@@ -122,6 +122,8 @@ const formatMod = await loadRouteModule("src/lib/format.ts");
 const qrMod = await loadRouteModule("src/lib/qr.ts");
 const plansMod = await loadRouteModule("src/lib/plans.ts");
 const telegramMod = await loadRouteModule("src/lib/telegram.ts");
+const tronVerifyMod = await loadRouteModule("src/lib/tron-verify.ts");
+const brandingMod = await loadRouteModule("src/lib/branding.ts");
 const whatsappMod = await loadRouteModule("src/lib/whatsapp.ts");
 const nextConfigMod = await loadRouteModule("next.config.ts");
 const authConfigMod = await loadRouteModule("src/auth.config.ts");
@@ -1963,6 +1965,183 @@ for (let i = 0; i < 600; i++) {
   const mc = cleanMoney(mRaw);
   const mn = numCanon(mc);
   secAssert(/^[0-9.]*$/.test(mc) && /^[0-9.]+$/.test(mn), "FUZZ-MONEY", "LOW", "cleanMoney/numCanon emitted non-numeric chars", `mc=${mc} mn=${mn}`);
+}
+
+endSuite();
+
+/* ============================================================
+   SUITE 10: Launch Upgrade Security Tests
+   (Strict $49 Office Logo Gate + PNG/JPEG Magic-Byte Anti-XSS +
+    TRON Base58Check / USDT TRC20 Verification + TXID Anti-Replay)
+   ============================================================ */
+startSuite("S10", "Launch Upgrades ($49 Office Gate, Logo XSS & USDT TRC20)");
+
+{
+  // 10.1 TRON Base58Check Checksum & Contract Address Verification
+  const officialHex = tronVerifyMod.tronBase58ToHex20("TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t");
+  secAssert(
+    officialHex === "a614f803b6fd780986a42c78ec9c7f77e6ded13c",
+    "TRON-01",
+    "HIGH",
+    "TRON Base58Check decoder failed on official USDT TRC20 contract",
+    `got=${officialHex}`
+  );
+  // Corrupted checksum address MUST return null
+  secAssert(
+    tronVerifyMod.tronBase58ToHex20("TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6u") === null,
+    "TRON-02",
+    "HIGH",
+    "TRON Base58Check decoder accepted corrupted checksum address"
+  );
+  // TXID validation rejects path traversal / SSRF / short strings
+  secAssert(
+    tronVerifyMod.isValidTronTxid("a".repeat(64)) === true &&
+      tronVerifyMod.isValidTronTxid("../admin") === false &&
+      tronVerifyMod.isValidTronTxid("a".repeat(63)) === false,
+    "TRON-03",
+    "HIGH",
+    "TRON TXID validator failed to enforce strict 64-hex format"
+  );
+
+  // 10.2 Strict $49 Office Branding Gate on PATCH /api/me
+  const validPngB64 = Buffer.from([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+  ]).toString("base64");
+  const validPngDataUrl = `data:image/png;base64,${validPngB64}`;
+  const svgXssDataUrl = `data:image/svg+xml;base64,${Buffer.from("<svg onload=alert(1)>").toString("base64")}`;
+  const fakePngDataUrl = `data:image/png;base64,${Buffer.from("<html><script>alert(1)</script></html>").toString("base64")}`;
+
+  // Lower plans (free, single, basic, verified, freelancer) + EXPIRED office MUST ALL get 403!
+  const blockedCases = [
+    { plan: "free", planExpiresAt: null, label: "free" },
+    { plan: "single", planExpiresAt: null, label: "single ($2)" },
+    { plan: "basic", planExpiresAt: new Date(Date.now() + 864e5), label: "basic ($5)" },
+    { plan: "verified", planExpiresAt: new Date(Date.now() + 864e5), label: "verified ($9)" },
+    { plan: "freelancer", planExpiresAt: new Date(Date.now() + 864e5), label: "freelancer ($15)" },
+    { plan: "office", planExpiresAt: new Date(Date.now() - 864e5), label: "expired office ($49)" },
+  ];
+
+  for (const tc of blockedCases) {
+    const state = resetMockState();
+    seedUsers(state);
+    const u = state.tables.users[0];
+    u.plan = tc.plan;
+    u.planExpiresAt = tc.planExpiresAt;
+    u.isAdmin = false;
+    state.session = sessFor(u);
+
+    const res = await routeMe.PATCH(
+      makeReq("https://miithaq.com/api/me", {
+        method: "PATCH",
+        json: { preferences: { officeName: "مكتب مزوّر", officeLogo: validPngDataUrl } },
+      })
+    );
+    secAssert(
+      res.status === 403,
+      "OFFICE-GATE-01",
+      "CRITICAL",
+      "Non-office or expired office user bypassed $49 office logo gate on PATCH /api/me",
+      `plan=${tc.label} => HTTP ${res.status}`
+    );
+  }
+
+  // Active $49 office user: SVG XSS & spoofed PNG magic bytes MUST be rejected with 422!
+  {
+    const state = resetMockState();
+    seedUsers(state);
+    const u = state.tables.users[0];
+    u.plan = "office";
+    u.planExpiresAt = new Date(Date.now() + 30 * 864e5);
+    u.isAdmin = false;
+    state.session = sessFor(u);
+
+    const resSvg = await routeMe.PATCH(
+      makeReq("https://miithaq.com/api/me", {
+        method: "PATCH",
+        json: { preferences: { officeLogo: svgXssDataUrl } },
+      })
+    );
+    secAssert(
+      resSvg.status === 422,
+      "OFFICE-XSS-01",
+      "CRITICAL",
+      "PATCH /api/me accepted SVG XSS payload in officeLogo",
+      `SVG => HTTP ${resSvg.status}`
+    );
+
+    const resFake = await routeMe.PATCH(
+      makeReq("https://miithaq.com/api/me", {
+        method: "PATCH",
+        json: { preferences: { officeLogo: fakePngDataUrl } },
+      })
+    );
+    secAssert(
+      resFake.status === 422,
+      "OFFICE-XSS-02",
+      "HIGH",
+      "PATCH /api/me accepted HTML spoofed as PNG in officeLogo",
+      `Fake PNG => HTTP ${resFake.status}`
+    );
+
+    // Valid PNG + officeName MUST succeed with 200!
+    const resOk = await routeMe.PATCH(
+      makeReq("https://miithaq.com/api/me", {
+        method: "PATCH",
+        json: { preferences: { officeName: "مكتب النور العقاري", officeLogo: validPngDataUrl } },
+      })
+    );
+    secAssert(
+      resOk.status === 200,
+      "OFFICE-OK-01",
+      "HIGH",
+      "Active $49 office user failed to save valid PNG office logo",
+      `Active office valid PNG => HTTP ${resOk.status}`
+    );
+
+    // hasActiveOfficePlan unit check
+    secAssert(
+      brandingMod.hasActiveOfficePlan({ plan: "office", planExpiresAt: new Date(Date.now() + 3600_000), isAdmin: false }) === true &&
+        brandingMod.hasActiveOfficePlan({ plan: "freelancer", planExpiresAt: new Date(Date.now() + 3600_000), isAdmin: false }) === false,
+      "OFFICE-GATE-02",
+      "HIGH",
+      "hasActiveOfficePlan helper returned unexpected result"
+    );
+  }
+
+  // 10.3 Global TXID Anti-Replay across two different accounts on POST /api/payment-requests
+  {
+    const state = resetMockState();
+    seedUsers(state);
+    const sharedTx = "TX-REPLAY-TEST-9876543210";
+
+    // Account 1 submits ShamCash receipt
+    state.session = sessFor(state.tables.users[0]);
+    const r1 = await routePayReqs.POST(
+      makeReq("https://miithaq.com/api/payment-requests", {
+        method: "POST",
+        json: { plan: "basic", method: "shamcash", txRef: sharedTx, senderName: "أحمد" },
+      })
+    );
+    secAssert(r1.status === 201, "PAY-REPLAY-SETUP", "MEDIUM", "Initial payment request failed", `HTTP ${r1.status}`);
+
+    // Account 2 tries to replay the EXACT same txRef -> MUST be blocked with 409!
+    state.session = sessFor(state.tables.users[1]);
+    const r2 = await routePayReqs.POST(
+      makeReq("https://miithaq.com/api/payment-requests", {
+        method: "POST",
+        json: { plan: "office", method: "shamcash", txRef: sharedTx, senderName: "محتال" },
+      })
+    );
+    secAssert(
+      r2.status === 409,
+      "PAY-REPLAY-01",
+      "CRITICAL",
+      "POST /api/payment-requests allowed replaying same txRef across a second user account!",
+      `Account 2 replay => HTTP ${r2.status}`
+    );
+  }
 }
 
 endSuite();
