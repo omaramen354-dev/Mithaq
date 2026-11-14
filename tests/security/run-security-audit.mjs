@@ -142,6 +142,10 @@ const routeGuestPrompt = await loadRouteModule("src/app/api/guest-prompt/route.t
 const routeHealth = await loadRouteModule("src/app/api/health/route.ts");
 const routeCron = await loadRouteModule("src/app/api/cron/expire-plans/route.ts");
 const routeAdminUsers = await loadRouteModule("src/app/api/admin/users/route.ts");
+const routeAdminUserContracts = await loadRouteModule("src/app/api/admin/users/[id]/contracts/route.ts");
+const routeAdminContracts = await loadRouteModule("src/app/api/admin/contracts/route.ts");
+const routeAdminContractId = await loadRouteModule("src/app/api/admin/contracts/[id]/route.ts");
+const routeAdminTelegramTest = await loadRouteModule("src/app/api/admin/telegram-test/route.ts");
 const routeAdminTx = await loadRouteModule("src/app/api/admin/transactions/route.ts");
 const routeAdminPay = await loadRouteModule("src/app/api/admin/payment-requests/route.ts");
 const routeAdminLogs = await loadRouteModule("src/app/api/admin/logs/route.ts");
@@ -1702,7 +1706,80 @@ const VALID_PNG_DATA = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCA
   else process.env.CRON_SECRET = origSecret;
 }
 
-// --- 7.15 Guest Prompt XFF Table Flooding (25 tests) ---
+// --- 7.15 New Admin Command Center Endpoints + Single-Plan Verify Guard ---
+{
+  const state = resetMockState();
+  seedUsers(state);
+  const alice = state.tables.users[0];
+  const admin = state.tables.users[3];
+
+  // Unauthenticated & non-admin MUST get 403 on all new admin endpoints
+  for (const [who, sess] of [["guest", null], ["non-admin", sessFor(alice)]]) {
+    state.session = sess;
+    const r1 = await routeAdminTelegramTest.POST();
+    const r2 = await routeAdminUserContracts.GET(makeReq(`https://miithaq.com/api/admin/users/${USER_A_ID}/contracts`), { params: Promise.resolve({ id: USER_A_ID }) });
+    const r3 = await routeAdminContracts.GET(makeReq("https://miithaq.com/api/admin/contracts"));
+    const r4 = await routeAdminContractId.DELETE(makeReq(`https://miithaq.com/api/admin/contracts/${USER_A_ID}`, { method: "DELETE" }), { params: Promise.resolve({ id: USER_A_ID }) });
+    for (const [name, res] of [["telegram-test", r1], ["user-contracts", r2], ["admin-contracts", r3], ["admin-contract-del", r4]]) {
+      secAssert(res.status === 403, "ADMIN-NEW-AUTHZ", "CRITICAL", `New admin endpoint ${name} allowed ${who}`, `${who} got HTTP ${res.status}`);
+      secAssert((res.headers.get("cache-control") || "").includes("no-store"), "ADMIN-NEW-CACHE", "LOW", `New admin endpoint ${name} missing no-store`);
+    }
+  }
+
+  // Admin: invalid UUIDs must return 422 cleanly (never 500)
+  state.session = sessFor(admin);
+  const badU = await routeAdminUserContracts.GET(makeReq("https://miithaq.com/api/admin/users/bad-id/contracts"), { params: Promise.resolve({ id: "bad-id" }) });
+  const badC = await routeAdminContractId.DELETE(makeReq("https://miithaq.com/api/admin/contracts/bad-id", { method: "DELETE" }), { params: Promise.resolve({ id: "bad-id" }) });
+  secAssert(badU.status === 422 && badC.status === 422, "ADMIN-NEW-UUID", "MEDIUM", "New admin routes did not reject non-UUID with 422", `u=${badU.status}, c=${badC.status}`);
+
+  // Admin: delete contract succeeds and writes audit log
+  state.session = sessFor(alice);
+  const created = await routeContracts.POST(makeReq("https://miithaq.com/api/contracts", {
+    method: "POST",
+    json: { type: "sale", party1: "Alice", party2: "Bob", party2Email: "bob@example.com" },
+  }));
+  const createdBody = await created.json();
+  const cid = createdBody.contract.id;
+
+  state.session = sessFor(admin);
+  const ucRes = await routeAdminUserContracts.GET(makeReq(`https://miithaq.com/api/admin/users/${USER_A_ID}/contracts`), { params: Promise.resolve({ id: USER_A_ID }) });
+  const ucBody = await ucRes.json();
+  secAssert(ucRes.status === 200 && ucBody.contracts.some((c) => c.id === cid), "ADMIN-USER-CONTRACTS", "MEDIUM", "Admin user contracts endpoint did not return user's contract");
+
+  const delRes = await routeAdminContractId.DELETE(makeReq(`https://miithaq.com/api/admin/contracts/${cid}`, { method: "DELETE" }), { params: Promise.resolve({ id: cid }) });
+  secAssert(delRes.status === 200 && !state.tables.contracts.some((c) => c.id === cid), "ADMIN-CONTRACT-DEL", "MEDIUM", "Admin contract DELETE failed");
+  secAssert(state.tables.activity_logs.some((l) => l.action === "admin_contract_deleted" && l.entityId === cid), "ADMIN-CONTRACT-DEL-LOG", "MEDIUM", "Admin contract DELETE did not record audit log");
+
+  // Single-plan billing integrity: instant checkout -> use 1 contract -> admin verify MUST keep isSingleUsed=true!
+  state.session = sessFor(alice);
+  const chkS = await routeCheckout.POST(makeReq("https://miithaq.com/api/checkout", {
+    method: "POST",
+    json: { planId: "single", transactionNumber: "5566778899", contactPhone: "0933998877" },
+  }));
+  secAssert(chkS.status === 200 && alice.plan === "single" && alice.isSingleUsed === false, "SINGLE-CHK", "MEDIUM", "Single plan checkout failed");
+
+  const use1 = await routeContracts.POST(makeReq("https://miithaq.com/api/contracts", {
+    method: "POST",
+    json: { type: "pledge", party1: "Alice", party2: "Bob", party2Email: "bob@example.com" },
+  }));
+  secAssert(use1.status === 201 && alice.isSingleUsed === true, "SINGLE-USE", "MEDIUM", "Single plan contract consumption failed");
+
+  const singleTx = state.tables.transactions.find((t) => t.transactionNumber === "5566778899");
+  state.session = sessFor(admin);
+  const verS = await routeAdminTx.POST(makeReq("https://miithaq.com/api/admin/transactions", {
+    method: "POST",
+    json: { id: singleTx.id, action: "verify" },
+  }));
+  secAssert(
+    verS.status === 200 && alice.isSingleUsed === true,
+    "SINGLE-VERIFY-PRESERVE",
+    "HIGH",
+    "Admin evening verify reset isSingleUsed=false on an already-consumed single plan, granting a free extra contract",
+    `After verify: alice.plan=${alice.plan}, isSingleUsed=${alice.isSingleUsed}`
+  );
+}
+
+// --- 7.16 Guest Prompt XFF Table Flooding (25 tests) ---
 {
   const state = resetMockState();
   state.session = null;

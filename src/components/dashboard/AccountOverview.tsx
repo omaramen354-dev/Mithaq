@@ -119,7 +119,8 @@ export default function AccountOverview({
               </span>
             ) : paid ? (
               <span>
-                <i className="fas fa-infinity" /> دفعة واحدة — بلا انتهاء
+                <i className="fas fa-file-circle-check" />{" "}
+                {plan === "single" ? "دفعة واحدة — لعقد واحد كامل المزايا" : "باقة مفعّلة"}
               </span>
             ) : (
               <span>

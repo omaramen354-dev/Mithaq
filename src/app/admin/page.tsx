@@ -2,14 +2,16 @@ import Link from "next/link";
 import { auth, signOut, adminEmails } from "@/lib/auth";
 import { isAdminUser } from "@/lib/admin-guard";
 import { db } from "@/db";
-import { contracts, paymentRequests, users } from "@/db/schema";
-import { desc, eq, ne, sql } from "drizzle-orm";
+import { contracts, paymentRequests, transactions, users } from "@/db/schema";
+import { desc, eq, gte, ne, sql } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
-import { arDate } from "@/lib/format";
+import { findPlan } from "@/lib/plans";
+import { telegramConfigured } from "@/lib/telegram";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 import TransactionsManager from "./TransactionsManager";
 import PaymentsManager from "./PaymentsManager";
 import UsersManager from "./UsersManager";
+import ContractsManager from "./ContractsManager";
 import LogsManager from "./LogsManager";
 import ErrorsManager from "./ErrorsManager";
 import TelegramTestButton from "./TelegramTestButton";
@@ -23,10 +25,67 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 /* ============================================================
-   /admin — لوحة الإدارة (صفحة مستقلة بهوية ميثاق الكاملة)
-   متاحة فقط للمشرفين (isAdmin من الجلسة). غير المشرف يرى شاشة قفل.
-   تعرض نبض المنصة الحي: العقود والتوقيعات والمستخدمين والمشتركين.
+   /admin — مركز قيادة منصة ميثاق (صفحة مستقلة بهوية ميثاق الكاملة)
+   - شريط جاهزية الإطلاق (فحص متغيرات شام كاش / USDT / تيليجرام / واتساب / الكرون)
+   - 6 بطاقات KPI تنفيذية (العقود، الإيرادات الموثقة، قيد المراجعة، المستخدمون، المشتركون، نسبة التوقيع)
+   - مخطط نبض النمو لآخر 14 يوماً (عقود + تسجيلات جديدة يومياً)
+   - إدارة المستخدمين المطوّرة + معاملات شام كاش + طلبات USDT + مستكشف كل العقود + السجل + الأخطاء
    ============================================================ */
+
+function computeReadiness() {
+  const shamAcc = (process.env.NEXT_PUBLIC_SHAM_CASH_ACCOUNT || "").trim();
+  const shamName = (process.env.NEXT_PUBLIC_SHAM_CASH_NAME || "").trim();
+  const usdt = (process.env.NEXT_PUBLIC_USDT_TRC20_ADDRESS || "").trim();
+  const wa = (process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "").trim();
+  const cron = (process.env.CRON_SECRET || "").trim();
+
+  const items = [
+    {
+      id: "shamcash",
+      label: "شام كاش",
+      ok: /^\d{6,}$/.test(shamAcc) && shamName.length >= 2,
+      hint: "NEXT_PUBLIC_SHAM_CASH_ACCOUNT + NAME",
+      icon: "fa-money-bill-transfer",
+    },
+    {
+      id: "usdt",
+      label: "محفظة USDT",
+      ok: /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(usdt),
+      hint: "NEXT_PUBLIC_USDT_TRC20_ADDRESS",
+      icon: "fa-coins",
+    },
+    {
+      id: "whatsapp",
+      label: "واتساب الدعم",
+      ok: /^\d{8,15}$/.test(wa),
+      hint: "NEXT_PUBLIC_SUPPORT_WHATSAPP",
+      icon: "fab fa-whatsapp",
+    },
+    {
+      id: "telegram",
+      label: "بوت تيليجرام",
+      ok: telegramConfigured(),
+      hint: "TELEGRAM_BOT_TOKEN + CHAT_ID",
+      icon: "fab fa-telegram",
+    },
+    {
+      id: "cron",
+      label: "الكرون التلقائي",
+      ok: cron.length >= 16,
+      hint: "CRON_SECRET",
+      icon: "fa-clock",
+    },
+    {
+      id: "db",
+      label: "قاعدة البيانات",
+      ok: true,
+      hint: "Neon Postgres متصل",
+      icon: "fa-database",
+    },
+  ];
+  const readyCount = items.filter((i) => i.ok).length;
+  return { items, readyCount, total: items.length };
+}
 
 export default async function AdminPage() {
   const session = await auth();
@@ -49,29 +108,35 @@ export default async function AdminPage() {
               حسابك: <bdi>{session.user.email}</bdi>
             </p>
           ) : (
-            <a className="btn btn-primary" href="/login">
+            <Link className="btn btn-primary" href="/login">
               <i className="fas fa-right-to-bracket" />
               تسجيل الدخول
-            </a>
+            </Link>
           )}
-          <a className="admin-gate-back" href="/">
+          <Link className="admin-gate-back" href="/">
             ← العودة إلى المنصة
-          </a>
+          </Link>
         </div>
       </main>
     );
   }
 
-  /* ===== إحصائيات حية ===== */
+  const fourteenDaysAgo = new Date(Date.now() - 13 * 864e5);
+  fourteenDaysAgo.setUTCHours(0, 0, 0, 0);
+
+  /* ===== إحصائيات حية متوازية ===== */
   const [
     totalContracts,
     signedContracts,
     partialContracts,
     totalUsers,
     premiumUsers,
-    recentContracts,
+    verifiedTxs,
+    unverifiedTxCount,
     typeCounts,
     payReqs,
+    recentContractDates,
+    recentUserDates,
   ] = await Promise.all([
     db.select({ n: sql<number>`count(*)::int` }).from(contracts),
     db
@@ -88,10 +153,13 @@ export default async function AdminPage() {
       .from(users)
       .where(ne(users.plan, "free")),
     db
-      .select()
-      .from(contracts)
-      .orderBy(desc(contracts.createdAt))
-      .limit(8),
+      .select({ planName: transactions.planName })
+      .from(transactions)
+      .where(eq(transactions.status, "verified")),
+    db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(transactions)
+      .where(eq(transactions.status, "unverified")),
     db
       .select({
         type: contracts.type,
@@ -100,33 +168,133 @@ export default async function AdminPage() {
       .from(contracts)
       .groupBy(contracts.type)
       .orderBy(desc(sql`count(*)`))
-      .limit(5),
-    /* طلبات الدفع — أولاً المعلقة ثم الأحدث */
+      .limit(6),
     db
       .select()
       .from(paymentRequests)
       .orderBy(desc(paymentRequests.createdAt))
       .limit(30),
+    db
+      .select({ createdAt: contracts.createdAt })
+      .from(contracts)
+      .where(gte(contracts.createdAt, fourteenDaysAgo)),
+    db
+      .select({ createdAt: users.createdAt })
+      .from(users)
+      .where(gte(users.createdAt, fourteenDaysAgo)),
   ]);
 
-  const draftContracts = totalContracts[0].n - signedContracts[0].n - partialContracts[0].n;
+  /* ===== الإيرادات الموثّقة (شام كاش موثّق + USDT مدفوع دون تكرار) ===== */
+  const shamRevenueUsd = verifiedTxs.reduce((acc, t) => {
+    const p = findPlan(t.planName) || findPlan(t.planName.toLowerCase());
+    return acc + (p?.priceUsd || 0);
+  }, 0);
+  const usdtRevenueUsd = payReqs
+    .filter((r) => r.status === "paid" && r.method === "usdt")
+    .reduce((acc, r) => acc + (Number(r.amountUsd) || 0), 0);
+  const totalRevenueUsd = shamRevenueUsd + usdtRevenueUsd;
+
+  const pendingPayReqs = payReqs.filter(
+    (r) => r.status === "pending" || r.status === "manual_review"
+  ).length;
+  const totalPendingAudit = (unverifiedTxCount[0]?.n || 0) + pendingPayReqs;
+
+  const totalC = totalContracts[0]?.n || 0;
+  const signedC = signedContracts[0]?.n || 0;
+  const partialC = partialContracts[0]?.n || 0;
+  const totalU = totalUsers[0]?.n || 0;
+  const paidU = premiumUsers[0]?.n || 0;
+
+  const signRate = totalC > 0 ? Math.round((signedC / totalC) * 100) : 0;
+  const convRate = totalU > 0 ? Math.round((paidU / totalU) * 100) : 0;
   const maxType = typeCounts[0]?.n || 1;
   const admins = adminEmails();
+  const readiness = computeReadiness();
+  const missingPayments = readiness.items.filter(
+    (i) => (i.id === "shamcash" || i.id === "usdt") && !i.ok
+  );
+
+  /* ===== بيانات نبض النمو اليومي لآخر 14 يوماً ===== */
+  const dayBuckets: { key: string; label: string; contracts: number; users: number }[] = [];
+  const bucketMap = new Map<string, { contracts: number; users: number }>();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 864e5);
+    const key = d.toISOString().slice(0, 10);
+    const label = `${d.getUTCDate()}/${d.getUTCMonth() + 1}`;
+    const entry = { contracts: 0, users: 0 };
+    bucketMap.set(key, entry);
+    dayBuckets.push({ key, label, contracts: 0, users: 0 });
+  }
+  for (const r of recentContractDates) {
+    const k = r.createdAt.toISOString().slice(0, 10);
+    const b = bucketMap.get(k);
+    if (b) b.contracts++;
+  }
+  for (const r of recentUserDates) {
+    const k = r.createdAt.toISOString().slice(0, 10);
+    const b = bucketMap.get(k);
+    if (b) b.users++;
+  }
+  for (const d of dayBuckets) {
+    const b = bucketMap.get(d.key);
+    if (b) {
+      d.contracts = b.contracts;
+      d.users = b.users;
+    }
+  }
+  const maxDaily = Math.max(
+    1,
+    ...dayBuckets.map((d) => Math.max(d.contracts, d.users))
+  );
 
   const stats = [
-    { icon: "fa-file-contract", label: "إجمالي العقود", value: totalContracts[0].n },
-    { icon: "fa-file-signature", label: "موقّعة بالكامل", value: signedContracts[0].n, gold: true },
-    { icon: "fa-pen-nib", label: "بانتظار توقيع الثاني", value: partialContracts[0].n },
-    { icon: "fa-inbox", label: "مسودات", value: draftContracts },
-    { icon: "fa-users", label: "المستخدمون", value: totalUsers[0].n },
-    { icon: "fa-crown", label: "مشتركون Premium", value: premiumUsers[0].n, gold: true },
+    {
+      icon: "fa-file-contract",
+      label: "إجمالي العقود",
+      value: totalC,
+      sub: `${partialC} بانتظار الثاني`,
+    },
+    {
+      icon: "fa-file-signature",
+      label: "موقّعة بالكامل",
+      value: signedC,
+      sub: `نسبة إتمام ${signRate}%`,
+      gold: true,
+    },
+    {
+      icon: "fa-users",
+      label: "المستخدمون",
+      value: totalU,
+      sub: `تحويل ${convRate}% لمدفوع`,
+    },
+    {
+      icon: "fa-crown",
+      label: "مشتركون نشطون",
+      value: paidU,
+      sub: "باقات مدفوعة فعّالة",
+      gold: true,
+    },
+    {
+      icon: "fa-sack-dollar",
+      label: "الإيرادات الموثّقة",
+      value: `$${totalRevenueUsd}`,
+      sub: `${(totalRevenueUsd * 15000).toLocaleString("en-US")} ل.س`,
+      gold: true,
+    },
+    {
+      icon: "fa-bell",
+      label: "بانتظار تدقيقك",
+      value: totalPendingAudit,
+      sub: totalPendingAudit > 0 ? "راجع معاملات اليوم" : "كل الحوالات مدقّقة ✓",
+      alert: totalPendingAudit > 0,
+    },
   ];
 
   return (
     <main className="admin-page">
       <RevealOnScroll />
 
-      {/* رأس اللوحة */}
+      {/* رأس اللوحة الفاخر */}
       <header className="admin-header">
         <div className="admin-header-inner">
           <div className="admin-identity">
@@ -135,16 +303,19 @@ export default async function AdminPage() {
               <img src="/mithaq-logo-transparent.svg" alt="شعار ميثاق" width={50} height={50} />
             </span>
             <div>
-              <div className="admin-kicker">منصة ميثاق — الإدارة</div>
+              <div className="admin-kicker">
+                <i className="fas fa-crown" style={{ marginLeft: 6 }} />
+                مركز قيادة ميثاق — الإدارة التنفيذية
+              </div>
               <h1 className="admin-title">نبض المنصة، لحظة بلحظة</h1>
             </div>
           </div>
           <div className="admin-header-actions">
             <TelegramTestButton />
-            <a className="btn btn-outline" href="/">
+            <Link className="btn btn-outline" href="/">
               <i className="fas fa-house" />
               المنصة
-            </a>
+            </Link>
             <form
               action={async () => {
                 "use server";
@@ -158,33 +329,127 @@ export default async function AdminPage() {
             </form>
           </div>
         </div>
+
+        {/* شريط جاهزية الإطلاق والربط */}
+        <div className="admin-readiness-bar">
+          <div className="arb-head">
+            <i className="fas fa-shield-halved" />
+            <span>
+              جاهزية الإطلاق:{" "}
+              <b>
+                {readiness.readyCount}/{readiness.total}
+              </b>
+            </span>
+          </div>
+          <div className="arb-pills">
+            {readiness.items.map((item) => (
+              <span
+                key={item.id}
+                className={`arb-pill ${item.ok ? "ok" : "miss"}`}
+                title={item.ok ? `${item.label} مفعّل وجاهز` : `أضف ${item.hint} في Vercel`}
+              >
+                <i className={item.icon.startsWith("fab ") ? item.icon : `fas ${item.icon}`} />
+                <span>{item.label}</span>
+                <i className={`fas ${item.ok ? "fa-circle-check" : "fa-circle-xmark"} arb-st`} />
+              </span>
+            ))}
+          </div>
+        </div>
       </header>
 
-      {/* بطاقات الإحصائيات */}
+      {/* بطاقات الإحصائيات التنفيذية */}
       <section className="admin-stats reveal">
         {stats.map((s) => (
-          <div className={`admin-stat${s.gold ? " gold" : ""}`} key={s.label}>
+          <div
+            className={`admin-stat${s.gold ? " gold" : ""}${s.alert ? " alert" : ""}`}
+            key={s.label}
+          >
             <div className="admin-stat-icon">
               <i className={`fas ${s.icon}`} />
             </div>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div className="admin-stat-value">{s.value}</div>
               <div className="admin-stat-label">{s.label}</div>
+              <div className="admin-stat-sub">{s.sub}</div>
             </div>
           </div>
         ))}
       </section>
 
-      {/* المستخدمون — إدارة كاملة: بحث، فلترة، ترقية باقات، صلاحيات */}
+      {/* تنبيه ذكي عند نقص بيانات المحافظ قبل إطلاق البيع */}
+      {missingPayments.length > 0 && (
+        <section className="admin-launch-banner reveal">
+          <div className="alb-icon">
+            <i className="fas fa-wallet" />
+          </div>
+          <div className="alb-body">
+            <b>بوابة استقبال المدفوعات بحاجة لاستكمال الربط في Vercel:</b>{" "}
+            <span>
+              المفقود حالياً:{" "}
+              {missingPayments.map((m) => `${m.label} (${m.hint})`).join(" · ")}. بمجرد
+              إضافتها في إعدادات Vercel وإعادة النشر ستتحول الشارات أعلاه إلى الأخضر ويفتح
+              الدفع للعملاء تلقائياً.
+            </span>
+          </div>
+        </section>
+      )}
+
+      {/* مخطط نبض النمو لآخر 14 يوماً */}
+      <section
+        className="admin-panel admin-pulse-panel reveal"
+        style={{ maxWidth: 1160, margin: "18px auto 0" }}
+      >
+        <div className="admin-panel-head" style={{ justifyContent: "space-between", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+            <i className="fas fa-chart-line" />
+            <h2>نبض النمو — آخر 14 يوماً</h2>
+          </div>
+          <div className="pulse-legend">
+            <span>
+              <i className="pulse-dot contracts" /> عقود جديدة ({recentContractDates.length})
+            </span>
+            <span>
+              <i className="pulse-dot users" /> تسجيلات جديدة ({recentUserDates.length})
+            </span>
+          </div>
+        </div>
+
+        <div className="admin-pulse-chart" role="img" aria-label="مخطط العقود والتسجيلات اليومية لآخر 14 يوماً">
+          {dayBuckets.map((d) => (
+            <div className="pulse-col" key={d.key} title={`${d.key}: ${d.contracts} عقد · ${d.users} مستخدم`}>
+              <div className="pulse-bars">
+                <span
+                  className="pulse-bar contracts"
+                  style={{
+                    height: `${d.contracts > 0 ? Math.max(12, Math.round((d.contracts / maxDaily) * 100)) : 4}%`,
+                    opacity: d.contracts > 0 ? 1 : 0.22,
+                  }}
+                >
+                  {d.contracts > 0 && <em>{d.contracts}</em>}
+                </span>
+                <span
+                  className="pulse-bar users"
+                  style={{
+                    height: `${d.users > 0 ? Math.max(12, Math.round((d.users / maxDaily) * 100)) : 4}%`,
+                    opacity: d.users > 0 ? 1 : 0.22,
+                  }}
+                >
+                  {d.users > 0 && <em>{d.users}</em>}
+                </span>
+              </div>
+              <span className="pulse-day">{d.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* المستخدمون — إدارة كاملة مع العدّاد الدقيق + درج العقود + تصدير CSV */}
       <UsersManager currentAdminId={session?.user?.dbId || ""} />
 
       {/* معاملات شام كاش — قائمتا unverified/verified مع أزرار التأكيد والتجميد وواتساب */}
       <TransactionsManager />
 
-      {/* لوحة الأخطاء الحية — أي عطل يُلتقط تلقائياً ويظهر هنا */}
-      <ErrorsManager />
-
-      {/* طلبات الدفع — تأكيد يدوي آمن */}
+      {/* طلبات الدفع — USDT / شام كاش */}
       <PaymentsManager
         requests={payReqs.map((r) => ({
           id: r.id,
@@ -198,62 +463,14 @@ export default async function AdminPage() {
         }))}
       />
 
-      <div className="admin-grid">
-        {/* أحدث العقود */}
-        <section className="admin-panel reveal">
-          <div className="admin-panel-head">
-            <i className="fas fa-clock-rotate-left" />
-            <h2>أحدث العقود</h2>
-          </div>
-          {recentContracts.length === 0 ? (
-            <div className="admin-empty">لا توجد عقود بعد — أول عقد سيظهر هنا فوراً.</div>
-          ) : (
-            <ul className="admin-list">
-              {recentContracts.map((c) => (
-                <li key={c.id}>
-                  <Link
-                    className="admin-row"
-                    href={`/admin/contracts/${c.id}`}
-                    title="معاينة العقد"
-                  >
-                    <div className="admin-row-main">
-                      <span className="admin-row-title">
-                        عقد {contractTypeName(c.type)}
-                        <i
-                          className="fas fa-eye"
-                          style={{ fontSize: 11, marginInlineStart: 7, color: "var(--gold-dark)" }}
-                        />
-                      </span>
-                      <span className="admin-row-parties">
-                        {c.party1Name} ↔ {c.party2Name}
-                      </span>
-                    </div>
-                    <div className="admin-row-side">
-                      <span
-                        className={`admin-badge ${
-                          c.status === "signed"
-                            ? "b-signed"
-                            : c.status === "partially_signed"
-                              ? "b-partial"
-                              : "b-draft"
-                        }`}
-                      >
-                        {c.status === "signed"
-                          ? "موقّع ✓"
-                          : c.status === "partially_signed"
-                            ? "نصف موقّع"
-                            : "مسودة"}
-                      </span>
-                      <span className="admin-row-date">{arDate(c.createdAt)}</span>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+      {/* لوحة الأخطاء الحية — أي عطل يُلتقط تلقائياً ويظهر هنا */}
+      <ErrorsManager />
 
-        {/* الجانب: أنواع العقود + المشرفون */}
+      <div className="admin-grid">
+        {/* مستكشف كل العقود (بحث + فلترة + معاينة + حذف العقود التجريبية) */}
+        <ContractsManager />
+
+        {/* الجانب: سجل الأحداث + أكثر القوالب + المشرفون */}
         <div className="admin-side">
           <LogsManager />
 
@@ -309,7 +526,7 @@ export default async function AdminPage() {
       </div>
 
       <footer className="admin-footer">
-        <span className="gold">مِــيــثَــاق</span> — لوحة الإدارة · البيانات مباشرة من Neon
+        <span className="gold">مِــيــثَــاق</span> — مركز القيادة · البيانات مباشرة من Neon
       </footer>
     </main>
   );
