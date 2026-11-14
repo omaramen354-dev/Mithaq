@@ -7,8 +7,9 @@ import { users } from "@/db/schema";
 
 /* ============================================================
    Auth.js v5 — مصادقة Google مع مزامنة جدول users في Neon
-   (إعداد يدوي بدل Drizzle Adapter لأن جدولنا مخصص:
-   googleId + preferences + plan — ونملؤه بأنفسنا)
+   - يتحقق من email_verified === true في حساب Google
+   - يعمل بوضع Fail-Closed عند تعذر مزامنة المستخدم في قاعدة البيانات
+   - الصلاحية الإدارية تُقاس حياً عبر admin-guard ولا تُثبّت بشكل ملتصق
    ============================================================ */
 
 declare module "next-auth" {
@@ -47,8 +48,8 @@ async function syncUser(profile: {
   email?: string | null;
   picture?: string | null;
 }): Promise<DbSyncResult> {
-  const email = (profile.email || "").toLowerCase();
-  if (!email) return null;
+  const email = (profile.email || "").toLowerCase().trim();
+  if (!email || !profile.sub) return null;
   const admins = adminEmails();
   const isAdminFlag = admins.includes(email);
 
@@ -61,14 +62,18 @@ async function syncUser(profile: {
   if (existing.length) {
     const now = new Date();
 
-    /* شبكة أمان: الاشتراك الشهري المنتهي يُعاد للمجانية فوراً عند
-       أول دخول — حتى قبل موعد كرون Vercel اليومي */
-    const monthly =
-      existing[0].plan === "freelancer" || existing[0].plan === "office";
+    /* شبكة أمان: أي اشتراك محدد المدة منتهٍ يُعاد للمجانية فوراً عند أول دخول */
+    const timedPlan =
+      existing[0].plan !== "free" && existing[0].plan !== "single";
     const planExpired =
-      monthly &&
+      timedPlan &&
       existing[0].planExpiresAt !== null &&
       existing[0].planExpiresAt.getTime() < now.getTime();
+
+    /* إذا كانت قائمة ADMIN_EMAILS مضبوطة، يُمنح المشرف تلقائياً لمن فيها،
+       ولا تلتصق الصلاحية قسراً عند إزالته من ADMIN_EMAILS إلا إذا رُقّي
+       يدوياً من داخل قاعدة البيانات (حارس المشرف يقرأ من DB مباشرة) */
+    const nextIsAdmin = admins.length > 0 ? isAdminFlag : existing[0].isAdmin;
 
     const updated = await db
       .update(users)
@@ -76,7 +81,7 @@ async function syncUser(profile: {
         name: profile.name || existing[0].name,
         email,
         picture: profile.picture || existing[0].picture,
-        isAdmin: isAdminFlag || existing[0].isAdmin,
+        isAdmin: nextIsAdmin,
         lastSeenAt: now,
         ...(planExpired ? { plan: "free", planExpiresAt: null } : {}),
       })
@@ -85,9 +90,7 @@ async function syncUser(profile: {
     return { dbId: updated[0].id, isAdmin: updated[0].isAdmin };
   }
 
-  /* لا ترقية تلقائية لأول مستخدم: المشرفية تُمنح حصراً عبر
-     ADMIN_EMAILS (أو يدوياً في قاعدة البيانات). الترقية التلقائية
-     كانت تمنح أول من يسجّل في قاعدة فارغة سيطرة كاملة على المنصة. */
+  /* لا ترقية تلقائية لأول مستخدم: المشرفية تُمنح حصراً عبر ADMIN_EMAILS */
   const inserted = await db
     .insert(users)
     .values({
@@ -109,7 +112,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, profile }) {
+    async signIn({ user, profile, account }) {
+      /* رفض حسابات Google غير المؤكَّد بريدها الإلكتروني */
+      if (
+        account?.provider === "google" &&
+        profile &&
+        "email_verified" in profile &&
+        profile.email_verified !== true
+      ) {
+        return false;
+      }
+
       try {
         const synced = await syncUser({
           sub: profile?.sub || user.id || "",
@@ -117,13 +130,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: profile?.email ?? user.email,
           picture: profile?.picture ?? user.image,
         });
+        if (!synced) return false;
         /* نمرّر نتائج المزامنة إلى jwt callback عبر user */
         (user as { dbSync?: DbSyncResult }).dbSync = synced;
         return true;
       } catch (error) {
         console.error("syncUser failed:", error);
-        /* لا نمنع الدخول إذا فشل الوصول لقاعدة البيانات */
-        return true;
+        /* Fail-Closed: لا نسمح بإنشاء جلسة ناقصة بلا dbId */
+        return false;
       }
     },
     async jwt({ token, user }) {

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { contracts, signatureEvents } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -6,6 +6,7 @@ import { contractFingerprint } from "@/lib/contract-hash";
 import { decodeShareToken } from "@/lib/share-token";
 import { maskEmail } from "@/lib/format";
 import { isOwnerSuspended } from "@/lib/mithaq-guard";
+import { noStoreJson } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 
@@ -34,10 +35,15 @@ export async function GET(
       subject: contracts.subject,
       notes: contracts.notes,
       createdAt: contracts.createdAt,
+      sig1Name: contracts.sig1Name,
+      sig1DataUrl: contracts.sig1DataUrl,
       sig1SignedAt: contracts.sig1SignedAt,
+      sig2Name: contracts.sig2Name,
+      sig2DataUrl: contracts.sig2DataUrl,
       sig2SignedAt: contracts.sig2SignedAt,
       signingMode: contracts.signingMode,
       party2Email: contracts.party2Email,
+      party2GoogleId: contracts.party2GoogleId,
       content: contracts.content,
       clauses: contracts.clauses,
       contentHash: contracts.contentHash,
@@ -48,13 +54,12 @@ export async function GET(
 
   const c = rows[0];
   if (!c)
-    return NextResponse.json({ ok: false, message: "العقد غير موجود." }, { status: 404 });
+    return noStoreJson({ ok: false, message: "العقد غير موجود." }, { status: 404 });
 
-  /* نفس حاجز الصفحات العامة: عقد صاحبه مجمّد مالياً لا يُتحقق منه
-     عبر الـ API أيضاً — وإلا صار المسار باباً خلفياً لتجاوز الحجب. */
+  /* نفس حاجز الصفحات العامة: عقد صاحبه مجمّد مالياً لا يُتحقق منه */
   const guard = await isOwnerSuspended(c.id);
   if (guard.suspended)
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, message: "هذا العقد غير متاح للتحقق حالياً." },
       { status: 403 }
     );
@@ -80,10 +85,20 @@ export async function GET(
     notes: c.notes,
     clauses: c.clauses,
     content: c.content,
+    signingMode: c.signingMode,
+    party2Email: c.party2Email,
+    party2GoogleId: c.party2GoogleId,
+    status: c.status,
+    sig1Name: c.sig1Name,
+    sig1DataUrl: c.sig1DataUrl,
+    sig1SignedAt: c.sig1SignedAt,
+    sig2Name: c.sig2Name,
+    sig2DataUrl: c.sig2DataUrl,
+    sig2SignedAt: c.sig2SignedAt,
   });
-  const matched = current === c.contentHash;
+  const matched = Boolean(c.contentHash) && current === c.contentHash;
 
-  return NextResponse.json({
+  return noStoreJson({
     ok: true,
     found: true,
     matched,

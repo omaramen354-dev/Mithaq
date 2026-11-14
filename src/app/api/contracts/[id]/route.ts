@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { contracts } from "@/db/schema";
@@ -7,19 +7,24 @@ import {
   buildContractContent,
   clampText,
   clampClauses,
-  isBodyTooLarge,
+  readBoundedJson,
   CONTRACT_LIMITS,
 } from "@/lib/contract-text";
-import { CONTRACT_TYPES } from "@/lib/contract-types";
+import { isValidContractType } from "@/lib/contract-types";
 import { parseParty2Email } from "@/lib/contract-schema";
 import { contractFingerprint } from "@/lib/contract-hash";
 import { decodeShareToken } from "@/lib/share-token";
+import { logEvent } from "@/lib/logger";
+import { noStoreJson } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 
 /* ============================================================
    /api/contracts/[id] — GET | PUT (تعديل) | DELETE
    id هنا = shareToken (المعرّف العام المستخدم في الروابط)
+   سلامة الإثبات القانوني:
+   - يُقفل التعديل والحذف بمجرد وجود أي توقيع (جزئي أو كامل)
+     لمنع التلاعب بالبنود أو إتلاف سجل التوقيعات (Bait-and-Switch).
    ============================================================ */
 
 async function findOwned(id: string, dbId: string) {
@@ -31,6 +36,14 @@ async function findOwned(id: string, dbId: string) {
   return rows[0] || null;
 }
 
+function isContractLocked(c: {
+  status: string;
+  sig1SignedAt: Date | null;
+  sig2SignedAt: Date | null;
+}): boolean {
+  return c.status !== "draft" || Boolean(c.sig1SignedAt) || Boolean(c.sig2SignedAt);
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -39,11 +52,11 @@ export async function GET(
   const id = decodeShareToken(rawId);
   const session = await auth();
   if (!session?.user?.dbId)
-    return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
+    return noStoreJson({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
   const contract = await findOwned(id, session.user.dbId);
   if (!contract)
-    return NextResponse.json({ ok: false, message: "العقد غير موجود." }, { status: 404 });
-  return NextResponse.json({ ok: true, contract });
+    return noStoreJson({ ok: false, message: "العقد غير موجود." }, { status: 404 });
+  return noStoreJson({ ok: true, contract });
 }
 
 export async function PUT(
@@ -54,36 +67,32 @@ export async function PUT(
   const id = decodeShareToken(rawId);
   const session = await auth();
   if (!session?.user?.dbId)
-    return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
+    return noStoreJson({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
   const existing = await findOwned(id, session.user.dbId);
   if (!existing)
-    return NextResponse.json({ ok: false, message: "العقد غير موجود." }, { status: 404 });
+    return noStoreJson({ ok: false, message: "العقد غير موجود." }, { status: 404 });
 
-  /* لا تعديل بعد التوقيع — سلامة الوثيقة */
-  if (existing.status === "signed")
-    return NextResponse.json(
-      { ok: false, message: "لا يمكن تعديل عقد موقّع من الطرفين." },
+  /* قفل كامل فور بدء التوقيع (جزئي أو كامل) لمنع تعديل البنود بعد توقيع أحد الطرفين */
+  if (isContractLocked(existing))
+    return noStoreJson(
+      { ok: false, message: "لا يمكن تعديل العقد بعد توقيع أي طرف عليه." },
       { status: 409 }
     );
 
-  if (isBodyTooLarge(req))
-    return NextResponse.json(
-      { ok: false, message: "حجم الطلب كبير جداً — اختصر النصوص والبنود." },
-      { status: 413 }
-    );
-
-  let body: Record<string, unknown>;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ ok: false, message: "صيغة JSON غير صحيحة." }, { status: 400 });
+  const parsed = await readBoundedJson<Record<string, unknown>>(
+    req,
+    CONTRACT_LIMITS.maxBodyBytes
+  );
+  if (!parsed.ok) {
+    return noStoreJson({ ok: false, message: parsed.message }, { status: parsed.status });
   }
+  const body = parsed.data;
 
-  /* نوع العقد يجب أن يبقى ضمن الأنواع المعروفة */
-  const nextType =
-    typeof body.type === "string" && CONTRACT_TYPES[body.type]
-      ? body.type
-      : existing.type;
+  /* نوع العقد يجب أن يبقى ضمن الأنواع المصرّح بها فقط (Object.hasOwn) */
+  if (body.type !== undefined && !isValidContractType(body.type)) {
+    return noStoreJson({ ok: false, message: "نوع العقد غير صحيح." }, { status: 422 });
+  }
+  const nextType = isValidContractType(body.type) ? body.type : existing.type;
 
   const nextSigningMode =
     body.signingMode === "quick" || body.signingMode === "send"
@@ -97,10 +106,7 @@ export async function PUT(
     { required: nextSigningMode !== "quick" }
   );
   if (!emailResult.ok)
-    return NextResponse.json(
-      { ok: false, message: emailResult.message },
-      { status: 422 }
-    );
+    return noStoreJson({ ok: false, message: emailResult.message }, { status: 422 });
 
   const merged = {
     type: nextType,
@@ -163,6 +169,9 @@ export async function PUT(
     notes: merged.notes,
     clauses: merged.clauses,
     content,
+    signingMode: nextSigningMode,
+    party2Email: merged.party2Email,
+    status: existing.status,
   });
 
   const updated = await db
@@ -174,10 +183,17 @@ export async function PUT(
       contentHash,
       updatedAt: new Date(),
     })
-    .where(eq(contracts.id, existing.id))
+    .where(and(eq(contracts.id, existing.id), eq(contracts.status, "draft")))
     .returning();
 
-  return NextResponse.json({ ok: true, contract: updated[0] });
+  if (!updated[0]) {
+    return noStoreJson(
+      { ok: false, message: "لا يمكن تعديل العقد بعد بدء التوقيع عليه." },
+      { status: 409 }
+    );
+  }
+
+  return noStoreJson({ ok: true, contract: updated[0] });
 }
 
 export async function DELETE(
@@ -188,10 +204,32 @@ export async function DELETE(
   const id = decodeShareToken(rawId);
   const session = await auth();
   if (!session?.user?.dbId)
-    return NextResponse.json({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
+    return noStoreJson({ ok: false, message: "سجّل الدخول أولاً." }, { status: 401 });
   const existing = await findOwned(id, session.user.dbId);
   if (!existing)
-    return NextResponse.json({ ok: false, message: "العقد غير موجود." }, { status: 404 });
-  await db.delete(contracts).where(eq(contracts.id, existing.id));
-  return NextResponse.json({ ok: true, message: "تم حذف العقد بنجاح." });
+    return noStoreJson({ ok: false, message: "العقد غير موجود." }, { status: 404 });
+
+  /* حماية الأدلة القانونية: لا يُحذف أي عقد يحمل توقيعاً (جزئياً أو كاملاً) */
+  if (isContractLocked(existing)) {
+    return noStoreJson(
+      { ok: false, message: "لا يمكن حذف عقد يحمل توقيعات موثّقة." },
+      { status: 409 }
+    );
+  }
+
+  await db
+    .delete(contracts)
+    .where(and(eq(contracts.id, existing.id), eq(contracts.status, "draft")));
+
+  await logEvent({
+    action: "contract_deleted",
+    entity: "contract",
+    entityId: existing.id,
+    actorId: session.user.dbId,
+    actorName: session.user.name || "",
+    actorEmail: session.user.email || "",
+    detail: `حذف مسودة عقد — ${existing.party1Name} ↔ ${existing.party2Name}`,
+  });
+
+  return noStoreJson({ ok: true, message: "تم حذف العقد بنجاح." });
 }

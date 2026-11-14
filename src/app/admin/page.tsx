@@ -3,7 +3,7 @@ import { auth, signOut, adminEmails } from "@/lib/auth";
 import { isAdminUser } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { contracts, paymentRequests, users } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, ne, sql } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
 import { arDate } from "@/lib/format";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
@@ -12,6 +12,7 @@ import PaymentsManager from "./PaymentsManager";
 import UsersManager from "./UsersManager";
 import LogsManager from "./LogsManager";
 import ErrorsManager from "./ErrorsManager";
+import TelegramTestButton from "./TelegramTestButton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -85,7 +86,7 @@ export default async function AdminPage() {
     db
       .select({ n: sql<number>`count(*)::int` })
       .from(users)
-      .where(eq(users.plan, "premium")),
+      .where(ne(users.plan, "free")),
     db
       .select()
       .from(contracts)
@@ -139,6 +140,7 @@ export default async function AdminPage() {
             </div>
           </div>
           <div className="admin-header-actions">
+            <TelegramTestButton />
             <a className="btn btn-outline" href="/">
               <i className="fas fa-house" />
               المنصة

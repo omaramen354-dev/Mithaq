@@ -57,7 +57,7 @@ const nextConfig: NextConfig = {
                  Font Awesome يُقدَّم محلياً — لا CDN خارجي. */
               `script-src ${scriptSrc}`,
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https:",
+              "img-src 'self' data: blob: https://lh3.googleusercontent.com https://*.googleusercontent.com",
               "font-src 'self' data:",
               `connect-src ${connectSrc}`,
               "frame-src 'self' https://accounts.google.com",

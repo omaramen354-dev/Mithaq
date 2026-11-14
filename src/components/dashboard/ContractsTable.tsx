@@ -146,7 +146,7 @@ export default function ContractsTable({
                     className="action-icon"
                     href={waHref(c)}
                     target="_blank"
-                    rel="noopener"
+                    rel="noopener noreferrer"
                     title="مشاركة عبر واتساب"
                   >
                     <i className="fab fa-whatsapp" />

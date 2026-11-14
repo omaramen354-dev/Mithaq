@@ -1,27 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { requireAdminSession } from "@/lib/admin-guard";
+import { isUuid } from "@/lib/contract-schema";
 import { db } from "@/db";
 import { activityLogs } from "@/db/schema";
 import { desc, eq, and, inArray } from "drizzle-orm";
 import { logEvent } from "@/lib/logger";
+import { readBoundedJson } from "@/lib/contract-text";
+import { extractClientIp, noStoreJson, NO_STORE_HEADERS } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /* ============================================================
    /api/errors — جمعية أخطاء المنصة (Error Collector)
-
-   POST: يستقبل الأخطاء من:
-   - المتصفح: window.onerror + unhandledrejection + ErrorBoundary
-     (متاح للجميع — ضيوف ومستخدمون — لنضغط الأخطاء الحرجة)
-   - الخادم: try/catch في الـ route handlers الحرجة
-   يُخزن في activity_logs بـ entity = "error" و action = "error_browser"
-   أو "error_server" مع level = error|warning.
-
-   GET: للأدمن فقط — آخر الأخطاء مع فلترة بالمصدر (browser/server).
-
-   DELETE: للأدمن فقط — مسح خطأ واحد أو الكل (تنظيف بعد المعالجة).
+   - POST العام يسجّل دائماً كـ error_browser (لا يُسمح بتزوير error_server من الخارج)
+   - حد إغراق محمي ضد تزوير X-Forwarded-For + حد عام احتياطي للطلبات المجهولة
+   - GET/DELETE للمشرفين فقط مع التحقق من UUID
    ============================================================ */
 
 type ErrorBody = {
@@ -36,55 +31,49 @@ type ErrorBody = {
   extra?: Record<string, unknown>;
 };
 
-/* حد أقصى لطول الرسالة والستاك حتى لا تُهيق قاعدة البيانات */
 const MAX_MSG = 500;
 const MAX_STACK = 3000;
 
-/* ===== حد إغراق بسيط لكل IP (نافذة متحركة في الذاكرة) =====
-   يعمل لكل نسخة من الخادم — كافٍ لمنع الإغراق العادي دون
-   تعقيد خارجي. الغرض حماية سجل الأحداث من التضخم */
 const RATE_WINDOW_MS = 60_000;
-const RATE_MAX = 15;
+const RATE_MAX_PER_IP = 15;
+const RATE_MAX_GLOBAL_UNAUTH = 15;
 const rateHits = new Map<string, number[]>();
 
-function isFlooding(ip: string): boolean {
+function isFlooding(key: string, max: number): boolean {
   const now = Date.now();
-  if (rateHits.size > 5000) rateHits.clear(); /* تنظيف ذاكرة وقائي */
-  const arr = (rateHits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (rateHits.size > 5000) rateHits.clear();
+  const arr = (rateHits.get(key) || []).filter((t) => now - t < RATE_WINDOW_MS);
   arr.push(now);
-  rateHits.set(ip, arr);
-  return arr.length > RATE_MAX;
+  rateHits.set(key, arr);
+  return arr.length > max;
 }
 
 export async function POST(req: NextRequest) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-  if (isFlooding(ip)) {
-    /* 429 صامت — لا نكتب شيئاً حتى لا يكون الإغراق وسيلة للتضخم */
-    return new NextResponse(null, { status: 429 });
-  }
-
-  let body: ErrorBody;
-  try {
-    body = (await req.json()) as ErrorBody;
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 400 });
-  }
-
-  const message = String(body.message || "").slice(0, MAX_MSG).trim();
-  if (!message) return NextResponse.json({ ok: false }, { status: 422 });
-
-  /* من غير المسجلين نحد الستاك حتى لا يعبّث أحدهم بالجدول */
+  const ip = extractClientIp(req.headers);
   const session = await auth();
   const isUser = Boolean(session?.user?.dbId);
 
-  const stack = isUser ? String(body.stack || "").slice(0, MAX_STACK) : "";
-  const source = body.source === "server" ? "server" : "browser";
+  if (
+    isFlooding(`ip:${ip}`, RATE_MAX_PER_IP) ||
+    (!isUser && isFlooding("global:unauth", RATE_MAX_GLOBAL_UNAUTH))
+  ) {
+    return new NextResponse(null, { status: 429, headers: NO_STORE_HEADERS });
+  }
 
-  /* extra يصل من العميل — نرفض أي كائن يتجاوز 2KB حتى لا يُستخدم
-     لتضخيم جدول الأحداث بمحتوى كبير أو عميق. */
+  const parsed = await readBoundedJson<ErrorBody>(req, 16_384);
+  if (!parsed.ok) {
+    return noStoreJson({ ok: false }, { status: parsed.status });
+  }
+  const body = parsed.data;
+
+  const message = String(body.message || "").slice(0, MAX_MSG).trim();
+  if (!message) return noStoreJson({ ok: false }, { status: 422 });
+
+  const stack = isUser ? String(body.stack || "").slice(0, MAX_STACK) : "";
+
+  /* لا يُسمح لطلبات HTTP العامة بتزوير أخطاء الخادم (error_server) */
   let extra: Record<string, unknown> = {};
-  if (body.extra && typeof body.extra === "object") {
+  if (body.extra && typeof body.extra === "object" && !Array.isArray(body.extra)) {
     try {
       const serialized = JSON.stringify(body.extra);
       if (serialized.length <= 2048) extra = body.extra as Record<string, unknown>;
@@ -95,7 +84,7 @@ export async function POST(req: NextRequest) {
   }
 
   await logEvent({
-    action: source === "server" ? "error_server" : "error_browser",
+    action: "error_browser",
     entity: "error",
     entityId: "",
     actorId: session?.user?.dbId || null,
@@ -106,16 +95,16 @@ export async function POST(req: NextRequest) {
       level: "error",
       stack,
       url: String(body.url || "").slice(0, 300),
-      line: body.line || null,
-      col: body.col || null,
+      line: typeof body.line === "number" && Number.isFinite(body.line) ? body.line : null,
+      col: typeof body.col === "number" && Number.isFinite(body.col) ? body.col : null,
       component: String(body.component || "").slice(0, 100),
       userAgent: String(body.userAgent || req.headers.get("user-agent") || "").slice(0, 250),
+      ip,
       extra,
     },
   });
 
-  /* نعيد 204 بلا جسم — أخف وزناً على الشبكة */
-  return new NextResponse(null, { status: 204 });
+  return new NextResponse(null, { status: 204, headers: NO_STORE_HEADERS });
 }
 
 const requireAdmin = requireAdminSession;
@@ -123,7 +112,7 @@ const requireAdmin = requireAdminSession;
 export async function GET(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
 
   const source = req.nextUrl.searchParams.get("source") || "";
@@ -144,7 +133,7 @@ export async function GET(req: NextRequest) {
     .orderBy(desc(activityLogs.createdAt))
     .limit(100);
 
-  return NextResponse.json({
+  return noStoreJson({
     ok: true,
     errors: rows.map((r) => ({
       id: r.id,
@@ -169,27 +158,23 @@ export async function GET(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
 
-  let body: { id?: string; all?: boolean };
-  try {
-    body = (await req.json()) as { id?: string; all?: boolean };
-  } catch {
-    body = {};
-  }
+  const parsed = await readBoundedJson<{ id?: string; all?: boolean }>(req, 8_192);
+  const body = parsed.ok ? parsed.data : {};
 
   if (body.all) {
     await db.delete(activityLogs).where(eq(activityLogs.entity, "error"));
-    return NextResponse.json({ ok: true, message: "تم مسح كل الأخطاء." });
+    return noStoreJson({ ok: true, message: "تم مسح كل الأخطاء." });
   }
 
-  const id = (body.id || "").trim();
-  if (!id) {
-    return NextResponse.json({ ok: false, message: "المعرّف مفقود." }, { status: 422 });
+  const id = String(body.id || "").trim();
+  if (!isUuid(id)) {
+    return noStoreJson({ ok: false, message: "معرّف الخطأ غير صالح." }, { status: 422 });
   }
   await db
     .delete(activityLogs)
     .where(and(eq(activityLogs.entity, "error"), inArray(activityLogs.id, [id])));
-  return NextResponse.json({ ok: true, message: "تم حذف الخطأ." });
+  return noStoreJson({ ok: true, message: "تم حذف الخطأ." });
 }

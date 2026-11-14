@@ -3,6 +3,9 @@ import { db } from "@/db";
 import { contracts } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { isUuid } from "@/lib/contract-schema";
+import { isOwnerSuspended } from "@/lib/mithaq-guard";
+import SuspendedScreen from "@/components/SuspendedScreen";
 import { resolveClauses } from "@/lib/contract-text";
 import PrintButton from "@/components/print/PrintButton";
 import ContractSheet, { verifyUrlFor } from "@/components/print/ContractSheet";
@@ -24,6 +27,7 @@ export default async function PrintPage({ params }: Props) {
   if (!session?.user?.dbId) redirect("/login");
 
   const { id } = await params;
+  if (!isUuid(id)) notFound();
 
   const rows = await db
     .select()
@@ -32,6 +36,10 @@ export default async function PrintPage({ params }: Props) {
     .limit(1);
   const contract = rows[0];
   if (!contract) notFound();
+
+  /* فحص الحجب المالي — لا يُسمح بطباعة عقود الحساب المجمّد */
+  const guard = await isOwnerSuspended(contract.id);
+  if (guard.suspended) return <SuspendedScreen />;
 
   const base = await requestBaseUrl();
   const clauses = resolveClauses({

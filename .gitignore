@@ -15,3 +15,8 @@ __MACOSX/
 
 # Freebuff local state
 .freebuff/
+
+# Legacy unencrypted/hardcoded-key backend dumps (never commit)
+archive/legacy-app/backend/data/
+archive/contracts-api.json
+

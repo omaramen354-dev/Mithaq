@@ -36,8 +36,11 @@ export function arDateTime(value: string | Date | null | undefined): string {
    (حماية خصوصية المُوقِّع على صفحة التحقق التي يفتحها أي ماسح باركود) */
 export function maskEmail(value: string | null | undefined): string {
   const email = (value || "").trim().toLowerCase();
-  if (!email || !email.includes("@")) return email ? "—" : "";
-  const [local, domain] = email.split("@");
+  if (!email) return "";
+  const parts = email.split("@");
+  if (parts.length !== 2) return "—";
+  const [local, domain] = parts;
+  if (!local || !domain || !domain.includes(".")) return "—";
   const head = local.slice(0, 1);
   return `${head}${"*".repeat(Math.max(2, Math.min(6, local.length - 1)))}@${domain}`;
 }

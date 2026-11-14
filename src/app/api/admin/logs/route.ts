@@ -1,32 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { requireAdminSession } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { activityLogs } from "@/db/schema";
 import { desc, eq, and } from "drizzle-orm";
+import { noStoreJson } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /* ============================================================
    /api/admin/logs — سجل أحداث المنصة (للمشرفين فقط)
-   GET ?entity=contract|user|payment|auth|system&action=...&limit=100
-   يعيد الأحدث أولاً
    ============================================================ */
 
 const requireAdmin = requireAdminSession;
-
 const ENTITIES = ["contract", "user", "payment", "auth", "system"] as const;
 
 export async function GET(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "غير مصرّح." }, { status: 403 });
+    return noStoreJson({ ok: false, message: "غير مصرّح." }, { status: 403 });
   }
 
   const sp = req.nextUrl.searchParams;
   const entity = sp.get("entity") || "";
   const action = sp.get("action") || "";
-  const limit = Math.min(Math.max(Number(sp.get("limit") || 120), 1), 300);
+  const rawLimit = Number(sp.get("limit"));
+  const limit =
+    Number.isFinite(rawLimit) && rawLimit >= 1
+      ? Math.min(Math.floor(rawLimit), 300)
+      : 120;
 
   const filters = [];
   if (ENTITIES.includes(entity as (typeof ENTITIES)[number])) {
@@ -41,7 +43,7 @@ export async function GET(req: NextRequest) {
     .orderBy(desc(activityLogs.createdAt))
     .limit(limit);
 
-  return NextResponse.json({
+  return noStoreJson({
     ok: true,
     logs: rows.map((r) => ({
       id: r.id,

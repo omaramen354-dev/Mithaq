@@ -38,7 +38,8 @@ export default function UserPlanCard({
 
   /* الاشتراك الشهري منتهٍ؟ نعرض تحذيراً لطيفاً */
   const monthlyExpired =
-    (plan === "freelancer" || plan === "office") &&
+    plan !== "free" &&
+    plan !== "single" &&
     planExpiresAt &&
     new Date(planExpiresAt).getTime() < Date.now();
 

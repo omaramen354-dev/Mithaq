@@ -431,13 +431,40 @@ export function qrMatrix(text: string, opts: QrOptions = {}): QrMatrix {
   throw lastErr instanceof Error ? lastErr : new Error("QR encode failed");
 }
 
+const SAFE_SVG_COLOR_RE =
+  /^(?:#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8}|rgb\(\d{1,3},\s*\d{1,3},\s*\d{1,3}\)|[a-zA-Z]{3,20})$/;
+
+function sanitizeSvgColor(raw: string | undefined): string {
+  const s = typeof raw === "string" ? raw.trim() : "";
+  return SAFE_SVG_COLOR_RE.test(s) ? s : "#000000";
+}
+
+function sanitizeSvgDim(raw: number | undefined, fallback: number, min: number, max: number): number {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(n)));
+}
+
+/** قصّ آمن للنص عند تجاوز سعة QR (الإصدار 10 مستوى L = 271 بايت UTF-8) حتى لا تنهار الصفحة */
+function fitQrText(text: string): string {
+  const raw = String(text == null ? "" : text);
+  const enc = new TextEncoder();
+  if (enc.encode(raw).length <= 271) return raw;
+  let out = raw;
+  while (enc.encode(out).length > 271 && out.length > 0) {
+    out = out.slice(0, Math.floor(out.length * 0.85));
+  }
+  return out;
+}
+
 /* svg(text, {size, ecc, ink}) → وسم SVG جاهز للطباعة والعرض */
 export function qrSvg(text: string, opts: QrOptions = {}): string {
-  const m = qrMatrix(text, opts);
-  const quiet = opts.quietZone ?? 4;
+  const safeText = fitQrText(text);
+  const m = qrMatrix(safeText, opts);
+  const quiet = sanitizeSvgDim(opts.quietZone, 4, 0, 16);
   const total = m.moduleCount + quiet * 2;
-  const ink = opts.ink || "#000000";
-  const size = opts.size || 96;
+  const ink = sanitizeSvgColor(opts.ink);
+  const size = sanitizeSvgDim(opts.size, 96, 16, 2048);
   let d = "";
   for (let row = 0; row < m.moduleCount; row++) {
     for (let col = 0; col < m.moduleCount; col++) {

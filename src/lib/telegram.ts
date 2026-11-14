@@ -94,3 +94,45 @@ export async function notifyContractEvent(
   }
   return sendTelegramMessage(text);
 }
+
+/**
+ * إشعار فوري للمشرف على تيليجرام عند كل عملية دفع / شحن (شام كاش أو USDT)
+ * يتيح للمشرف المتابعة الفورية أو المراجعة المسائية الكاملة من /admin.
+ */
+export async function notifyPaymentEvent(info: {
+  source: "checkout_instant" | "payment_request";
+  planTitle: string;
+  planId: string;
+  amountUsd: number;
+  amountSyp?: number;
+  method: string;
+  txRef: string;
+  phone?: string;
+  userName: string;
+  userEmail: string;
+  adminUrl?: string;
+}): Promise<TgResult> {
+  const now = new Date().toLocaleString("ar-SY");
+  const header =
+    info.source === "checkout_instant"
+      ? "💳 <b>عملية شحن شام كاش جديدة (تفعيل فوري بانتظار مراجعتك)</b>"
+      : "🧾 <b>طلب دفع جديد بانتظار المراجعة</b>";
+
+  const lines = [
+    header,
+    "",
+    `📦 الباقة: <b>${esc(info.planTitle)}</b> (${esc(info.planId)})`,
+    `💵 القيمة: ${esc(info.amountUsd)} USDT${info.amountSyp ? ` (${esc(info.amountSyp.toLocaleString("en-US"))} ل.س)` : ""}`,
+    `🏦 الطريقة: ${esc(info.method)}`,
+    `🔢 رقم العملية: <code>${esc(info.txRef)}</code>`,
+    ...(info.phone ? [`📞 الهاتف: <code>${esc(info.phone)}</code>`] : []),
+    `👤 المستخدم: ${esc(info.userName || "—")} (${esc(info.userEmail || "—")})`,
+    `🕒 ${now}`,
+  ];
+
+  if (info.adminUrl) {
+    lines.push("", `🔎 للمراجعة (تأكيد أو تجميد): ${esc(info.adminUrl)}`);
+  }
+
+  return sendTelegramMessage(lines.join("\n"));
+}

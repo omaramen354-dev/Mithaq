@@ -50,8 +50,8 @@ export const PLANS: Plan[] = [
     icon: "fa-file-contract",
     priceUsd: 5,
     priceSyp: 75000,
-    unit: "once",
-    tagline: "7 عقود شهرياً بجودة احترافية — تدفع مرة واحدة.",
+    unit: "month",
+    tagline: "7 عقود شهرياً بجودة احترافية — اشتراك شهري مرن.",
     features: ["7 عقود شهرياً", "PDF احترافي", "رابط مشاركة", "حفظ دائم"],
   },
   {
@@ -60,9 +60,9 @@ export const PLANS: Plan[] = [
     icon: "fa-stamp",
     priceUsd: 9,
     priceSyp: 135000,
-    unit: "once",
-    tagline: "أفضل باقة فردية: PDF، توقيع، مشاركة وختم ميثاق.",
-    features: ["كل مزايا أساسي", "توقيع رقمي", "ختم ميثاق", "أولوية في التحسينات"],
+    unit: "month",
+    tagline: "أفضل باقة فردية: 15 عقداً شهرياً مع توقيع رقمي وختم ميثاق.",
+    features: ["15 عقداً شهرياً", "توقيع رقمي وPDF احترافي", "ختم ميثاق وبصمة SHA-256", "أولوية في التحسينات"],
     popular: true,
   },
   {
@@ -121,13 +121,16 @@ export function priceLabelSyp(p: Plan): string {
 export const MONTH_DAYS = 30;
 
 /* الحدود الشهرية لكل باقة — يُطبقها الخادم عند إنشاء العقد
-   null = بلا حد (الموثّقة دفعة واحدة، والمستقل/المكاتب طوال
-   فاعلية الاشتراك الشهري، والعقد الواحد تُدار عبر isSingleUsed) */
+   - free: 3 عقود شهرياً
+   - single: عقد واحد (تُدار عبر isSingleUsed)
+   - basic: 7 عقود شهرياً (اشتراك 30 يوماً)
+   - verified: 15 عقداً شهرياً (اشتراك 30 يوماً)
+   - freelancer / office: غير محدود طوال فاعلية الاشتراك الشهري */
 export const PLAN_LIMITS: Record<string, number | null> = {
-  free: 3, // 3 عقود شهرياً
-  single: null, // عقد واحد (تُدار عبر isSingleUsed)
-  basic: 7, // 7 عقود شهرياً
-  verified: null, // غير محدود
-  freelancer: null, // غير محدود طوال الاشتراك
-  office: null, // غير محدود طوال الاشتراك
+  free: 3,
+  single: null,
+  basic: 7,
+  verified: 15,
+  freelancer: null,
+  office: null,
 };
