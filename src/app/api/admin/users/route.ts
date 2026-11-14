@@ -99,6 +99,7 @@ export async function GET(req: NextRequest) {
               eq(transactions.status, "suspended")
             )
           )
+          .catch(() => [])
       : Promise.resolve([]),
     db
       .select({ n: sql<number>`count(*)::int` })

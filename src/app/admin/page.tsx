@@ -3,7 +3,7 @@ import { auth, signOut, adminEmails } from "@/lib/auth";
 import { isAdminUser } from "@/lib/admin-guard";
 import { db } from "@/db";
 import { contracts, paymentRequests, transactions, users } from "@/db/schema";
-import { desc, eq, gte, ne, sql } from "drizzle-orm";
+import { desc, gte, sql } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
 import { findPlan } from "@/lib/plans";
 import { telegramConfigured } from "@/lib/telegram";
@@ -27,23 +27,46 @@ export const dynamic = "force-dynamic";
 /* ============================================================
    /admin — مركز قيادة منصة ميثاق (صفحة مستقلة بهوية ميثاق الكاملة)
    - شريط جاهزية الإطلاق (فحص متغيرات شام كاش / USDT / تيليجرام / واتساب / الكرون)
-   - 6 بطاقات KPI تنفيذية (العقود، الإيرادات الموثقة، قيد المراجعة، المستخدمون، المشتركون، نسبة التوقيع)
-   - مخطط نبض النمو لآخر 14 يوماً (عقود + تسجيلات جديدة يومياً)
-   - إدارة المستخدمين المطوّرة + معاملات شام كاش + طلبات USDT + مستكشف كل العقود + السجل + الأخطاء
+   - 6 بطاقات KPI تنفيذية + مخطط نبض النمو لآخر 14 يوماً
+   - عزل كامل لكل استعلام قاعدة بيانات (safeQuery) بحيث لا ينهار /admin
+     أبداً بخطأ React #441 مهما حدث في أي جدول أو اتصال عابر
    ============================================================ */
+
+function safeIso(v: unknown): string {
+  if (!v) return "";
+  if (v instanceof Date) return Number.isNaN(v.getTime()) ? "" : v.toISOString();
+  const d = new Date(String(v));
+  return Number.isNaN(d.getTime()) ? "" : d.toISOString();
+}
+
+async function safeQuery<T>(
+  label: string,
+  fn: () => Promise<T>,
+  fallback: T,
+  issues: string[]
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[/admin] query "${label}" failed:`, msg);
+    issues.push(`${label}: ${msg.slice(0, 180)}`);
+    return fallback;
+  }
+}
 
 function computeReadiness() {
   const shamAcc = (process.env.NEXT_PUBLIC_SHAM_CASH_ACCOUNT || "").trim();
   const shamName = (process.env.NEXT_PUBLIC_SHAM_CASH_NAME || "").trim();
   const usdt = (process.env.NEXT_PUBLIC_USDT_TRC20_ADDRESS || "").trim();
-  const wa = (process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "").trim();
+  const waDigits = (process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "").replace(/\D/g, "");
   const cron = (process.env.CRON_SECRET || "").trim();
 
   const items = [
     {
       id: "shamcash",
       label: "شام كاش",
-      ok: /^\d{6,}$/.test(shamAcc) && shamName.length >= 2,
+      ok: shamAcc.length >= 4 && shamName.length >= 2,
       hint: "NEXT_PUBLIC_SHAM_CASH_ACCOUNT + NAME",
       icon: "fa-money-bill-transfer",
     },
@@ -57,7 +80,7 @@ function computeReadiness() {
     {
       id: "whatsapp",
       label: "واتساب الدعم",
-      ok: /^\d{8,15}$/.test(wa),
+      ok: waDigits.length >= 8 && waDigits.length <= 16,
       hint: "NEXT_PUBLIC_SUPPORT_WHATSAPP",
       icon: "fab fa-whatsapp",
     },
@@ -78,7 +101,7 @@ function computeReadiness() {
     {
       id: "db",
       label: "قاعدة البيانات",
-      ok: true,
+      ok: Boolean(process.env.DATABASE_URL),
       hint: "Neon Postgres متصل",
       icon: "fa-database",
     },
@@ -123,72 +146,133 @@ export default async function AdminPage() {
 
   const fourteenDaysAgo = new Date(Date.now() - 13 * 864e5);
   fourteenDaysAgo.setUTCHours(0, 0, 0, 0);
+  const dbIssues: string[] = [];
 
-  /* ===== إحصائيات حية متوازية ===== */
+  /* ===== استعلامات حية معزولة الخطأ (7 استعلامات خفيفة بدل 11) ===== */
   const [
-    totalContracts,
-    signedContracts,
-    partialContracts,
-    totalUsers,
-    premiumUsers,
-    verifiedTxs,
-    unverifiedTxCount,
+    contractAgg,
+    userAgg,
+    txSummary,
     typeCounts,
     payReqs,
     recentContractDates,
     recentUserDates,
   ] = await Promise.all([
-    db.select({ n: sql<number>`count(*)::int` }).from(contracts),
-    db
-      .select({ n: sql<number>`count(*)::int` })
-      .from(contracts)
-      .where(eq(contracts.status, "signed")),
-    db
-      .select({ n: sql<number>`count(*)::int` })
-      .from(contracts)
-      .where(eq(contracts.status, "partially_signed")),
-    db.select({ n: sql<number>`count(*)::int` }).from(users),
-    db
-      .select({ n: sql<number>`count(*)::int` })
-      .from(users)
-      .where(ne(users.plan, "free")),
-    db
-      .select({ planName: transactions.planName })
-      .from(transactions)
-      .where(eq(transactions.status, "verified")),
-    db
-      .select({ n: sql<number>`count(*)::int` })
-      .from(transactions)
-      .where(eq(transactions.status, "unverified")),
-    db
-      .select({
-        type: contracts.type,
-        n: sql<number>`count(*)::int`,
-      })
-      .from(contracts)
-      .groupBy(contracts.type)
-      .orderBy(desc(sql`count(*)`))
-      .limit(6),
-    db
-      .select()
-      .from(paymentRequests)
-      .orderBy(desc(paymentRequests.createdAt))
-      .limit(30),
-    db
-      .select({ createdAt: contracts.createdAt })
-      .from(contracts)
-      .where(gte(contracts.createdAt, fourteenDaysAgo)),
-    db
-      .select({ createdAt: users.createdAt })
-      .from(users)
-      .where(gte(users.createdAt, fourteenDaysAgo)),
+    safeQuery(
+      "contracts_stats",
+      () =>
+        db
+          .select({
+            total: sql<number>`count(*)::int`,
+            signed: sql<number>`count(*) filter (where ${contracts.status} = 'signed')::int`,
+            partial: sql<number>`count(*) filter (where ${contracts.status} = 'partially_signed')::int`,
+          })
+          .from(contracts),
+      [{ total: 0, signed: 0, partial: 0 }],
+      dbIssues
+    ),
+    safeQuery(
+      "users_stats",
+      () =>
+        db
+          .select({
+            total: sql<number>`count(*)::int`,
+            paid: sql<number>`count(*) filter (where ${users.plan} <> 'free')::int`,
+          })
+          .from(users),
+      [{ total: 0, paid: 0 }],
+      dbIssues
+    ),
+    safeQuery(
+      "transactions_summary",
+      () =>
+        db
+          .select({
+            status: transactions.status,
+            planName: transactions.planName,
+          })
+          .from(transactions)
+          .limit(500),
+      [] as { status: string; planName: string | null }[],
+      dbIssues
+    ),
+    safeQuery(
+      "contracts_by_type",
+      () =>
+        db
+          .select({
+            type: contracts.type,
+            n: sql<number>`count(*)::int`,
+          })
+          .from(contracts)
+          .groupBy(contracts.type)
+          .orderBy(desc(sql`count(*)`))
+          .limit(6),
+      [] as { type: string; n: number }[],
+      dbIssues
+    ),
+    safeQuery(
+      "payment_requests",
+      () =>
+        db
+          .select({
+            id: paymentRequests.id,
+            userId: paymentRequests.userId,
+            plan: paymentRequests.plan,
+            amountUsd: paymentRequests.amountUsd,
+            method: paymentRequests.method,
+            status: paymentRequests.status,
+            txRef: paymentRequests.txRef,
+            createdAt: paymentRequests.createdAt,
+          })
+          .from(paymentRequests)
+          .orderBy(desc(paymentRequests.createdAt))
+          .limit(30),
+      [] as {
+        id: string;
+        userId: string | null;
+        plan: string;
+        amountUsd: string;
+        method: string;
+        status: string;
+        txRef: string | null;
+        createdAt: Date;
+      }[],
+      dbIssues
+    ),
+    safeQuery(
+      "pulse_contracts_14d",
+      () =>
+        db
+          .select({ createdAt: contracts.createdAt })
+          .from(contracts)
+          .where(gte(contracts.createdAt, fourteenDaysAgo)),
+      [] as { createdAt: Date }[],
+      dbIssues
+    ),
+    safeQuery(
+      "pulse_users_14d",
+      () =>
+        db
+          .select({ createdAt: users.createdAt })
+          .from(users)
+          .where(gte(users.createdAt, fourteenDaysAgo)),
+      [] as { createdAt: Date }[],
+      dbIssues
+    ),
   ]);
 
   /* ===== الإيرادات الموثّقة (شام كاش موثّق + USDT مدفوع دون تكرار) ===== */
-  const shamRevenueUsd = verifiedTxs.reduce((acc, t) => {
-    const p = findPlan(t.planName) || findPlan(t.planName.toLowerCase());
-    return acc + (p?.priceUsd || 0);
-  }, 0);
+  const shamRevenueUsd = txSummary
+    .filter((t) => t.status === "verified")
+    .reduce((acc, t) => {
+      const name = String(t.planName || "").trim();
+      if (!name) return acc;
+      const p = findPlan(name) || findPlan(name.toLowerCase());
+      return acc + (p?.priceUsd || 0);
+    }, 0);
+  const unverifiedTxCount = txSummary.filter((t) => t.status === "unverified").length;
+
   const usdtRevenueUsd = payReqs
     .filter((r) => r.status === "paid" && r.method === "usdt")
     .reduce((acc, r) => acc + (Number(r.amountUsd) || 0), 0);
@@ -197,17 +281,17 @@ export default async function AdminPage() {
   const pendingPayReqs = payReqs.filter(
     (r) => r.status === "pending" || r.status === "manual_review"
   ).length;
-  const totalPendingAudit = (unverifiedTxCount[0]?.n || 0) + pendingPayReqs;
+  const totalPendingAudit = unverifiedTxCount + pendingPayReqs;
 
-  const totalC = totalContracts[0]?.n || 0;
-  const signedC = signedContracts[0]?.n || 0;
-  const partialC = partialContracts[0]?.n || 0;
-  const totalU = totalUsers[0]?.n || 0;
-  const paidU = premiumUsers[0]?.n || 0;
+  const totalC = Number(contractAgg[0]?.total) || 0;
+  const signedC = Number(contractAgg[0]?.signed) || 0;
+  const partialC = Number(contractAgg[0]?.partial) || 0;
+  const totalU = Number(userAgg[0]?.total) || 0;
+  const paidU = Number(userAgg[0]?.paid) || 0;
 
   const signRate = totalC > 0 ? Math.round((signedC / totalC) * 100) : 0;
   const convRate = totalU > 0 ? Math.round((paidU / totalU) * 100) : 0;
-  const maxType = typeCounts[0]?.n || 1;
+  const maxType = Number(typeCounts[0]?.n) || 1;
   const admins = adminEmails();
   const readiness = computeReadiness();
   const missingPayments = readiness.items.filter(
@@ -226,12 +310,12 @@ export default async function AdminPage() {
     dayBuckets.push({ key, label, contracts: 0, users: 0 });
   }
   for (const r of recentContractDates) {
-    const k = r.createdAt.toISOString().slice(0, 10);
+    const k = safeIso(r.createdAt).slice(0, 10);
     const b = bucketMap.get(k);
     if (b) b.contracts++;
   }
   for (const r of recentUserDates) {
-    const k = r.createdAt.toISOString().slice(0, 10);
+    const k = safeIso(r.createdAt).slice(0, 10);
     const b = bucketMap.get(k);
     if (b) b.users++;
   }
@@ -357,6 +441,21 @@ export default async function AdminPage() {
         </div>
       </header>
 
+      {/* تنبيه تشخيصي للمشرف فقط في حال تعذّر أحد استعلامات Neon */}
+      {dbIssues.length > 0 && (
+        <section className="admin-launch-banner reveal" role="alert">
+          <div className="alb-icon">
+            <i className="fas fa-triangle-exclamation" />
+          </div>
+          <div className="alb-body">
+            <b>تنبيه تشخيصي من قاعدة البيانات (اللّوحة تعمل بأمان ولم تتوقف):</b>{" "}
+            <span dir="ltr" style={{ display: "inline-block", fontFamily: "monospace", fontSize: 12 }}>
+              {dbIssues.join(" | ")}
+            </span>
+          </div>
+        </section>
+      )}
+
       {/* بطاقات الإحصائيات التنفيذية */}
       <section className="admin-stats reveal">
         {stats.map((s) => (
@@ -459,7 +558,7 @@ export default async function AdminPage() {
           method: r.method,
           status: r.status,
           txRef: r.txRef,
-          createdAt: r.createdAt.toISOString(),
+          createdAt: safeIso(r.createdAt) || new Date().toISOString(),
         }))}
       />
 
