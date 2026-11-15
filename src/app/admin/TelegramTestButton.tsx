@@ -31,10 +31,10 @@ export default function TelegramTestButton() {
         className="btn btn-outline"
         onClick={sendTest}
         disabled={busy}
-        title="إرسال رسالة اختبار إلى بوت تيليجرام"
+        title="تفعيل أزرار تيليجرام المباشرة وإرسال رسالة اختبار"
       >
-        <i className={busy ? "fas fa-spinner fa-spin" : "fab fa-telegram"} />
-        {busy ? "جارٍ الاختبار..." : "اختبار تيليجرام"}
+        <i className={busy ? "fas fa-spinner fa-spin" : "fas fa-paper-plane"} />
+        {busy ? "جارٍ التفعيل..." : "تفعيل واختبار تيليجرام"}
       </button>
       {notice && (
         <span

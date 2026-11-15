@@ -8,7 +8,9 @@ import { CONTRACT_GUIDES } from "@/lib/contract-guides";
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = (
     process.env.NEXT_PUBLIC_BASE_URL || "https://miithaq.com"
-  ).replace(/\/+$/, "");
+  )
+    .trim()
+    .replace(/\/+$/, "");
   const now = new Date();
 
   /* صفحات الهبوط المستقلة لكل نوع عقد — أهم مسارات الاكتساب

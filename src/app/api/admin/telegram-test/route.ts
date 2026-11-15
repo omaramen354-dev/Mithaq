@@ -1,13 +1,19 @@
 import { requireAdminSession } from "@/lib/admin-guard";
 import { noStoreJson } from "@/lib/client-ip";
-import { sendTelegramMessage, telegramConfigured } from "@/lib/telegram";
+import { requestBaseUrl } from "@/lib/base-url";
+import {
+  registerTelegramWebhook,
+  sendTelegramMessage,
+  telegramConfigured,
+} from "@/lib/telegram";
 
 export const runtime = "nodejs";
 
 /* ============================================================
    POST /api/admin/telegram-test
-   إرسال رسالة اختبار فورية لبوت تيليجرام (للمشرفين فقط)
-   للتحقق من صحة TELEGRAM_BOT_TOKEN و TELEGRAM_CHAT_ID على الإنتاج.
+   1. يُسجّل عنوان Webhook تيليجرام الآمن تلقائياً (/api/telegram/webhook)
+      حتى تعمل أزرار (✅ تأكيد الحوالة / ❄️ تجميد الحساب) بضغطة واحدة.
+   2. يُرسل رسالة اختبار فورية لبوت تيليجرام (للمشرفين فقط).
    ============================================================ */
 
 export async function POST() {
@@ -27,12 +33,20 @@ export async function POST() {
     );
   }
 
+  const baseUrl = await requestBaseUrl();
+  const hook = await registerTelegramWebhook(baseUrl);
+
   const now = new Date().toLocaleString("ar-SY");
+  const hookLine = hook.ok
+    ? "🔘 أزرار التأكيد والتجميد المباشرة داخل تيليجرام: <b>مفعّلة وجاهزة ✓</b>"
+    : "⚠️ تعذّر تفعيل أزرار تيليجرام التفاعلية تلقائياً (الإشعارات تعمل بشكل طبيعي).";
+
   const res = await sendTelegramMessage(
     [
       "✅ <b>اختبار إشعارات منصة ميثاق ناجح!</b>",
       "",
-      "البوت مربوط بالمنصة بنجاح وستصلك عليه جميع إشعارات الشحن والتوقيعات فوراً.",
+      "البوت مربوط بالمنصة بنجاح وستصلك عليه جميع إشعارات الشحن (شام كاش + USDT) والأخطاء فوراً.",
+      hookLine,
       `🕒 ${now}`,
     ].join("\n")
   );
@@ -56,6 +70,9 @@ export async function POST() {
 
   return noStoreJson({
     ok: true,
-    message: "تم إرسال رسالة الاختبار بنجاح — افتح تيليجرام وتأكد من وصولها!",
+    webhookRegistered: hook.ok,
+    message: hook.ok
+      ? "تم تفعيل أزرار التأكيد/التجميد وإرسال رسالة الاختبار بنجاح ✓"
+      : "تم إرسال رسالة الاختبار بنجاح (تحقق من HTTPS لتفعيل أزرار تيليجرام).",
   });
 }

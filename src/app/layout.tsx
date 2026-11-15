@@ -34,7 +34,7 @@ const thmanyahDisplay = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "https://miithaq.com"
+    (process.env.NEXT_PUBLIC_BASE_URL || "https://miithaq.com").trim()
   ),
   title: {
     default: "ميثاق – MITHAQ | عقودك بثقة وسهولة",
