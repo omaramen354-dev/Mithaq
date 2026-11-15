@@ -46,7 +46,7 @@ export default function NotFound() {
             <i className="fas fa-house" />
             الرئيسية
           </Link>
-          <Link className="btn btn-outline" href="/contracts">
+          <Link className="btn btn-soft" href="/contracts">
             <i className="fas fa-file-contract" />
             قوالب العقود
           </Link>

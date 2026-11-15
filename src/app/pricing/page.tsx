@@ -5,6 +5,7 @@ import { desc, eq } from "drizzle-orm";
 import PricingClient from "./PricingClient";
 import type { Metadata } from "next";
 import { OG_IMAGE } from "@/lib/seo";
+import { getPaymentConfig } from "@/lib/payment-config";
 
 const PRICING_DESC =
   "باقات ميثاق: العقد الواحد، أساسي، موثّق، المستقل، المكاتب، والمراجعة القانونية — ادفع بـ USDT أو شام كاش، وتفعيل المزايا بعد تأكيد الدفع.";
@@ -69,6 +70,7 @@ export default async function PricingPage() {
       isLoggedIn={isLoggedIn}
       userName={session?.user?.name || null}
       myRequests={myRequests}
+      paymentConfig={getPaymentConfig()}
     />
   );
 }

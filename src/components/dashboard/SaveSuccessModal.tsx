@@ -136,7 +136,7 @@ export default function SaveSuccessModal({
           </a>
           <button
             type="button"
-            className="btn btn-outline"
+            className="btn btn-soft"
             onClick={() => window.location.assign(`/print/${contract.id}`)}
           >
             <i className="fas fa-print" />

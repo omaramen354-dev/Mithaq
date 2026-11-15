@@ -13,30 +13,23 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
 import { findPlan, priceLabel, priceLabelSyp } from "@/lib/plans";
-
-/* ===== بيانات شام كاش =====
-   تُضبط من متغيرات البيئة عند النشر بدل تعديل الكود:
-   NEXT_PUBLIC_SHAM_CASH_ACCOUNT  رقم الحساب
-   NEXT_PUBLIC_SHAM_CASH_NAME     اسم المستفيد كما يظهر في شام كاش
-   NEXT_PUBLIC_SUPPORT_WHATSAPP   رقم الدعم بصيغة دولية بلا +
-   لا تُدرج أرقاماً حقيقية داخل الكود (تظهر للعميل لكن تُسجَّل في Git). */
-const SHAM_ACCOUNT = (process.env.NEXT_PUBLIC_SHAM_CASH_ACCOUNT || "").trim();
-const SHAM_NAME = (process.env.NEXT_PUBLIC_SHAM_CASH_NAME || "").trim();
-const SUPPORT_WA = (process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "").trim();
-
-/** لا نسمح بإرسال طلب قبل ضبط وجهة التحويل فعلياً */
-const PAYMENT_CONFIGURED =
-  /^\d{6,}$/.test(SHAM_ACCOUNT) && SHAM_NAME.length >= 2;
+import type { PublicPaymentConfig } from "@/lib/payment-config";
 
 export default function CheckoutClient({
   planParam,
   isLoggedIn,
   userName,
+  paymentConfig,
 }: {
   planParam: string;
   isLoggedIn: boolean;
   userName: string | null;
+  paymentConfig: PublicPaymentConfig;
 }) {
+  const SHAM_ACCOUNT = paymentConfig.shamAccount;
+  const SHAM_NAME = paymentConfig.shamName;
+  const SUPPORT_WA = paymentConfig.supportWhatsapp.replace(/\D/g, "");
+  const PAYMENT_CONFIGURED = paymentConfig.shamReady;
   const router = useRouter();
   const plan = useMemo(() => findPlan(planParam) || findPlan("verified")!, [planParam]);
 

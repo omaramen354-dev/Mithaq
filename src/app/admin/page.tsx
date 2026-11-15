@@ -7,6 +7,7 @@ import { desc, gte, sql } from "drizzle-orm";
 import { contractTypeName } from "@/lib/contract-types";
 import { findPlan } from "@/lib/plans";
 import { telegramConfigured } from "@/lib/telegram";
+import { getPaymentConfig } from "@/lib/payment-config";
 import RevealOnScroll from "@/components/dashboard/RevealOnScroll";
 import TransactionsManager from "./TransactionsManager";
 import PaymentsManager from "./PaymentsManager";
@@ -57,31 +58,28 @@ async function safeQuery<T>(
 }
 
 function computeReadiness() {
-  const shamAcc = (process.env.NEXT_PUBLIC_SHAM_CASH_ACCOUNT || "").trim();
-  const shamName = (process.env.NEXT_PUBLIC_SHAM_CASH_NAME || "").trim();
-  const usdt = (process.env.NEXT_PUBLIC_USDT_TRC20_ADDRESS || "").trim();
-  const waDigits = (process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "").replace(/\D/g, "");
+  const pay = getPaymentConfig();
   const cron = (process.env.CRON_SECRET || "").trim();
 
   const items = [
     {
       id: "shamcash",
       label: "شام كاش",
-      ok: shamAcc.length >= 4 && shamName.length >= 2,
+      ok: pay.shamReady,
       hint: "NEXT_PUBLIC_SHAM_CASH_ACCOUNT + NAME",
       icon: "fa-money-bill-transfer",
     },
     {
       id: "usdt",
       label: "محفظة USDT",
-      ok: /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(usdt),
+      ok: pay.usdtReady,
       hint: "NEXT_PUBLIC_USDT_TRC20_ADDRESS",
       icon: "fa-coins",
     },
     {
       id: "whatsapp",
       label: "واتساب الدعم",
-      ok: waDigits.length >= 8 && waDigits.length <= 16,
+      ok: pay.whatsappReady,
       hint: "NEXT_PUBLIC_SUPPORT_WHATSAPP",
       icon: "fa-headset",
     },
