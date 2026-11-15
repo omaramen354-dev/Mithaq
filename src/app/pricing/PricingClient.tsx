@@ -10,6 +10,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import PaymentQrBox from "@/components/PaymentQrBox";
 import { PAID_PLANS, findPlan, priceLabel, priceLabelSyp, type Plan } from "@/lib/plans";
 import { whatsappLink } from "@/lib/whatsapp";
 import type { PublicPaymentConfig } from "@/lib/payment-config";
@@ -46,7 +47,6 @@ export default function PricingClient({
   const [method, setMethod] = useState<"usdt" | "shamcash">("usdt");
   const [txRef, setTxRef] = useState("");
   const [senderName, setSenderName] = useState("");
-  const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ t: string; ok: boolean } | null>(null);
 
@@ -70,22 +70,11 @@ export default function PricingClient({
     setTxRef("");
     setSenderName("");
     setMsg(null);
-    setCopied(false);
     document.body.style.overflow = "hidden";
   }
   function closePop() {
     setPop(null);
     document.body.style.overflow = "";
-  }
-
-  async function copyWallet() {
-    try {
-      await navigator.clipboard.writeText(WALLET);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      /* المتصفح منع النسخ — المستخدم ينسخ يدوياً */
-    }
   }
 
   async function submit() {
@@ -371,7 +360,7 @@ export default function PricingClient({
                   disabled={!USDT_READY}
                   title={USDT_READY ? "الدفع بـ USDT" : "غير مضبوط بعد"}
                 >
-                  <i className="fab fa-bitcoin" />
+                  <i className="fas fa-coins" />
                   USDT — TRC20{USDT_READY ? "" : " (غير متاح)"}
                 </button>
                 <button
@@ -396,13 +385,13 @@ export default function PricingClient({
                   </div>
                   {USDT_READY ? (
                     <>
-                      <div className="paypop-wallet">
-                        <code dir="ltr">{WALLET}</code>
-                        <button type="button" onClick={copyWallet}>
-                          <i className={`fas ${copied ? "fa-check" : "fa-copy"}`} />
-                          {copied ? "تم النسخ" : "نسخ"}
-                        </button>
-                      </div>
+                      <PaymentQrBox
+                        value={WALLET}
+                        caption="امسح العنوان من محفظتك (TRC20) أو انسخه"
+                        copyLabel="نسخ العنوان"
+                        downloadFileName="mithaq-usdt-trc20-qr.png"
+                        size={156}
+                      />
                       <div className="paypop-warn">
                         <i className="fas fa-bolt" />
                         تأكد أن الشبكة TRC20 — عند لصق رقم العملية (TXID) يتحقق النظام من البلوكشين ويُفعّل باقتك تلقائياً خلال ثوانٍ.
@@ -424,14 +413,14 @@ export default function PricingClient({
                       : "الدفع عبر شام كاش غير مضبوط حالياً"}
                   </div>
                   {SHAM_READY ? (
-                    <div className="paypop-sham">
-                      <div>
-                        <span>الاسم:</span> <b>{SHAM_NAME}</b>
-                      </div>
-                      <div>
-                        <span>الرقم:</span> <b dir="ltr">{SHAM_NUMBER}</b>
-                      </div>
-                    </div>
+                    <PaymentQrBox
+                      value={SHAM_NUMBER}
+                      accountName={SHAM_NAME}
+                      caption="امسح الباركود مباشرة من تطبيق شام كاش أو انسخ الرمز"
+                      copyLabel="نسخ رمز الحساب"
+                      downloadFileName="mithaq-shamcash-qr.png"
+                      size={156}
+                    />
                   ) : (
                     <div className="paypop-warn">
                       <i className="fas fa-triangle-exclamation" />
