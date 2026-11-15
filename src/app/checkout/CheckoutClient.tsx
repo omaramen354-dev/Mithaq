@@ -12,6 +12,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
+import PaymentQrBox from "@/components/PaymentQrBox";
 import { findPlan, priceLabel, priceLabelSyp } from "@/lib/plans";
 import type { PublicPaymentConfig } from "@/lib/payment-config";
 
@@ -126,25 +127,34 @@ export default function CheckoutClient({
           </h2>
           <ol style={{ paddingLeft: 20, margin: "0 0 14px", fontSize: 12.5, color: "var(--muted)" }}>
             <li>
-              حوّل مبلغ <b>{priceLabelSyp(plan)}</b> إلى حساب شام كاش التالي:
-              <div
-                dir="ltr"
-                style={{
-                  direction: "ltr",
-                  background: "rgba(212,168,67,0.08)",
-                  border: "1px dashed var(--gold)",
-                  borderRadius: 10,
-                  padding: "8px 12px",
-                  marginTop: 6,
-                  textAlign: "center",
-                  fontWeight: 800,
-                  letterSpacing: 1,
-                }}
-              >
-                {PAYMENT_CONFIGURED
-                  ? `${SHAM_ACCOUNT} — ${SHAM_NAME}`
-                  : "⚠️ بيانات الحساب غير مضبوطة بعد"}
-              </div>
+              حوّل مبلغ <b>{priceLabelSyp(plan)}</b> إلى حساب شام كاش التالي (بمسح الباركود أو نسخ الرمز):
+              {PAYMENT_CONFIGURED ? (
+                <PaymentQrBox
+                  value={SHAM_ACCOUNT}
+                  accountName={SHAM_NAME}
+                  caption="امسح الباركود مباشرة من تطبيق شام كاش"
+                  copyLabel="نسخ رمز الحساب"
+                  downloadFileName="mithaq-shamcash-qr.png"
+                  size={172}
+                />
+              ) : (
+                <div
+                  dir="ltr"
+                  style={{
+                    direction: "ltr",
+                    background: "rgba(212,168,67,0.08)",
+                    border: "1px dashed var(--gold)",
+                    borderRadius: 10,
+                    padding: "8px 12px",
+                    marginTop: 6,
+                    textAlign: "center",
+                    fontWeight: 800,
+                    letterSpacing: 1,
+                  }}
+                >
+                  ⚠️ بيانات الحساب غير مضبوطة بعد
+                </div>
+              )}
             </li>
             <li>بعد نجاح التحويل، أرسل طلبك بالحقول أدناه فقط — بدون أي رسالة واتساب إضافية.</li>
             <li>
@@ -333,7 +343,7 @@ export default function CheckoutClient({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <i className="fab fa-whatsapp" /> تواصل عبر الواتساب
+                <i className="fas fa-headset" /> تواصل عبر الواتساب
               </a>
             ) : (
               <span style={{ fontWeight: 700 }}>راسل إدارة المنصة</span>
