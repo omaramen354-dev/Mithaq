@@ -42,7 +42,13 @@ export default function PaymentsManager({ requests }: { requests: PReq[] }) {
     ) {
       return;
     }
-    if (action === "rejected" && !window.confirm("رفض هذا الطلب؟")) return;
+    if (
+      action === "rejected" &&
+      !window.confirm(
+        "رفض هذا الطلب؟ (إذا كانت الباقة مفعّلة فوراً سيتم تجميد الحساب وإبطال بصمة عقوده وQR فوراً)"
+      )
+    )
+      return;
     setBusyId(id);
     setErr(null);
     try {
@@ -98,6 +104,14 @@ export default function PaymentsManager({ requests }: { requests: PReq[] }) {
               <div className="admin-row-main">
                 <span className="admin-row-title">
                   {PLAN_NAMES[r.plan] || r.plan} — {r.amountUsd} USDT
+                  {r.status === "manual_review" && (
+                    <span
+                      className="admin-badge b-hot"
+                      style={{ marginInlineStart: 8, fontSize: 10.5 }}
+                    >
+                      مفعّل فوراً · بانتظار المراجعة
+                    </span>
+                  )}
                 </span>
                 <span className="admin-row-parties">
                   {r.method === "usdt" ? "USDT (TRC20)" : "شام كاش"} ·{" "}
@@ -120,12 +134,12 @@ export default function PaymentsManager({ requests }: { requests: PReq[] }) {
                   </button>
                   <button
                     type="button"
-                    className="btn btn-outline paymgr-btn bad"
+                    className="btn btn-soft paymgr-btn bad"
                     disabled={busyId === r.id}
                     onClick={() => decide(r.id, "rejected")}
                   >
-                    <i className="fas fa-xmark" />
-                    رفض
+                    <i className={`fas ${r.status === "manual_review" ? "fa-snowflake" : "fa-xmark"}`} />
+                    {r.status === "manual_review" ? "تجميد" : "رفض"}
                   </button>
                 </div>
               </div>

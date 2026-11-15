@@ -20,7 +20,7 @@ type Pop = { plan: Plan } | null;
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "قيد المراجعة",
-  manual_review: "قيد المراجعة",
+  manual_review: "مفعّل — قيد التدقيق",
   paid: "مؤكد ✓",
   rejected: "مرفوض",
 };
@@ -148,8 +148,8 @@ export default function PricingClient({
           اختر باقتك، ووثّق عقودك <span className="gold">بثقة</span>
         </h1>
         <p className="pricing-sub">
-          ادفع عبر شام كاش وتُفعّل باقتك <b>فوراً</b> مع تحقق يدوي لاحق من الإيصال،
-          أو عبر USDT (TRC20) ويُفعّل فريقنا باقتك بعد تأكيد التحويل.
+          ادفع عبر <b>شام كاش</b> أو <b>USDT (TRC20)</b> وتُفعّل باقتك <b>فوراً</b> مع
+          التحقق التلقائي من البلوكشين أو المراجعة المسائية للإيصال.
         </p>
         {!isLoggedIn && (
           <div className="pricing-guest-note">
@@ -316,7 +316,7 @@ export default function PricingClient({
           <li>اختر باقتك واضغط «اشترك بشام كاش» أو «الدفع بـ USDT».</li>
           <li>حوّل المبلغ إلى محفظة USDT (شبكة TRC20 فقط) أو عبر شام كاش.</li>
           <li>أرسل رقم العملية (TXID) أو رقم إيصال شام كاش في النافذة.</li>
-          <li>في شام كاش تتفعّل باقتك فوراً مع مراجعة لاحقة للحوالة، وفي USDT تُفعّل فور تأكيد الحوالة.</li>
+          <li>تُفعّل باقتك فوراً عبر شام كاش أو USDT (TRC20) مع تحقق تلقائي أو مراجعة مسائية للإيصال.</li>
         </ol>
         <p className="pricing-note">
           <i className="fas fa-shield-halved" />
@@ -394,7 +394,7 @@ export default function PricingClient({
                       />
                       <div className="paypop-warn">
                         <i className="fas fa-bolt" />
-                        تأكد أن الشبكة TRC20 — عند لصق رقم العملية (TXID) يتحقق النظام من البلوكشين ويُفعّل باقتك تلقائياً خلال ثوانٍ.
+                        تأكد أن الشبكة TRC20 — تُفعّل باقتك <b>فوراً</b> بمجرد إرسال رقم العملية (TXID) مع تحقق تلقائي أو مراجعة مسائية. أي رقم عملية غير مطابق يعرّض الحساب للتجميد وإبطال بصمة عقوده.
                       </div>
                     </>
                   ) : (
@@ -489,8 +489,8 @@ export default function PricingClient({
                 </a>
               </div>
               <p className="paypop-foot">
-                بعد إرسال الطلب يراجعه فريق ميثاق ويُفعّل باقتك على حسابك — يمكنك
-                متابعة حالة الطلب من هذه الصفحة.
+                الباقات القياسية تُفعّل فوراً بعد إرسال الإثبات مع تدقيق مسائي — وأي رقم
+                عملية وهمي أو مكرر يعرّض الحساب للتجميد وإبطال بصمة عقوده.
               </p>
             </div>
           </div>

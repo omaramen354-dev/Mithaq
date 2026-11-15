@@ -102,7 +102,9 @@ export default function SampleContractPage() {
     updatedAt: sig2Date,
   };
 
-  const base = (process.env.NEXT_PUBLIC_BASE_URL || "https://miithaq.com").replace(/\/+$/, "");
+  const base = (process.env.NEXT_PUBLIC_BASE_URL || "https://miithaq.com")
+    .trim()
+    .replace(/\/+$/, "");
 
   return (
     <main style={{ padding: "24px 18px 60px" }}>

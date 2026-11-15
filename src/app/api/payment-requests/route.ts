@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
+import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { contracts, paymentRequests, users } from "@/db/schema";
+import { contracts, paymentRequests, transactions, users } from "@/db/schema";
 import { and, eq, gte, ilike, inArray, sql } from "drizzle-orm";
 import { findPlan, MONTH_DAYS } from "@/lib/plans";
 import { isUuid } from "@/lib/contract-schema";
@@ -18,10 +19,14 @@ export const runtime = "nodejs";
    POST /api/payment-requests — طلبات الدفع (USDT TRC20 / شام كاش)
    - فحص حجم الجسم وحدود الطول الصارمة + التحقق من ملكية contractId
    - منع تكرار نفس رقم العملية/TXID على مستوى النظام (منع Replay Attack)
-   - التحقق التلقائي المجاني من تحويلات USDT (TRC20) عبر TronGrid API:
-     • عند تطابق المبلغ والمحفظة وعقد USDT الرسمي ← تفعيل فوري تلقائي 100%!
-     • عند عدم مطابقة المحفظة أو نقص المبلغ ← رفض فوري 422 برسالة واضحة.
-     • عند انقطاع الشبكة أو عدم فهرسة المعاملة بعد ← حفظ للمراجعة اليدوية.
+   - عند الدفع بـ USDT (TRC20) لباقة قياسية:
+     • إن كان TXID بصيغة TRON 64-hex: نفحص بلوكشين TRON عبر TronGrid:
+       - تطابق مؤكد ← تفعيل فوري بحالة paid (لا يحتاج مراجعة).
+       - عدم تطابق مؤكد (محفظة خاطئة/مبلغ ناقص/عملية فاشلة) ← رفض فوري 422.
+       - تعذر الشبكة/عدم الفهرسة بعد ← تفعيل فوري بحالة manual_review + أزرار تيليجرام.
+     • وإن كان مرجع تحويل داخلي (مثل Binance/OKX ID) ← تفعيل فوري بحالة manual_review
+       مع إرسال إشعار فوري إلى تيليجرام يحتوي على أزرار (✅ تأكيد / ❄️ تجميد مباشر)
+       للمراجعة المسائية تماماً مثل شام كاش (مع منع التكديس وعدم منح paidOnce قبل التأكيد).
    ============================================================ */
 
 type Body = {
@@ -169,13 +174,55 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const isEligibleUsdtInstant = method === "usdt" && !plan.service;
+
+  /* منع التكديس المتسلسل لطلبات التفعيل الفوري غير المدققة (شام كاش أو USDT) */
+  if (isEligibleUsdtInstant) {
+    const [pendingTx, pendingInstantPr] = await Promise.all([
+      db
+        .select({ id: transactions.id })
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.userId, session.user.dbId),
+            eq(transactions.status, "unverified")
+          )
+        )
+        .limit(1),
+      db
+        .select({ id: paymentRequests.id })
+        .from(paymentRequests)
+        .where(
+          and(
+            eq(paymentRequests.userId, session.user.dbId),
+            eq(paymentRequests.status, "manual_review")
+          )
+        )
+        .limit(1),
+    ]);
+    if (pendingTx.length || pendingInstantPr.length) {
+      return noStoreJson(
+        {
+          ok: false,
+          message:
+            "لديك عملية دفع سابقة مفعّلة بانتظار مراجعة الإدارة — لا يمكن تفعيل طلب جديد قبل تدقيق العملية الحالية.",
+        },
+        { status: 409 }
+      );
+    }
+  }
+
   const storedTxRef = [txRef, senderName ? "الاسم: " + senderName : ""]
     .filter(Boolean)
     .join(" | ");
-  const adminBase = (process.env.NEXT_PUBLIC_BASE_URL || req.nextUrl.origin || "").replace(/\/+$/, "");
+  const adminBase = (process.env.NEXT_PUBLIC_BASE_URL || req.nextUrl.origin || "")
+    .trim()
+    .replace(/\/+$/, "");
+  const now = new Date();
+  const reqId = randomUUID();
 
-  /* ===== التحقق التلقائي الفوري من USDT TRC20 عبر TronGrid المجاني ===== */
-  if (method === "usdt" && !plan.service && isValidTronTxid(txRef)) {
+  /* ===== 1. التحقق التلقائي الفوري من USDT TRC20 عبر TronGrid المجاني ===== */
+  if (isEligibleUsdtInstant && isValidTronTxid(txRef)) {
     const check = await verifyUsdtTrc20Transfer(txRef, plan.priceUsd);
 
     if (check.status === "invalid") {
@@ -183,7 +230,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (check.status === "verified") {
-      const now = new Date();
       const expires =
         plan.unit === "month"
           ? new Date(now.getTime() + MONTH_DAYS * 864e5)
@@ -192,6 +238,7 @@ export async function POST(req: NextRequest) {
 
       await db.batch([
         db.insert(paymentRequests).values({
+          id: reqId,
           userId: session.user.dbId,
           contractId: verifiedContractId,
           plan: plan.id,
@@ -216,7 +263,7 @@ export async function POST(req: NextRequest) {
       await logEvent({
         action: "usdt_auto_verified",
         entity: "payment",
-        entityId: "",
+        entityId: reqId,
         actorId: session.user.dbId,
         actorName: session.user.name || "",
         actorEmail: session.user.email || "",
@@ -226,6 +273,8 @@ export async function POST(req: NextRequest) {
 
       notifyPaymentEvent({
         source: "usdt_auto_verified",
+        recordKind: "pr",
+        recordId: reqId,
         planTitle: plan.title,
         planId: plan.id,
         amountUsd: check.amountUsdt,
@@ -246,10 +295,80 @@ export async function POST(req: NextRequest) {
       );
     }
     /* حالة unavailable (الشبكة لم تفهرس المعاملة بعد أو تعذّر الاتصال)
-       تستمر بسلاسة للحفظ بحالة pending للمراجعة اليدوية مع إشعار تيليجرام */
+       تنتقل للتفعيل الفوري مع المراجعة المسائية عبر تيليجرام أدناه */
   }
 
+  /* ===== 2. تفعيل فوري لدفعات USDT (TRC20) مع المراجعة المسائية من تيليجرام ===== */
+  if (isEligibleUsdtInstant) {
+    const expires =
+      plan.unit === "month"
+        ? new Date(now.getTime() + MONTH_DAYS * 864e5)
+        : null;
+
+    await db.batch([
+      db.insert(paymentRequests).values({
+        id: reqId,
+        userId: session.user.dbId,
+        contractId: verifiedContractId,
+        plan: plan.id,
+        amountUsd: String(plan.priceUsd),
+        method: "usdt",
+        status: "manual_review",
+        txRef: storedTxRef,
+        createdAt: now,
+        updatedAt: now,
+      }),
+      /* تفعيل فوري دون منح paidOnce إلا بعد تأكيد المشرف (تيليجرام أو /admin) */
+      db
+        .update(users)
+        .set({
+          plan: plan.id,
+          planExpiresAt: expires,
+          isSingleUsed: plan.id === "single" ? false : undefined,
+        })
+        .where(eq(users.id, session.user.dbId)),
+    ]);
+
+    await logEvent({
+      action: "usdt_instant_activated",
+      entity: "payment",
+      entityId: reqId,
+      actorId: session.user.dbId,
+      actorName: session.user.name || "",
+      actorEmail: session.user.email || "",
+      detail: `تفعيل فوري لدفعة USDT (TRC20) رقم ${txRef} — باقة ${plan.title} بانتظار المراجعة المسائية`,
+      meta: { plan: plan.id, txRef, amountUsd: plan.priceUsd },
+    });
+
+    notifyPaymentEvent({
+      source: "usdt_instant",
+      recordKind: "pr",
+      recordId: reqId,
+      planTitle: plan.title,
+      planId: plan.id,
+      amountUsd: plan.priceUsd,
+      amountSyp: plan.priceSyp,
+      method: "USDT (TRC20)",
+      txRef,
+      userName: session.user.name || "",
+      userEmail: session.user.email || "",
+      adminUrl: adminBase ? `${adminBase}/admin` : undefined,
+    }).catch(() => {});
+
+    return noStoreJson(
+      {
+        ok: true,
+        autoVerified: true,
+        pendingAudit: true,
+        message: `تم تفعيل باقة «${plan.title}» فوراً — مزاياك جاهزة الآن! سيراجع الفريق رقم الحوالة في التدقيق المسائي، وأي رقم غير مطابق يعرّض الحساب للتجميد وإبطال العقود.`,
+      },
+      { status: 201 }
+    );
+  }
+
+  /* ===== 3. طلبات الخدمات (مثل المراجعة القانونية) أو شام كاش من النافذة ===== */
   await db.insert(paymentRequests).values({
+    id: reqId,
     userId: session.user.dbId,
     contractId: verifiedContractId,
     plan: plan.id,
@@ -257,11 +376,15 @@ export async function POST(req: NextRequest) {
     method,
     status: "pending",
     txRef: storedTxRef,
+    createdAt: now,
+    updatedAt: now,
   });
 
-  /* إشعار فوري للمشرف على تيليجرام بوجود طلب دفع جديد */
+  /* إشعار فوري للمشرف على تيليجرام مع أزرار التأكيد/التجميد المباشرة */
   notifyPaymentEvent({
     source: "payment_request",
+    recordKind: "pr",
+    recordId: reqId,
     planTitle: plan.title,
     planId: plan.id,
     amountUsd: plan.priceUsd,

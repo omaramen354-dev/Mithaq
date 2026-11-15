@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { transactions, users } from "@/db/schema";
@@ -141,15 +142,17 @@ export async function POST(req: NextRequest) {
   }
 
   const now = new Date();
+  const txId = randomUUID();
   const expires =
     plan.unit === "month" ? new Date(now.getTime() + MONTH_DAYS * 864e5) : null;
 
   /* 6. حفظ المعاملة بحالة unverified + تفعيل فوري للباقة دون منح paidOnce
-        (paidOnce لا يُمنح إلا بعد تأكيد المشرف في /admin، وفي حال التزوير
+        (paidOnce لا يُمنح إلا بعد تأكيد المشرف في /admin أو تيليجرام، وفي حال التزوير
         يجمّد المشرف الحساب فتُبطَل الباقة وكل العقود فوراً) */
   try {
     await db.batch([
       db.insert(transactions).values({
+        id: txId,
         userId: session.user.dbId,
         transactionNumber: txNumber,
         contactPhone: phone,
@@ -180,7 +183,7 @@ export async function POST(req: NextRequest) {
   await logEvent({
     action: "checkout_submitted",
     entity: "payment",
-    entityId: "",
+    entityId: txId,
     actorId: session.user.dbId,
     actorName: session.user.name || "",
     actorEmail: session.user.email || "",
@@ -195,10 +198,14 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  /* إشعار فوري للمشرف عبر بوت تيليجرام (لا يُعطّل الطلب عند عدم التهيئة) */
-  const adminBase = (process.env.NEXT_PUBLIC_BASE_URL || req.nextUrl.origin || "").replace(/\/+$/, "");
+  /* إشعار فوري للمشرف عبر بوت تيليجرام مع أزرار تأكيد/تجميد مباشر */
+  const adminBase = (process.env.NEXT_PUBLIC_BASE_URL || req.nextUrl.origin || "")
+    .trim()
+    .replace(/\/+$/, "");
   notifyPaymentEvent({
     source: "checkout_instant",
+    recordKind: "tx",
+    recordId: txId,
     planTitle: plan.title,
     planId: plan.id,
     amountUsd: plan.priceUsd,

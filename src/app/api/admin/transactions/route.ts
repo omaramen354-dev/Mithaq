@@ -2,12 +2,11 @@ import { NextRequest } from "next/server";
 import { requireAdminSession } from "@/lib/admin-guard";
 import { isUuid } from "@/lib/contract-schema";
 import { db } from "@/db";
-import { paymentRequests, transactions, users } from "@/db/schema";
-import { and, desc, eq, inArray } from "drizzle-orm";
-import { findPlan, MONTH_DAYS } from "@/lib/plans";
-import { logEvent } from "@/lib/logger";
+import { transactions, users } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 import { readBoundedJson } from "@/lib/contract-text";
 import { noStoreJson } from "@/lib/client-ip";
+import { decideTransaction } from "@/lib/payment-decisions";
 
 export const runtime = "nodejs";
 
@@ -19,15 +18,6 @@ export const runtime = "nodejs";
    ============================================================ */
 
 const requireAdmin = requireAdminSession;
-
-async function fetchTx(id: string) {
-  const rows = await db
-    .select()
-    .from(transactions)
-    .where(eq(transactions.id, id))
-    .limit(1);
-  return rows[0] || null;
-}
 
 type Body = {
   id?: string;
@@ -85,158 +75,12 @@ export async function POST(req: NextRequest) {
     return noStoreJson({ ok: false, message: "بيانات القرار غير صالحة." }, { status: 422 });
   }
 
-  const tx = await fetchTx(id);
-  if (!tx) {
-    return noStoreJson({ ok: false, message: "المعاملة غير موجودة." }, { status: 404 });
-  }
-  if (tx.status === "suspended" && action !== "unsuspend") {
-    return noStoreJson(
-      { ok: false, message: "المعاملة مجمّدة سابقاً — راجع السجل قبل أي قرار." },
-      { status: 409 }
-    );
-  }
-  if (tx.status === "verified" && action === "verify") {
-    return noStoreJson({ ok: false, message: "هذه المعاملة موثقة سابقاً." }, { status: 409 });
-  }
-
-  const now = new Date();
-  const actor = {
+  const res = await decideTransaction(id, action, {
     actorId: session.user.dbId,
     actorName: session.user.name || "",
     actorEmail: session.user.email || "",
-  };
-
-  /* ===== تجميد الحساب وإبطال المزايا و paidOnce فوراً ===== */
-  if (action === "suspend") {
-    await db
-      .update(transactions)
-      .set({ status: "suspended", reviewedAt: now, reviewedBy: session.user.dbId, updatedAt: now })
-      .where(eq(transactions.id, id));
-
-    if (tx.userId) {
-      await db
-        .update(users)
-        .set({
-          plan: "free",
-          planExpiresAt: null,
-          paidOnce: false,
-          isSingleUsed: false,
-        })
-        .where(eq(users.id, tx.userId));
-    }
-
-    await logEvent({
-      action: "transaction_suspended",
-      entity: "payment",
-      entityId: id,
-      ...actor,
-      detail: "تجميد الحساب وإبطال بصمة SHA-256 ورمز QR نظراً لمخالفة مالية",
-      meta: { txRef: tx.transactionNumber, plan: tx.planName, targetUser: tx.userId },
-    });
-
-    return noStoreJson({ ok: true, message: "تم تجميد الحساب وإبطال الهاش." });
-  }
-
-  /* ===== تأكيد الحوالة يدوياً ===== */
-  if (action === "verify") {
-    await db
-      .update(transactions)
-      .set({ status: "verified", reviewedAt: now, reviewedBy: session.user.dbId, updatedAt: now })
-      .where(eq(transactions.id, id));
-
-    const plan = findPlan(tx.planName) || findPlan(tx.planName.toLowerCase());
-    if (!plan || plan.service || !tx.userId) {
-      await logEvent({
-        action: "transaction_verified_no_plan",
-        entity: "payment",
-        entityId: id,
-        ...actor,
-        detail: `تأكيد الحوالة — رقم العملية ${tx.transactionNumber} — لم نجد باقة مطابقة (${tx.planName})`,
-        meta: { plan: tx.planName, targetUser: tx.userId },
-      });
-      return noStoreJson({
-        ok: true,
-        message: "تم التأكيد — لم نعثر على باقة مقابلة (سُجّل الإثبات فقط).",
-      });
-    }
-
-    const [targetUser] = await db
-      .select({
-        plan: users.plan,
-        planExpiresAt: users.planExpiresAt,
-        isSingleUsed: users.isSingleUsed,
-      })
-      .from(users)
-      .where(eq(users.id, tx.userId))
-      .limit(1);
-
-    const alreadyActiveSamePlan = targetUser?.plan === plan.id;
-    const existingFutureExpiry =
-      targetUser?.planExpiresAt && targetUser.planExpiresAt.getTime() > now.getTime()
-        ? targetUser.planExpiresAt
-        : null;
-    const expires =
-      plan.unit === "month"
-        ? alreadyActiveSamePlan && existingFutureExpiry
-          ? existingFutureExpiry
-          : new Date(now.getTime() + MONTH_DAYS * 864e5)
-        : null;
-    const isOnce = plan.unit === "once";
-
-    await db.batch([
-      db
-        .update(paymentRequests)
-        .set({ status: "paid", updatedAt: now })
-        .where(
-          and(
-            eq(paymentRequests.userId, tx.userId),
-            inArray(paymentRequests.status, ["pending", "manual_review"])
-          )
-        ),
-      db
-        .update(users)
-        .set({
-          plan: plan.id,
-          planExpiresAt: expires,
-          paidOnce: isOnce ? true : undefined,
-          /* إذا كانت الباقة single مفعّلة مسبقاً عبر الشراء الفوري فلا نُصفّر
-             isSingleUsed حتى لا يحصل العميل على عقد ثانٍ مجاناً عند التدقيق المسائي */
-          isSingleUsed:
-            plan.id === "single"
-              ? alreadyActiveSamePlan
-                ? Boolean(targetUser?.isSingleUsed)
-                : false
-              : undefined,
-        })
-        .where(eq(users.id, tx.userId)),
-    ]);
-
-    await logEvent({
-      action: "transaction_verified",
-      entity: "payment",
-      entityId: id,
-      ...actor,
-      detail: `تأكيد الحوالة رقم ${tx.transactionNumber} وتفعيل باقة ${plan.title}`,
-      meta: { plan: plan.id, targetUser: tx.userId },
-    });
-
-    return noStoreJson({ ok: true, message: `تم التأكيد وتفعيل باقة ${plan.title}.` });
-  }
-
-  /* ===== رفع الحظر (unsuspend) ===== */
-  await db
-    .update(transactions)
-    .set({ status: "unverified", reviewedAt: now, reviewedBy: session.user.dbId, updatedAt: now })
-    .where(eq(transactions.id, id));
-
-  await logEvent({
-    action: "transaction_unsuspended",
-    entity: "payment",
-    entityId: id,
-    ...actor,
-    detail: `رفع الحظر — المعاملة ${tx.transactionNumber} — إعادة فحص`,
-    meta: { txRef: tx.transactionNumber },
+    via: "admin",
   });
 
-  return noStoreJson({ ok: true, message: "تم رفع الحظر — المعاملة عادت غير موثقة." });
+  return noStoreJson({ ok: res.ok, message: res.message }, { status: res.status });
 }

@@ -148,6 +148,7 @@ const routeAdminUserContracts = await loadRouteModule("src/app/api/admin/users/[
 const routeAdminContracts = await loadRouteModule("src/app/api/admin/contracts/route.ts");
 const routeAdminContractId = await loadRouteModule("src/app/api/admin/contracts/[id]/route.ts");
 const routeAdminTelegramTest = await loadRouteModule("src/app/api/admin/telegram-test/route.ts");
+const routeTelegramWebhook = await loadRouteModule("src/app/api/telegram/webhook/route.ts");
 const routeAdminDbSync = await loadRouteModule("src/app/api/admin/db-sync/route.ts");
 const routeAdminTx = await loadRouteModule("src/app/api/admin/transactions/route.ts");
 const routeAdminPay = await loadRouteModule("src/app/api/admin/payment-requests/route.ts");
@@ -2167,6 +2168,222 @@ startSuite("S10", "Launch Upgrades ($49 Office Gate, Logo XSS & USDT TRC20)");
       "POST /api/admin/db-sync accessible by non-admin user",
       `Non-admin => HTTP ${nonAdmin.status}`
     );
+  }
+
+  // 10.5 Telegram Interactive Webhook Security (Secret Token, Chat ID & Callback Validation)
+  //      + 10.6 Instant USDT Activation, Anti-Stacking & 1-Tap Telegram Freeze/Confirm
+  {
+    const prevTok = process.env.TELEGRAM_BOT_TOKEN;
+    const prevChat = process.env.TELEGRAM_CHAT_ID;
+    const prevFetch = globalThis.fetch;
+    process.env.TELEGRAM_BOT_TOKEN = "123456:TEST_BOT_TOKEN_FOR_SECURITY_AUDIT";
+    process.env.TELEGRAM_CHAT_ID = "999888777";
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify({ ok: true, result: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+
+    try {
+      const validSecret = telegramMod.getTelegramWebhookSecret();
+
+      // 10.5a Missing or forged X-Telegram-Bot-Api-Secret-Token -> MUST return 401
+      const noSecretRes = await routeTelegramWebhook.POST(
+        makeReq("https://miithaq.com/api/telegram/webhook", {
+          method: "POST",
+          json: { callback_query: { id: "cb1", data: "tx:v:00000000-0000-4000-8000-000000000001" } },
+        })
+      );
+      secAssert(
+        noSecretRes.status === 401,
+        "TG-WEBHOOK-01",
+        "CRITICAL",
+        "POST /api/telegram/webhook accepted request without valid secret token",
+        `Missing secret => HTTP ${noSecretRes.status}`
+      );
+
+      const badSecretRes = await routeTelegramWebhook.POST(
+        makeReq("https://miithaq.com/api/telegram/webhook", {
+          method: "POST",
+          headers: { "x-telegram-bot-api-secret-token": "wrong-secret-token" },
+          json: { callback_query: { id: "cb2", data: "tx:v:00000000-0000-4000-8000-000000000001" } },
+        })
+      );
+      secAssert(
+        badSecretRes.status === 401,
+        "TG-WEBHOOK-01B",
+        "CRITICAL",
+        "POST /api/telegram/webhook accepted forged secret token",
+        `Forged secret => HTTP ${badSecretRes.status}`
+      );
+
+      // 10.5b Valid secret token, but spoofed chat.id / from.id -> MUST return 403
+      const spoofedChatRes = await routeTelegramWebhook.POST(
+        makeReq("https://miithaq.com/api/telegram/webhook", {
+          method: "POST",
+          headers: { "x-telegram-bot-api-secret-token": validSecret },
+          json: {
+            callback_query: {
+              id: "cb3",
+              from: { id: 111222333, first_name: "Attacker" },
+              message: { message_id: 1, chat: { id: 111222333 }, text: "Payment" },
+              data: "tx:v:00000000-0000-4000-8000-000000000001",
+            },
+          },
+        })
+      );
+      secAssert(
+        spoofedChatRes.status === 403,
+        "TG-WEBHOOK-02",
+        "CRITICAL",
+        "POST /api/telegram/webhook accepted callback from unauthorized chat/sender ID",
+        `Spoofed chat => HTTP ${spoofedChatRes.status}`
+      );
+
+      // 10.5c Malformed callback_data injection -> MUST return 422
+      const badDataRes = await routeTelegramWebhook.POST(
+        makeReq("https://miithaq.com/api/telegram/webhook", {
+          method: "POST",
+          headers: { "x-telegram-bot-api-secret-token": validSecret },
+          json: {
+            callback_query: {
+              id: "cb4",
+              from: { id: 999888777, first_name: "Admin" },
+              message: { message_id: 2, chat: { id: 999888777 }, text: "Payment" },
+              data: "tx:v:../admin;DROP TABLE users",
+            },
+          },
+        })
+      );
+      secAssert(
+        badDataRes.status === 422,
+        "TG-WEBHOOK-03",
+        "HIGH",
+        "POST /api/telegram/webhook accepted malformed callback_data",
+        `Malformed data => HTTP ${badDataRes.status}`
+      );
+
+      // 10.6a Instant USDT activation + anti-stacking + 1-tap Telegram Freeze revokes access!
+      const state = resetMockState();
+      seedUsers(state);
+      const mallory = state.tables.users[2];
+      state.session = sessFor(mallory);
+
+      const usdt1 = await routePayReqs.POST(
+        makeReq("https://miithaq.com/api/payment-requests", {
+          method: "POST",
+          json: { plan: "verified", method: "usdt", txRef: "BINANCE-INTERNAL-99887766" },
+        })
+      );
+      const usdt1Json = await usdt1.json();
+      secAssert(
+        usdt1.status === 201 &&
+          usdt1Json.autoVerified === true &&
+          mallory.plan === "verified" &&
+          mallory.paidOnce !== true &&
+          state.tables.payment_requests[0]?.status === "manual_review",
+        "USDT-INSTANT-01",
+        "HIGH",
+        "Instant USDT activation failed or improperly granted permanent paidOnce before audit",
+        `status=${usdt1.status}, plan=${mallory.plan}, paidOnce=${mallory.paidOnce}, prStatus=${state.tables.payment_requests[0]?.status}`
+      );
+
+      // Anti-stacking: second instant USDT attempt while manual_review is open -> MUST return 409
+      const usdtStack = await routePayReqs.POST(
+        makeReq("https://miithaq.com/api/payment-requests", {
+          method: "POST",
+          json: { plan: "office", method: "usdt", txRef: "BINANCE-INTERNAL-11223344" },
+        })
+      );
+      secAssert(
+        usdtStack.status === 409,
+        "USDT-INSTANT-02",
+        "HIGH",
+        "User stacked a second unreviewed instant USDT activation",
+        `Stacked USDT => HTTP ${usdtStack.status}`
+      );
+
+      // Admin taps "❄️ تجميد الحساب" directly in Telegram (pr:f:<id>)
+      const prId = state.tables.payment_requests[0].id;
+      const tgFreeze = await routeTelegramWebhook.POST(
+        makeReq("https://miithaq.com/api/telegram/webhook", {
+          method: "POST",
+          headers: { "x-telegram-bot-api-secret-token": validSecret },
+          json: {
+            callback_query: {
+              id: "cb-freeze",
+              from: { id: 999888777, first_name: "Founder" },
+              message: { message_id: 10, chat: { id: 999888777 }, text: "USDT payment alert" },
+              data: `pr:f:${prId}`,
+            },
+          },
+        })
+      );
+      secAssert(
+        tgFreeze.status === 200 &&
+          mallory.plan === "free" &&
+          state.tables.payment_requests[0].status === "rejected" &&
+          state.tables.transactions.some((t) => t.userId === mallory.id && t.status === "suspended"),
+        "TG-WEBHOOK-04",
+        "CRITICAL",
+        "Telegram 1-tap Freeze (pr:f:<id>) failed to revoke plan & suspend fraudster in transactions table",
+        `HTTP ${tgFreeze.status}, plan=${mallory.plan}, prStatus=${state.tables.payment_requests[0].status}`
+      );
+
+      // Verify frozen fraudster is now blocked from creating contracts (403)!
+      state.session = sessFor(mallory);
+      const frozenCreate = await routeContracts.POST(
+        makeReq("https://miithaq.com/api/contracts", {
+          method: "POST",
+          json: { type: "sale", party1: "Mallory", party2: "Victim", party2Email: "v@example.com" },
+        })
+      );
+      secAssert(
+        frozenCreate.status === 403,
+        "TG-WEBHOOK-05",
+        "CRITICAL",
+        "User frozen via Telegram 1-tap button could still create contracts!",
+        `Frozen contract create => HTTP ${frozenCreate.status}`
+      );
+
+      // 10.6b Telegram 1-tap Confirm (tx:v:<id>) verifies ShamCash transaction cleanly
+      const alice = state.tables.users[0];
+      state.session = sessFor(alice);
+      await routeCheckout.POST(
+        makeReq("https://miithaq.com/api/checkout", {
+          method: "POST",
+          json: { planId: "single", transactionNumber: "7788990011", contactPhone: "0933123456" },
+        })
+      );
+      const aliceTx = state.tables.transactions.find((t) => t.userId === alice.id);
+      const tgConfirm = await routeTelegramWebhook.POST(
+        makeReq("https://miithaq.com/api/telegram/webhook", {
+          method: "POST",
+          headers: { "x-telegram-bot-api-secret-token": validSecret },
+          json: {
+            callback_query: {
+              id: "cb-verify",
+              from: { id: 999888777, first_name: "Founder" },
+              message: { message_id: 11, chat: { id: 999888777 }, text: "ShamCash alert" },
+              data: `tx:v:${aliceTx.id}`,
+            },
+          },
+        })
+      );
+      secAssert(
+        tgConfirm.status === 200 && aliceTx.status === "verified" && alice.paidOnce === true,
+        "TG-WEBHOOK-06",
+        "HIGH",
+        "Telegram 1-tap Confirm (tx:v:<id>) failed to mark ShamCash transaction verified & grant paidOnce",
+        `HTTP ${tgConfirm.status}, txStatus=${aliceTx.status}, paidOnce=${alice.paidOnce}`
+      );
+    } finally {
+      globalThis.fetch = prevFetch;
+      if (prevTok === undefined) delete process.env.TELEGRAM_BOT_TOKEN;
+      else process.env.TELEGRAM_BOT_TOKEN = prevTok;
+      if (prevChat === undefined) delete process.env.TELEGRAM_CHAT_ID;
+      else process.env.TELEGRAM_CHAT_ID = prevChat;
+    }
   }
 }
 
