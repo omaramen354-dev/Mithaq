@@ -138,3 +138,44 @@ export async function notifyPaymentEvent(info: {
 
   return sendTelegramMessage(lines.join("\n"));
 }
+
+/**
+ * إشعار فوري للمشرف على تيليجرام عند وقوع خطأ فعلي في المنصة (متصفح أو خادم).
+ * يُستدعى مع حماية ضد التكرار والإغراق من /api/errors.
+ */
+export async function notifyErrorEvent(info: {
+  source: "browser" | "server";
+  message: string;
+  component?: string;
+  url?: string;
+  userName?: string;
+  userEmail?: string;
+  adminUrl?: string;
+}): Promise<TgResult> {
+  const now = new Date().toLocaleString("ar-SY");
+  const title =
+    info.source === "server"
+      ? "🔥 <b>خطأ خادم فوري — منصة ميثاق</b>"
+      : "🚨 <b>تنبيه خطأ فوري — منصة ميثاق</b>";
+
+  const who =
+    info.userName || info.userEmail
+      ? `${esc(info.userName || "مستخدم")} (${esc(info.userEmail || "—")})`
+      : "زائر غير مسجّل";
+
+  const lines = [
+    title,
+    "",
+    `⚠️ الرسالة: <code>${esc(info.message.slice(0, 350))}</code>`,
+    ...(info.component ? [`🧩 المكوّن: ${esc(info.component)}`] : []),
+    ...(info.url ? [`🌐 الصفحة: ${esc(info.url.slice(0, 220))}`] : []),
+    `👤 المستخدم: ${who}`,
+    `🕒 ${now}`,
+  ];
+
+  if (info.adminUrl) {
+    lines.push("", `🔎 سجل الأخطاء في لوحة القيادة: ${esc(info.adminUrl)}`);
+  }
+
+  return sendTelegramMessage(lines.join("\n"));
+}

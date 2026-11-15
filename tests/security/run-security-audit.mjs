@@ -148,6 +148,7 @@ const routeAdminUserContracts = await loadRouteModule("src/app/api/admin/users/[
 const routeAdminContracts = await loadRouteModule("src/app/api/admin/contracts/route.ts");
 const routeAdminContractId = await loadRouteModule("src/app/api/admin/contracts/[id]/route.ts");
 const routeAdminTelegramTest = await loadRouteModule("src/app/api/admin/telegram-test/route.ts");
+const routeAdminDbSync = await loadRouteModule("src/app/api/admin/db-sync/route.ts");
 const routeAdminTx = await loadRouteModule("src/app/api/admin/transactions/route.ts");
 const routeAdminPay = await loadRouteModule("src/app/api/admin/payment-requests/route.ts");
 const routeAdminLogs = await loadRouteModule("src/app/api/admin/logs/route.ts");
@@ -2140,6 +2141,31 @@ startSuite("S10", "Launch Upgrades ($49 Office Gate, Logo XSS & USDT TRC20)");
       "CRITICAL",
       "POST /api/payment-requests allowed replaying same txRef across a second user account!",
       `Account 2 replay => HTTP ${r2.status}`
+    );
+  }
+
+  // 10.4 Admin-only protection on POST /api/admin/db-sync (must reject guest & non-admin with 403)
+  {
+    const state = resetMockState();
+    seedUsers(state);
+    state.session = null;
+    const unauth = await routeAdminDbSync.POST();
+    secAssert(
+      unauth.status === 403,
+      "DBSYNC-AUTH-01",
+      "CRITICAL",
+      "POST /api/admin/db-sync accessible without authentication",
+      `Unauth => HTTP ${unauth.status}`
+    );
+
+    state.session = sessFor(state.tables.users[0]); // non-admin
+    const nonAdmin = await routeAdminDbSync.POST();
+    secAssert(
+      nonAdmin.status === 403,
+      "DBSYNC-AUTH-02",
+      "CRITICAL",
+      "POST /api/admin/db-sync accessible by non-admin user",
+      `Non-admin => HTTP ${nonAdmin.status}`
     );
   }
 }

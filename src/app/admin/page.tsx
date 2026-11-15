@@ -15,6 +15,7 @@ import ContractsManager from "./ContractsManager";
 import LogsManager from "./LogsManager";
 import ErrorsManager from "./ErrorsManager";
 import TelegramTestButton from "./TelegramTestButton";
+import DbSyncButton from "./DbSyncButton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -82,14 +83,14 @@ function computeReadiness() {
       label: "واتساب الدعم",
       ok: waDigits.length >= 8 && waDigits.length <= 16,
       hint: "NEXT_PUBLIC_SUPPORT_WHATSAPP",
-      icon: "fab fa-whatsapp",
+      icon: "fa-headset",
     },
     {
       id: "telegram",
       label: "بوت تيليجرام",
       ok: telegramConfigured(),
       hint: "TELEGRAM_BOT_TOKEN + CHAT_ID",
-      icon: "fab fa-telegram",
+      icon: "fa-paper-plane",
     },
     {
       id: "cron",
@@ -452,6 +453,7 @@ export default async function AdminPage() {
             <span dir="ltr" style={{ display: "inline-block", fontFamily: "monospace", fontSize: 12 }}>
               {dbIssues.join(" | ")}
             </span>
+            <DbSyncButton />
           </div>
         </section>
       )}
