@@ -113,6 +113,7 @@ export async function verifyUsdtTrc20Transfer(
   const targetWallet = (
     walletAddress ??
     process.env.NEXT_PUBLIC_USDT_TRC20_ADDRESS ??
+    process.env.USDT_TRC20_ADDRESS ??
     ""
   ).trim();
   const expectedToHex = tronBase58ToHex20(targetWallet);

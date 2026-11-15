@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import CheckoutClient from "./CheckoutClient";
+import { getPaymentConfig } from "@/lib/payment-config";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -29,6 +30,7 @@ export default async function CheckoutPage({
       planParam={planParam || ""}
       isLoggedIn={Boolean(session?.user?.dbId)}
       userName={session?.user?.name || null}
+      paymentConfig={getPaymentConfig()}
     />
   );
 }

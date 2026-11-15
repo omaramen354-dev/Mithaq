@@ -2943,6 +2943,28 @@ html.mithaq-modal-open .main-wrapper { margin-inline-start: 0; }
 .plan-cta { text-align: center; }
 
 .plan-btn { width: 100%; justify-content: center; }
+.plan-card .btn-soft,
+.plan-card .btn-outline {
+  color: var(--green);
+  background: rgba(29, 74, 62, 0.07);
+  border: 1.5px solid rgba(29, 74, 62, 0.22);
+}
+.plan-card .btn-soft:hover:not(:disabled),
+.plan-card .btn-outline:hover:not(:disabled) {
+  background: rgba(29, 74, 62, 0.13);
+  border-color: var(--green);
+}
+.plan-card .btn-soft:disabled,
+.plan-card .btn-outline:disabled {
+  opacity: 0.78;
+  cursor: not-allowed;
+}
+[data-theme="dark"] .plan-card .btn-soft,
+[data-theme="dark"] .plan-card .btn-outline {
+  color: var(--ivory);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(212, 168, 67, 0.3);
+}
 
 .plan-state {
   display: inline-flex;

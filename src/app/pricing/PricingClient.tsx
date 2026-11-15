@@ -12,18 +12,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { PAID_PLANS, findPlan, priceLabel, priceLabelSyp, type Plan } from "@/lib/plans";
 import { whatsappLink } from "@/lib/whatsapp";
-
-/* ===== بيانات الدفع =====
-   تُضبط من متغيرات البيئة قبل البناء بدل تعديل الكود:
-   NEXT_PUBLIC_USDT_TRC20_ADDRESS · NEXT_PUBLIC_SHAM_CASH_ACCOUNT
-   NEXT_PUBLIC_SHAM_CASH_NAME · NEXT_PUBLIC_SUPPORT_WHATSAPP
-   لا نعرض عنواناً وهمياً ولا نسمح بإرسال طلب قبل ضبط الوجهة. */
-const WALLET = (process.env.NEXT_PUBLIC_USDT_TRC20_ADDRESS || "").trim();
-const SHAM_NAME = (process.env.NEXT_PUBLIC_SHAM_CASH_NAME || "").trim();
-const SHAM_NUMBER = (process.env.NEXT_PUBLIC_SHAM_CASH_ACCOUNT || "").trim();
-const USDT_READY = /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(WALLET);
-const SHAM_READY = /^\d{6,}$/.test(SHAM_NUMBER) && SHAM_NAME.length >= 2;
-const ANY_METHOD_READY = USDT_READY || SHAM_READY;
+import type { PublicPaymentConfig } from "@/lib/payment-config";
 
 type MyReq = { id: string; plan: string; status: string; createdAt: string };
 type Pop = { plan: Plan } | null;
@@ -39,11 +28,20 @@ export default function PricingClient({
   isLoggedIn,
   userName,
   myRequests,
+  paymentConfig,
 }: {
   isLoggedIn: boolean;
   userName: string | null;
   myRequests: MyReq[];
+  paymentConfig: PublicPaymentConfig;
 }) {
+  const WALLET = paymentConfig.usdtWallet;
+  const SHAM_NAME = paymentConfig.shamName;
+  const SHAM_NUMBER = paymentConfig.shamAccount;
+  const USDT_READY = paymentConfig.usdtReady;
+  const SHAM_READY = paymentConfig.shamReady;
+  const ANY_METHOD_READY = paymentConfig.anyMethodReady;
+  const SUPPORT_WA = paymentConfig.supportWhatsapp;
   const [pop, setPop] = useState<Pop>(null);
   const [method, setMethod] = useState<"usdt" | "shamcash">("usdt");
   const [txRef, setTxRef] = useState("");
@@ -224,15 +222,30 @@ export default function PricingClient({
                 ) : isLoggedIn ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                     {!ANY_METHOD_READY ? (
-                      <button
-                        type="button"
-                        className="btn btn-outline plan-btn"
-                        disabled
-                        title="لم تُضبط بيانات الدفع بعد"
-                      >
-                        <i className="fas fa-triangle-exclamation" />
-                        الدفع غير متاح حالياً
-                      </button>
+                      paymentConfig.whatsappReady ? (
+                        <a
+                          href={whatsappLink(
+                            `مرحباً فريق ميثاق، أرغب بالاشتراك في باقة ${p.title}`,
+                            SUPPORT_WA
+                          )}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-soft plan-btn"
+                        >
+                          <i className="fas fa-headset" />
+                          تواصل للاشتراك الآن
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-soft plan-btn"
+                          disabled
+                          title="لم تُضبط بيانات الدفع في Vercel بعد"
+                        >
+                          <i className="fas fa-triangle-exclamation" />
+                          الدفع قيد التفعيل حالياً
+                        </button>
+                      )
                     ) : p.service ? (
                       <button
                         type="button"
@@ -259,7 +272,7 @@ export default function PricingClient({
                             className={`btn ${SHAM_READY ? "btn-soft" : "btn-primary"} plan-btn`}
                             onClick={() => openPop(p)}
                           >
-                            <i className="fab fa-bitcoin" />
+                            <i className="fas fa-coins" />
                             الدفع بـ USDT (TRC20)
                           </button>
                         )}
@@ -269,7 +282,7 @@ export default function PricingClient({
                 ) : (
                   <Link
                     href="/login?callbackUrl=%2Fpricing"
-                    className="btn btn-outline plan-btn"
+                    className="btn btn-primary plan-btn"
                   >
                     <i className="fas fa-right-to-bracket" />
                     سجّل الدخول للاشتراك
@@ -474,15 +487,15 @@ export default function PricingClient({
                   {busy ? "جارٍ الإرسال…" : "أرسل الطلب"}
                 </button>
                 <a
-                  className="btn btn-outline"
+                  className="btn btn-soft"
                   href={whatsappLink(
                     waText || "مرحباً، أريد الاشتراك في ميثاق",
-                    process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP
+                    SUPPORT_WA
                   )}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <i className="fab fa-whatsapp" />
+                  <i className="fas fa-headset" />
                   إرسال عبر واتساب
                 </a>
               </div>
