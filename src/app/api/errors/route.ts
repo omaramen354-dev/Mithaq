@@ -8,6 +8,7 @@ import { desc, eq, and, inArray } from "drizzle-orm";
 import { logEvent } from "@/lib/logger";
 import { readBoundedJson } from "@/lib/contract-text";
 import { extractClientIp, noStoreJson, NO_STORE_HEADERS } from "@/lib/client-ip";
+import { notifyErrorEvent } from "@/lib/telegram";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,6 +39,32 @@ const RATE_WINDOW_MS = 60_000;
 const RATE_MAX_PER_IP = 15;
 const RATE_MAX_GLOBAL_UNAUTH = 15;
 const rateHits = new Map<string, number[]>();
+
+/* حماية إشعارات تيليجرام للأخطاء:
+   - لا يُكرّر نفس الخطأ على تيليجرام أكثر من مرة كل 5 دقائق
+   - سقف عالمي 6 تنبيهات خطأ في 5 دقائق لمنع أي إغراق للمشرف */
+const TG_DEDUP_MS = 5 * 60_000;
+const TG_MAX_GLOBAL_WINDOW = 6;
+const tgDedup = new Map<string, number>();
+let tgGlobalHits: number[] = [];
+
+function shouldAlertTelegram(signature: string): boolean {
+  const now = Date.now();
+  tgGlobalHits = tgGlobalHits.filter((t) => now - t < TG_DEDUP_MS);
+  if (tgGlobalHits.length >= TG_MAX_GLOBAL_WINDOW) return false;
+
+  if (tgDedup.size > 500) {
+    for (const [k, ts] of tgDedup.entries()) {
+      if (now - ts >= TG_DEDUP_MS) tgDedup.delete(k);
+    }
+  }
+  const last = tgDedup.get(signature);
+  if (last && now - last < TG_DEDUP_MS) return false;
+
+  tgDedup.set(signature, now);
+  tgGlobalHits.push(now);
+  return true;
+}
 
 function isFlooding(key: string, max: number): boolean {
   const now = Date.now();
@@ -83,6 +110,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const component = String(body.component || "").slice(0, 100);
+  const pageUrl = String(body.url || "").slice(0, 300);
+
   await logEvent({
     action: "error_browser",
     entity: "error",
@@ -94,15 +124,39 @@ export async function POST(req: NextRequest) {
     meta: {
       level: "error",
       stack,
-      url: String(body.url || "").slice(0, 300),
+      url: pageUrl,
       line: typeof body.line === "number" && Number.isFinite(body.line) ? body.line : null,
       col: typeof body.col === "number" && Number.isFinite(body.col) ? body.col : null,
-      component: String(body.component || "").slice(0, 100),
+      component,
       userAgent: String(body.userAgent || req.headers.get("user-agent") || "").slice(0, 250),
       ip,
       extra,
     },
   });
+
+  /* إرسال تنبيه فوري لتيليجرام للأخطاء الحقيقية (مستخدم مسجّل أو خطأ Boundary حرج)
+     مع منع الإغراق والتكرار لمدة 5 دقائق */
+  const isCriticalBoundary =
+    component === "error-boundary" || message.startsWith("[Boundary]");
+  if (isUser || isCriticalBoundary) {
+    const sig = `${component}|${message.slice(0, 80)}`;
+    if (shouldAlertTelegram(sig)) {
+      const adminBase = (
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        req.nextUrl.origin ||
+        ""
+      ).replace(/\/+$/, "");
+      notifyErrorEvent({
+        source: "browser",
+        message,
+        component,
+        url: pageUrl,
+        userName: session?.user?.name || "",
+        userEmail: session?.user?.email || "",
+        adminUrl: adminBase ? `${adminBase}/admin` : undefined,
+      }).catch(() => {});
+    }
+  }
 
   return new NextResponse(null, { status: 204, headers: NO_STORE_HEADERS });
 }
