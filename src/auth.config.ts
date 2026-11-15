@@ -33,6 +33,7 @@ export const authConfig = {
       const path = request.nextUrl.pathname;
       if (
         path === "/" ||
+        path === "/sample" ||
         path === "/pricing" ||
         path === "/privacy" ||
         path === "/terms" ||

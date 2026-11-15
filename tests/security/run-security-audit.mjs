@@ -1855,7 +1855,7 @@ secAssert(!/img-src[^;]*\shttps:(?:\s|;|$)/.test(csp),
 // Test authConfig.callbacks.authorized across 80 routes
 const authCb = authConfigMod.authConfig.callbacks.authorized;
 const privatePaths = ["/admin", "/dashboard", "/print/123", "/sign/123", "/checkout", "/me", "/settings", "/Admin", "/ADMIN", "/print/../../admin"];
-const publicPaths = ["/", "/pricing", "/privacy", "/terms", "/contracts", "/contracts/design"];
+const publicPaths = ["/", "/sample", "/pricing", "/privacy", "/terms", "/contracts", "/contracts/design"];
 for (const p of privatePaths) {
   const allowed = authCb({ auth: null, request: { nextUrl: new URL(`https://miithaq.com${p}`) } });
   secAssert(allowed === false, "AUTH-MW-PRIV", "CRITICAL", `Guest allowed into private path ${p}`);
